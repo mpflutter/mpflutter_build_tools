@@ -1,0 +1,13 @@
+name: mpflutter_build_tools
+description: The MPFlutter Build Tools
+publish_to: "none"
+
+version: 2.0.0
+
+environment:
+  sdk: ">=3.1.1 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path: any
