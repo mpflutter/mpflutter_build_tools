@@ -212,6 +212,7 @@ globalThis.FlutterHostView = FlutterHostView;
     FlutterHostView: FlutterHostView,
     wx: wx,
     Object: Object,
+    crypto: require('./flutter_bom/crypto'),
     _flutter: _flutter,
     window: _flutter.window,
     location: _flutter.window.location,
@@ -272,4 +273,5 @@ globalThis.FlutterHostView = FlutterHostView;
   };
   globalThis.XMLHttpRequest =
     require("./flutter_bom/xml-http-request").XMLHttpRequest;
+  globalThis.crypto = _flutter.self.crypto;
 })();
