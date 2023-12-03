@@ -212,7 +212,7 @@ globalThis.FlutterHostView = FlutterHostView;
     FlutterHostView: FlutterHostView,
     wx: wx,
     Object: Object,
-    crypto: require('./flutter_bom/crypto'),
+    crypto: require("./flutter_bom/crypto"),
     _flutter: _flutter,
     window: _flutter.window,
     location: _flutter.window.location,
@@ -224,7 +224,8 @@ globalThis.FlutterHostView = FlutterHostView;
     Float32Array: Float32Array,
     encodeURIComponent: encodeURIComponent,
     Intl: {},
-    HTMLTextAreaElement: (require("./flutter_bom/input").FlutterMiniProgramMockInputElement),
+    HTMLTextAreaElement: require("./flutter_bom/input")
+      .FlutterMiniProgramMockInputElement,
     $__dart_deferred_initializers__: [],
     dartDeferredLibraryLoader: function (uri, res, rej) {
       const pkgs = require("./pkgs").default;
@@ -250,6 +251,7 @@ globalThis.FlutterHostView = FlutterHostView;
         }
       }
     },
+    XMLHttpRequest: require("./flutter_bom/xml-http-request").XMLHttpRequest,
   };
   _flutter.self.safeAreaInsetTop = wx.getSystemInfoSync().safeArea.top;
   _flutter.self.safeAreaInsetBottom =
@@ -262,7 +264,7 @@ globalThis.FlutterHostView = FlutterHostView;
     _flutter.self.androidBackPressed();
   };
   globalThis.HTMLTextAreaElement =
-    (require("./flutter_bom/input").FlutterMiniProgramMockInputElement);
+    require("./flutter_bom/input").FlutterMiniProgramMockInputElement;
   globalThis.MutationObserver = function () {
     return {
       observe: function () {},
@@ -274,4 +276,14 @@ globalThis.FlutterHostView = FlutterHostView;
   globalThis.XMLHttpRequest =
     require("./flutter_bom/xml-http-request").XMLHttpRequest;
   globalThis.crypto = _flutter.self.crypto;
+
+
+  let originObjectStringFunction = Object.prototype.toString;
+  Object.prototype.toString = function() {
+    if (this.$$clazz$$) {
+      return `[object ${this.$$clazz$$}]`;
+    }
+    return originObjectStringFunction.apply(this, arguments);
+  }
+
 })();

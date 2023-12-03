@@ -60,7 +60,9 @@ const STATUS_TEXT_MAP = {
 };
 
 export class XMLHttpRequest {
+
   constructor(pageId) {
+    this.$$clazz$$ = "XMLHttpRequest";
     this.$_pageId = pageId;
     this.$_method = "";
     this.$_url = "";
@@ -90,10 +92,12 @@ export class XMLHttpRequest {
     this.eventCallbacks[event] = callback;
   }
 
+  removeEventListener() {}
+
   $$trigger(event) {
     const cb = this.eventCallbacks[event];
     if (cb) {
-      cb({});
+      cb({$$clazz$$: "Event"});
     }
   }
 
@@ -137,7 +141,7 @@ export class XMLHttpRequest {
 
     // 头信息
     const header = Object.assign({}, this.$_header);
-
+    
     this.$_requestTask = wx.request({
       url,
       data: this.$_data || {},
@@ -313,9 +317,13 @@ export class XMLHttpRequest {
   send(data) {
     if (this.$_readyState !== XMLHttpRequest.OPENED) return;
 
+    if (data instanceof Uint8Array) {
+      data = data.buffer;
+    }
     this.$_data = data;
     this.$_callRequest();
   }
+
 }
 
 XMLHttpRequest.UNSENT = 0;
