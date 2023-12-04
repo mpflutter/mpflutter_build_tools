@@ -219,6 +219,7 @@ globalThis.FlutterHostView = FlutterHostView;
     document: _flutter.document,
     setTimeout: setTimeout,
     setInterval: setInterval,
+    localStorage: new (require("./flutter_bom/storage").LocalStorage)(),
     clearTimeout: clearTimeout,
     clearInterval: clearInterval,
     Float32Array: Float32Array,
@@ -276,14 +277,13 @@ globalThis.FlutterHostView = FlutterHostView;
   globalThis.XMLHttpRequest =
     require("./flutter_bom/xml-http-request").XMLHttpRequest;
   globalThis.crypto = _flutter.self.crypto;
-
+  globalThis.localStorage = _flutter.self.localStorage;
 
   let originObjectStringFunction = Object.prototype.toString;
-  Object.prototype.toString = function() {
+  Object.prototype.toString = function () {
     if (this.$$clazz$$) {
       return `[object ${this.$$clazz$$}]`;
     }
     return originObjectStringFunction.apply(this, arguments);
-  }
-
+  };
 })();

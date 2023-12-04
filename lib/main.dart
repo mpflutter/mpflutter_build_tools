@@ -220,7 +220,7 @@ $subPkgJS
     content = content.replaceAll('return !!J.getInterceptor\$(object)[tag];',
         'if (object.\$\$clazz\$\$) {return true;}return !!J.getInterceptor\$(object)[tag];');
     File(filePath).writeAsStringSync(
-        '''var self = getApp()._flutter.self;var XMLHttpRequest = self.XMLHttpRequest;var \$__dart_deferred_initializers__ = self.\$__dart_deferred_initializers__; var document = self.document;''' +
+        '''var self = getApp()._flutter.self;var XMLHttpRequest = self.XMLHttpRequest;var \$__dart_deferred_initializers__ = self.\$__dart_deferred_initializers__;var document = self.document;var window = self.window;''' +
             content);
   }
 

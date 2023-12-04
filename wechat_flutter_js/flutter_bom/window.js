@@ -31,6 +31,7 @@ export class FlutterMiniProgramMockWindow {
     search: "",
     pathname: "",
   };
+  localStorage = new (require('./storage').LocalStorage);
   performance = {
     now: () => {
       return new Date().getTime();
