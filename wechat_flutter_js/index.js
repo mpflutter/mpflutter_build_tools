@@ -9,6 +9,7 @@ Page({
   data: {
     inputValue: "",
     inputType: "",
+    inputPassword: false,
     inputConfirmType: "",
     inputFocus: false,
     inputHoldKeyboard: true,
@@ -185,6 +186,7 @@ function setupFlutterHostView(self) {
       inputValue: "",
       inputSelectionStart: -1,
       inputSelectionEnd: -1,
+      inputPassword: false,
     });
   };
 
@@ -205,6 +207,12 @@ function setupFlutterHostView(self) {
     const self = FlutterHostView.shared.self;
     if (self.data.inputType === value) return;
     self.setData({ inputType: value });
+  };
+
+  FlutterHostView.shared.requireSetInputPassword = (value) => {
+    const self = FlutterHostView.shared.self;
+    if (self.data.inputPassword === value) return;
+    self.setData({ inputPassword: value });
   };
 
   FlutterHostView.shared.requireSetConfirmType = (value) => {

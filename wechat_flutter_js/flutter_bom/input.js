@@ -2,7 +2,8 @@
 // Use of this source code is governed by a Apache-2.0 license that can be
 // found in the LICENSE file.
 
-const FlutterMiniProgramMockElement = require('./element').FlutterMiniProgramMockElement
+const FlutterMiniProgramMockElement =
+  require("./element").FlutterMiniProgramMockElement;
 
 export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockElement {
   constructor() {
@@ -35,6 +36,14 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
       newValue = "text";
     }
     FlutterHostView.shared.requireSetInputType(newValue);
+  }
+
+  set type(v) {
+    if (v === "password") {
+      FlutterHostView.shared.requireSetInputPassword(true);
+    } else {
+      FlutterHostView.shared.requireSetInputPassword(false);
+    }
   }
 
   get enterkeyhint() {

@@ -22,6 +22,7 @@
   style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" 
   value="{{inputValue}}"
   type="{{inputType}}"
+  password="{{inputPassword}}"
   confirm-type="{{inputConfirmType}}"
   focus="{{inputFocus}}" 
   selection-start="{{inputSelectionStart}}"
