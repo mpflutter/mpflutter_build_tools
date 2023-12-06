@@ -7,10 +7,25 @@ late Directory mpflutterSrcRoot;
 
 void main(List<String> arguments) async {
   init();
+
+  print("====== 欢迎使用 MPFlutter Build Tools ======\n");
+  print("特别提示你：\n");
+  print("1. MPFlutter Build Tools 目前不是开源项目\n");
+  print("2. 禁止反编译、修改 MPFlutter Build Tools 程序\n");
+  print("3. 禁止在未获取授权的情况下，移除 UNLICENSED 标识\n");
+  print("4. MPFlutter Build Tools 会上传埋点信息，用于营销分析，如果你不同意该行为，应停止使用。\n");
+  print("===========================================\n");
+
   if (arguments.contains("--wechat")) {
+    print("[INFO] 正在构建 wechat 小程序\n");
     final builder = WechatBuilder();
-    await builder.buildFlutterWeb(arguments);
-    await builder.buildFlutterWechat(arguments);
+    try {
+      await builder.buildFlutterWeb(arguments);
+      await builder.buildFlutterWechat(arguments);
+      print("[INFO] 构建成功，产物在 build/wechat 目录，使用微信开发者工具导入预览、上传、发布。\n");
+    } catch (e) {
+      print("[ERROR] 构建失败，失败信息： $e\n");
+    }
   }
 }
 
@@ -26,6 +41,7 @@ void init() {
 
 class WechatBuilder {
   Future buildFlutterWeb(List<String> arguments) async {
+    print("[INFO] 正在构建 flutter for web 产物\n");
     final completer = Completer();
     // 转发请求至Flutter命令
     final flutterProcess = await Process.start('flutter', [
@@ -58,7 +74,7 @@ class WechatBuilder {
   }
 
   Future buildFlutterWechat(List<String> arguments) async {
-    print("start build buildFlutterWechat");
+    print("[INFO] 正在构建 wechat 产物\n");
     // create wechat dir
     final wechatOut = Directory(join('build', 'wechat'));
     if (wechatOut.existsSync()) {
@@ -67,8 +83,7 @@ class WechatBuilder {
     // copy src dir to build
     final wechatSrc = Directory('wechat');
     if (!wechatSrc.existsSync()) {
-      print('工程目录下不存在 wechat 文件夹，请先按照教程初始化 wechat 工程。');
-      return;
+      throw '工程目录下不存在 wechat 文件夹，请先按照教程初始化 wechat 工程。';
     }
     wechatOut.createSync();
     _copyDirectory(wechatSrc, wechatOut);
