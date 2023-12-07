@@ -31,11 +31,13 @@ export class FlutterMiniProgramMockWindow {
     search: "",
     pathname: "",
   };
-  localStorage = new (require('./storage').LocalStorage);
+  localStorage = new (require("./storage").LocalStorage)();
   performance = {
     now: () => {
       return new Date().getTime();
     },
+    mark: function () {},
+    measure: function () {},
   };
   history = {
     replaceState: () => {},
