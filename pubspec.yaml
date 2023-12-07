@@ -9,4 +9,4 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  path: any
+  path: ^1.9.0
