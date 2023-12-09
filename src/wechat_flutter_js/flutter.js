@@ -213,6 +213,8 @@ globalThis.FlutterHostView = FlutterHostView;
     wx: wx,
     Object: Object,
     Promise: Promise,
+    Array: Array,
+    Uint8Array: Uint8Array,
     crypto: require("./flutter_bom/crypto"),
     _flutter: _flutter,
     window: _flutter.window,

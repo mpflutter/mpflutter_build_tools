@@ -56,6 +56,8 @@ class MPJSClientImpl {
         result = this.onApplyFunction(params);
       } else if (method === "mpjs.returnCallDartFunctionResult") {
         this.onReturnCallDartFunctionResult(params);
+      } else if (method === "mpjs.plainValueOfObject") {
+        result = this.onPlainValueOfObject(params);
       }
     } catch (_error) {
       error = `${_error}`;
@@ -90,8 +92,11 @@ class MPJSClientImpl {
 
   onNewObject(params) {
     const clazz = params.clazz;
+    const args = params.arguments;
     const realClazz = globalThis[clazz];
-    const result = new realClazz();
+    const result = new realClazz(
+      ...(args ? args.map((it) => this.tranformRefToObject(it)) : [])
+    );
     return this.tranformObjectToRef(result);
   }
 
@@ -101,6 +106,15 @@ class MPJSClientImpl {
     const realObject = this.tranformRefToObject(objectRef);
     if (realObject) {
       return this.tranformObjectToRef(realObject[key]);
+    }
+    return undefined;
+  }
+
+  onPlainValueOfObject(params) {
+    const objectRef = params.objectRef;
+    const realObject = this.tranformRefToObject(objectRef);
+    if (realObject) {
+      return realObject;
     }
     return undefined;
   }
@@ -211,3 +225,7 @@ class MPJSClientImpl {
 
 const impl = new MPJSClientImpl();
 impl.start();
+
+Array.prototype.$mpjs_value = function () {
+  return this;
+};
