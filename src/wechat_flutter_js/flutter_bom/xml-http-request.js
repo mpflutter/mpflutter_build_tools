@@ -1,6 +1,8 @@
 // Tencent is pleased to support the open source community by making Kbone available.
 // Copyright (C) 2020 THL A29 Limited, a Tencent company. All rights reserved.
-// Kbone is licensed under the BSD 3-Clause License, except for the third-party components listed below. 
+// Kbone is licensed under the BSD 3-Clause License, except for the third-party components listed below.
+
+const { Blob } = require("./blob");
 
 const SUPPORT_METHOD = [
   "OPTIONS",
@@ -60,7 +62,6 @@ const STATUS_TEXT_MAP = {
 };
 
 export class XMLHttpRequest {
-
   constructor(pageId) {
     this.$$clazz$$ = "XMLHttpRequest";
     this.$_pageId = pageId;
@@ -97,7 +98,7 @@ export class XMLHttpRequest {
   $$trigger(event) {
     const cb = this.eventCallbacks[event];
     if (cb) {
-      cb({$$clazz$$: "Event"});
+      cb({ $$clazz$$: "Event" });
     }
   }
 
@@ -141,7 +142,7 @@ export class XMLHttpRequest {
 
     // 头信息
     const header = Object.assign({}, this.$_header);
-    
+
     this.$_requestTask = wx.request({
       url,
       data: this.$_data || {},
@@ -149,7 +150,9 @@ export class XMLHttpRequest {
       method: this.$_method,
       dataType: this.$_responseType === "json" ? "json" : "text",
       responseType:
-        this.$_responseType === "arraybuffer" ? "arraybuffer" : "text",
+        this.$_responseType === "arraybuffer" || this.$_responseType === "blob"
+          ? "arraybuffer"
+          : "text",
       success: this.$_requestSuccess,
       fail: this.$_requestFail,
       complete: this.$_requestComplete,
@@ -169,7 +172,11 @@ export class XMLHttpRequest {
     if (data) {
       this.$_callReadyStateChange(XMLHttpRequest.LOADING);
       this.$$trigger("loadstart");
-      this.$_response = data;
+      if (this.$_responseType === "blob") {
+        this.$_response = new Blob([data]);
+      } else {
+        this.$_response = data;
+      }
       this.$$trigger("loadend");
     }
   }
@@ -323,7 +330,6 @@ export class XMLHttpRequest {
     this.$_data = data;
     this.$_callRequest();
   }
-
 }
 
 XMLHttpRequest.UNSENT = 0;

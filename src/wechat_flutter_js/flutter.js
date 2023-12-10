@@ -223,6 +223,8 @@ globalThis.FlutterHostView = FlutterHostView;
     setTimeout: setTimeout,
     setInterval: setInterval,
     localStorage: new (require("./flutter_bom/storage").LocalStorage)(),
+    Blob: require("./flutter_bom/blob").Blob,
+    FileReader: require("./flutter_bom/file-reader").FileReader,
     clearTimeout: clearTimeout,
     clearInterval: clearInterval,
     Float32Array: Float32Array,
@@ -281,6 +283,8 @@ globalThis.FlutterHostView = FlutterHostView;
     require("./flutter_bom/xml-http-request").XMLHttpRequest;
   globalThis.crypto = _flutter.self.crypto;
   globalThis.localStorage = _flutter.self.localStorage;
+  globalThis.Blob = _flutter.self.Blob;
+  globalThis.FileReader = _flutter.self.FileReader;
 
   let originObjectStringFunction = Object.prototype.toString;
   Object.prototype.toString = function () {
