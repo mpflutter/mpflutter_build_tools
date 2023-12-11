@@ -68,7 +68,10 @@ export class FlutterMiniProgramMockWindow {
       options = {};
     }
     return new Promise(async (resolve, reject) => {
-      if (url.endsWith("k3kXo84MPvpLmixcA63oeALhL4iJ-Q7m8w.otf")) {
+      if (
+        url.startsWith("https://fonts.gstatic.com/s/notosanssc/") &&
+        (url.endsWith(".otf") || url.endsWith(".ttf"))
+      ) {
         const fs = wx.getFileSystemManager();
         const brExists = await new Promise((resolve) => {
           fs.getFileInfo({
