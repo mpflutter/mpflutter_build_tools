@@ -79,6 +79,10 @@ export class FlutterMiniProgramMockDocument {
       const el = new (require("./input").FlutterMiniProgramMockInputElement)();
       el.tagName = "input";
       return el;
+    } else if (tag === "textarea") {
+      const el = new (require("./input").FlutterMiniProgramMockTextAreaElement)();
+      el.tagName = "textarea";
+      return el;
     } else if (tag === "form") {
       const el = new (require("./input").FlutterMiniProgramMockFormElement)();
       el.tagName = "form";

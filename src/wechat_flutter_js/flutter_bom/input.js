@@ -82,6 +82,12 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
   };
 }
 
+export class FlutterMiniProgramMockTextAreaElement extends FlutterMiniProgramMockInputElement {
+  focus = () => {
+    FlutterHostView.shared.requireInputFocus(true, "textarea");
+  };
+}
+
 export class FlutterMiniProgramMockFormElement extends FlutterMiniProgramMockElement {
   focus() {}
   addEventListener = (event, callback) => {};

@@ -11,6 +11,7 @@ Page({
     inputPassword: false,
     inputConfirmType: "",
     inputFocus: false,
+    textareaFocus: false,
     inputHoldKeyboard: true,
     inputSelectionStart: -1,
     inputSelectionEnd: -1,
@@ -195,11 +196,31 @@ function setupFlutterHostView(self) {
     self.setData({ inputValue: value });
   };
 
-  FlutterHostView.shared.requireInputFocus = (value) => {
+  FlutterHostView.shared.requireInputFocus = (value, tag) => {
     const self = FlutterHostView.shared.self;
     FlutterHostView.shared.inputHasFocus = value;
     if (self.data.inputFocus === value) return;
-    self.setData({ inputHoldKeyboard: true, inputFocus: value });
+    if (value) {
+      if (tag === "textarea") {
+        self.setData({
+          inputHoldKeyboard: true,
+          inputFocus: false,
+          textareaFocus: true,
+        });
+      } else {
+        self.setData({
+          inputHoldKeyboard: true,
+          inputFocus: true,
+          textareaFocus: false,
+        });
+      }
+    } else {
+      self.setData({
+        inputHoldKeyboard: true,
+        inputFocus: false,
+        textareaFocus: false,
+      });
+    }
   };
 
   FlutterHostView.shared.requireSetInputType = (value) => {
@@ -222,6 +243,8 @@ function setupFlutterHostView(self) {
 
   FlutterHostView.shared.requireSelectionRange = (start, end) => {
     const self = FlutterHostView.shared.self;
+    const oldInputFocus = self.data.inputFocus;
+    const oldTextareaFocus = self.data.textareaFocus;
     self.setData({
       inputSelectionStart: start,
       inputSelectionEnd: end,
@@ -236,7 +259,10 @@ function setupFlutterHostView(self) {
           setupResumeTimer();
           return;
         }
-        self.setData({ inputFocus: true });
+        self.setData({
+          inputFocus: oldInputFocus,
+          textareaFocus: oldTextareaFocus,
+        });
       }, 64);
     };
     setupResumeTimer();
