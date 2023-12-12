@@ -61,7 +61,7 @@ class WechatBuilder {
       ...arguments.contains('--debug')
           ? ['--source-maps', '--dart2js-optimization', 'O1']
           : [],
-    ]);
+    ], runInShell: true);
 
     // 获取Flutter命令的输出
     flutterProcess.stdout.transform(utf8.decoder).listen((data) {
@@ -276,7 +276,7 @@ $subPkgJS
       if (element.path.endsWith('index.js') ||
           element.path.endsWith('index.json') ||
           element.path.endsWith('index.wxml')) return;
-      Process.runSync('brotli', [element.path, '-o', element.path + ".br"]);
+      Process.runSync('brotli', [element.path, '-o', element.path + ".br"], runInShell: true);
       element.deleteSync();
     });
   }
