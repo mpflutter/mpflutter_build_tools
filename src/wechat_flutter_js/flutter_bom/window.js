@@ -20,6 +20,7 @@ export class FlutterMiniProgramMockWindow {
 
   // webs
   navigator = {
+    appVersion: "",
     platform: "",
     userAgent: "",
     vendor: "",
