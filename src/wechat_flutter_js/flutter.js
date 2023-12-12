@@ -21,8 +21,8 @@ export class FlutterHostView {
     if (event.touches) {
       for (let index = 0; index < event.touches.length; index++) {
         const touch = event.touches[index];
-        touch.clientX = touch.pageX;
-        touch.clientY = touch.pageY;
+        touch.clientX = touch.pageX ?? touch.x;
+        touch.clientY = touch.pageY ?? touch.y;
       }
       event.touches.item = function (index) {
         return event.touches[index];
@@ -31,8 +31,8 @@ export class FlutterHostView {
     if (event.changedTouches) {
       for (let index = 0; index < event.changedTouches.length; index++) {
         const touch = event.changedTouches[index];
-        touch.clientX = touch.pageX;
-        touch.clientY = touch.pageY;
+        touch.clientX = touch.pageX ?? touch.x;
+        touch.clientY = touch.pageY ?? touch.y;
       }
       event.changedTouches.item = function (index) {
         return event.changedTouches[index];
