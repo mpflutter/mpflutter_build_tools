@@ -1,23 +1,10 @@
-// Tencent is pleased to support the open source community by making Kbone available.
-// Copyright (C) 2020 THL A29 Limited, a Tencent company. All rights reserved.
-// Kbone is licensed under the BSD 3-Clause License, except for the third-party components listed below.
-
-const { Blob } = require("./blob");
-
-const SUPPORT_METHOD = [
-  "OPTIONS",
-  "GET",
-  "HEAD",
-  "POST",
-  "PUT",
-  "DELETE",
-  "TRACE",
-  "CONNECT",
-];
+const {
+  Blob
+} = require("./blob");
+const SUPPORT_METHOD = ["OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "CONNECT"];
 const STATUS_TEXT_MAP = {
   100: "Continue",
   101: "Switching protocols",
-
   200: "OK",
   201: "Created",
   202: "Accepted",
@@ -25,7 +12,6 @@ const STATUS_TEXT_MAP = {
   204: "No Content",
   205: "Reset Content",
   206: "Partial Content",
-
   300: "Multiple Choices",
   301: "Moved Permanently",
   302: "Found",
@@ -33,7 +19,6 @@ const STATUS_TEXT_MAP = {
   304: "Not Modified",
   305: "Use Proxy",
   307: "Temporary Redirect",
-
   400: "Bad Request",
   401: "Unauthorized",
   402: "Payment Required",
@@ -52,14 +37,20 @@ const STATUS_TEXT_MAP = {
   415: "Unsupported Media Type",
   416: "Requested Range Not Suitable",
   417: "Expectation Failed",
-
   500: "Internal Server Error",
   501: "Not Implemented",
   502: "Bad Gateway",
   503: "Service Unavailable",
   504: "Gateway Timeout",
-  505: "HTTP Version Not Supported",
+  505: "HTTP Version Not Supported"
 };
+class XMLHttpRequestUpload {
+  constructor() {
+    this.$$clazz$$ = "XMLHttpRequestUpload";
+  }
+  addEventListener(event, callback) {}
+  removeEventListener() {}
+}
 
 export class XMLHttpRequest {
   constructor(pageId) {
@@ -72,266 +63,180 @@ export class XMLHttpRequest {
     this.$_statusText = "";
     this.$_readyState = XMLHttpRequest.UNSENT;
     this.$_header = {
-      Accept: "*/*",
+      Accept: "*/*"
     };
     this.$_responseType = "";
     this.$_resHeader = null;
     this.$_response = null;
     this.$_timeout = 0;
     this.$_startTime = null;
-    this.$_withCredentials = true; // 向前兼容，默认为 true
-
+    this.$_withCredentials = true;
     this.$_requestTask = null;
     this.$_requestSuccess = this.$_requestSuccess.bind(this);
     this.$_requestFail = this.$_requestFail.bind(this);
     this.$_requestComplete = this.$_requestComplete.bind(this);
-
-    this.eventCallbacks = {};
+    this.eventCallbacks = {}
+    this.upload = new XMLHttpRequestUpload();
   }
-
   addEventListener(event, callback) {
-    this.eventCallbacks[event] = callback;
+    this.eventCallbacks[event] = callback
   }
-
   removeEventListener() {}
-
   $$trigger(event) {
     const cb = this.eventCallbacks[event];
     if (cb) {
-      cb({ $$clazz$$: "Event" });
+      cb({
+        $$clazz$$: "Event"
+      })
     }
   }
-
-  /**
-   * readyState 变化
-   */
   $_callReadyStateChange(readyState) {
     const hasChange = readyState !== this.$_readyState;
     this.$_readyState = readyState;
-
-    if (hasChange) this.$$trigger("readystatechange");
+    if (hasChange) this.$$trigger("readystatechange")
   }
-
-  /**
-   * 执行请求
-   */
   $_callRequest() {
     if (this.$_timeout) {
-      this.$_startTime = +new Date();
-
+      this.$_startTime = +new Date;
       setTimeout(() => {
         if (!this.$_status && this.$_readyState !== XMLHttpRequest.DONE) {
-          // 超时
           if (this.$_requestTask) this.$_requestTask.abort();
           this.$_callReadyStateChange(XMLHttpRequest.DONE);
-          this.$$trigger("timeout");
+          this.$$trigger("timeout")
         }
-      }, this.$_timeout);
+      }, this.$_timeout)
     }
-
-    // 重置各种状态
     this.$_status = 0;
     this.$_statusText = "";
     this.$_readyState = XMLHttpRequest.OPENED;
     this.$_resHeader = null;
     this.$_response = null;
-
-    // 补完 url
     let url = this.$_url;
     url = url.indexOf("//") === -1 ? window.location.origin + url : url;
-
-    // 头信息
     const header = Object.assign({}, this.$_header);
-
     this.$_requestTask = wx.request({
-      url,
+      url: url,
       data: this.$_data || {},
-      header,
+      header: header,
       method: this.$_method,
       dataType: this.$_responseType === "json" ? "json" : "text",
-      responseType:
-        this.$_responseType === "arraybuffer" || this.$_responseType === "blob"
-          ? "arraybuffer"
-          : "text",
+      responseType: this.$_responseType === "arraybuffer" || this.$_responseType === "blob" ? "arraybuffer" : "text",
       success: this.$_requestSuccess,
       fail: this.$_requestFail,
-      complete: this.$_requestComplete,
-    });
+      complete: this.$_requestComplete
+    })
   }
-
-  /**
-   * 请求成功
-   */
-  $_requestSuccess({ data, statusCode, header }) {
+  $_requestSuccess({
+    data,
+    statusCode,
+    header
+  }) {
     this.$_status = statusCode;
     this.$_resHeader = header;
-
     this.$_callReadyStateChange(XMLHttpRequest.HEADERS_RECEIVED);
-
-    // 处理返回数据
     if (data) {
       this.$_callReadyStateChange(XMLHttpRequest.LOADING);
       this.$$trigger("loadstart");
       if (this.$_responseType === "blob") {
-        this.$_response = new Blob([data]);
+        this.$_response = new Blob([data])
       } else {
-        this.$_response = data;
+        this.$_response = data
       }
-      this.$$trigger("loadend");
+      this.$$trigger("loadend")
     }
   }
-
-  /**
-   * 请求失败
-   */
-  $_requestFail({ errMsg }) {
+  $_requestFail({
+    errMsg
+  }) {
     this.$_status = 0;
     this.$_statusText = errMsg;
-
-    this.$$trigger("error");
+    this.$$trigger("error")
   }
-
-  /**
-   * 请求完成
-   */
   $_requestComplete() {
     this.$_startTime = null;
     this.$_requestTask = null;
     this.$_callReadyStateChange(XMLHttpRequest.DONE);
-
     if (this.$_status) {
-      this.$$trigger("load");
+      this.$$trigger("load")
     }
   }
-
-  /**
-   * 对外属性和方法
-   */
   get timeout() {
-    return this.$_timeout;
+    return this.$_timeout
   }
-
   set timeout(timeout) {
-    if (typeof timeout !== "number" || !isFinite(timeout) || timeout <= 0)
-      return;
-
-    this.$_timeout = timeout;
+    if (typeof timeout !== "number" || !isFinite(timeout) || timeout <= 0) return;
+    this.$_timeout = timeout
   }
-
   get status() {
-    return this.$_status;
+    return this.$_status
   }
-
   get statusText() {
-    if (
-      this.$_readyState === XMLHttpRequest.UNSENT ||
-      this.$_readyState === XMLHttpRequest.OPENED
-    )
-      return "";
-
-    return STATUS_TEXT_MAP[this.$_status + ""] || this.$_statusText || "";
+    if (this.$_readyState === XMLHttpRequest.UNSENT || this.$_readyState === XMLHttpRequest.OPENED) return "";
+    return STATUS_TEXT_MAP[this.$_status + ""] || this.$_statusText || ""
   }
-
   get readyState() {
-    return this.$_readyState;
+    return this.$_readyState
   }
-
   get responseType() {
-    return this.$_responseType;
+    return this.$_responseType
   }
-
   set responseType(value) {
     if (typeof value !== "string") return;
-
-    this.$_responseType = value;
+    this.$_responseType = value
   }
-
   get responseText() {
     if (!this.$_responseType || this.$_responseType === "text") {
-      return this.$_response;
+      return this.$_response
     }
-
-    return null;
+    return null
   }
-
   get response() {
-    return this.$_response;
+    return this.$_response
   }
-
   get withCredentials() {
-    return this.$_withCredentials;
+    return this.$_withCredentials
   }
-
   set withCredentials(value) {
-    this.$_withCredentials = !!value;
+    this.$_withCredentials = !!value
   }
-
   abort() {
     if (this.$_requestTask) {
       this.$_requestTask.abort();
-      this.$$trigger("abort");
+      this.$$trigger("abort")
     }
   }
-
   getAllResponseHeaders() {
-    if (
-      this.$_readyState === XMLHttpRequest.UNSENT ||
-      this.$_readyState === XMLHttpRequest.OPENED ||
-      !this.$_resHeader
-    )
-      return "";
-
-    return Object.keys(this.$_resHeader)
-      .map((key) => `${key}: ${this.$_resHeader[key]}`)
-      .join("\r\n");
+    if (this.$_readyState === XMLHttpRequest.UNSENT || this.$_readyState === XMLHttpRequest.OPENED || !this.$_resHeader) return "";
+    return Object.keys(this.$_resHeader).map(key => `${key}: ${this.$_resHeader[key]}`).join("\r\n")
   }
-
   getResponseHeader(name) {
-    if (
-      this.$_readyState === XMLHttpRequest.UNSENT ||
-      this.$_readyState === XMLHttpRequest.OPENED ||
-      !this.$_resHeader
-    )
-      return null;
-
-    // 处理大小写不敏感
-    const key = Object.keys(this.$_resHeader).find(
-      (item) => item.toLowerCase() === name.toLowerCase()
-    );
+    if (this.$_readyState === XMLHttpRequest.UNSENT || this.$_readyState === XMLHttpRequest.OPENED || !this.$_resHeader) return null;
+    const key = Object.keys(this.$_resHeader).find(item => item.toLowerCase() === name.toLowerCase());
     const value = key ? this.$_resHeader[key] : null;
-
-    return typeof value === "string" ? value : null;
+    return typeof value === "string" ? value : null
   }
-
   open(method, url) {
     if (typeof method === "string") method = method.toUpperCase();
-
     if (SUPPORT_METHOD.indexOf(method) < 0) return;
     if (!url || typeof url !== "string") return;
-
     this.$_method = method;
     this.$_url = url;
-
-    this.$_callReadyStateChange(XMLHttpRequest.OPENED);
+    this.$_callReadyStateChange(XMLHttpRequest.OPENED)
   }
-
   setRequestHeader(header, value) {
     if (typeof header === "string" && typeof value === "string") {
-      this.$_header[header] = value;
+      this.$_header[header] = value
     }
   }
-
   send(data) {
     if (this.$_readyState !== XMLHttpRequest.OPENED) return;
-
     if (data instanceof Uint8Array) {
-      data = data.buffer;
+      data = data.buffer
     }
     this.$_data = data;
-    this.$_callRequest();
+    this.$_callRequest()
   }
 }
-
 XMLHttpRequest.UNSENT = 0;
 XMLHttpRequest.OPENED = 1;
 XMLHttpRequest.HEADERS_RECEIVED = 2;
