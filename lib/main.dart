@@ -50,18 +50,25 @@ class WechatBuilder {
 
     final completer = Completer();
     // 转发请求至Flutter命令
-    final flutterProcess = await Process.start('flutter', [
-      'build',
-      'web',
-      ...([...arguments]..removeWhere((element) =>
-          element == "--mpjs" ||
-          element == "--wechat" ||
-          element == "--debug")),
-      ...['--web-renderer', 'canvaskit'],
-      ...arguments.contains('--debug')
-          ? ['--source-maps', '--dart2js-optimization', 'O1']
-          : [],
-    ], runInShell: true);
+    final flutterProcess = await Process.start(
+        'flutter',
+        [
+          'build',
+          'web',
+          ...([...arguments]..removeWhere((element) =>
+              element == "--mpjs" ||
+              element == "--wechat" ||
+              element == "--debug")),
+          ...[
+            '--web-renderer',
+            'canvaskit',
+            '--dart-define=<mpflutter.library.core=true>'
+          ],
+          ...arguments.contains('--debug')
+              ? ['--source-maps', '--dart2js-optimization', 'O1']
+              : [],
+        ],
+        runInShell: true);
 
     // 获取Flutter命令的输出
     flutterProcess.stdout.transform(utf8.decoder).listen((data) {
@@ -276,7 +283,8 @@ $subPkgJS
       if (element.path.endsWith('index.js') ||
           element.path.endsWith('index.json') ||
           element.path.endsWith('index.wxml')) return;
-      Process.runSync('brotli', [element.path, '-o', element.path + ".br"], runInShell: true);
+      Process.runSync('brotli', [element.path, '-o', element.path + ".br"],
+          runInShell: true);
       element.deleteSync();
     });
   }
