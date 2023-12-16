@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart';
+import './sourcemap.server.dart';
 
 late Directory mpflutterSrcRoot;
 
@@ -23,6 +24,9 @@ void main(List<String> arguments) async {
       await builder.buildFlutterWeb(arguments);
       await builder.buildFlutterWechat(arguments);
       print("[INFO] 构建成功，产物在 build/wechat 目录，使用微信开发者工具导入预览、上传、发布。");
+      if (arguments.contains('--debug')) {
+        runSourceMapServer();
+      }
     } catch (e) {
       print("[ERROR] 构建失败，失败信息： $e");
     }
@@ -177,6 +181,12 @@ class WechatBuilder {
     if (File(join('build', 'web', 'main.dart.js.map')).existsSync()) {
       File(join('build', 'web', 'main.dart.js.map')).copySync(
           join('build', 'wechat_tmp', 'pages', 'index', 'main.dart.js.map'));
+      String fileContent = File(
+              join('build', 'wechat_tmp', 'pages', 'index', 'main.dart.js.map'))
+          .readAsStringSync();
+      fileContent = _fixSourceMap(fileContent);
+      File(join('build', 'wechat_tmp', 'pages', 'index', 'main.dart.js.map'))
+          .writeAsStringSync(fileContent);
     }
     subPkgs.asMap().forEach((key, value) {
       final pkgDirRoot = join('build', 'wechat_tmp', 'pkg' + key.toString());
@@ -192,6 +202,12 @@ class WechatBuilder {
         if (File(join('build', 'web', element + ".map")).existsSync()) {
           File(join('build', 'web', element + ".map"))
               .copySync(join(pkgDirRoot, 'pages', element + ".map"));
+          String fileContent = File(join(pkgDirRoot, 'pages', element + ".map"))
+              .readAsStringSync();
+          fileContent = fileContent.replaceAll(
+              '"sourceRoot": ""', '"sourceRoot": "http://localhost:10706/"');
+          File(join(pkgDirRoot, 'pages', element + ".map"))
+              .writeAsStringSync(fileContent);
         }
       });
     });
@@ -377,4 +393,18 @@ String _fixRootUri(String rootUriOrigin) {
     rootUri = rootUri.replaceFirst('..\\', '');
   }
   return rootUri;
+}
+
+String _fixSourceMap(String content) {
+  final obj = json.decode(content);
+  obj['sourceRoot'] = 'http://localhost:10706/';
+  final sources = obj['sources'] as List<dynamic>;
+  for (var i = 0; i < sources.length; i++) {
+    final uri = sources[i] as String;
+    if (uri.startsWith('../')) {
+      final newUri = 'dart-package:///' + uri;
+      obj['sources'][i] = newUri.replaceAll('..', '__');
+    }
+  }
+  return json.encode(obj);
 }
