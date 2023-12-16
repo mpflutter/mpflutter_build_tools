@@ -23,6 +23,7 @@ Page({
     require("./mpjs");
     await loadAssetPages();
     await loadCanvasKitPages();
+    await loadPlugins();
 
     setupFlutterHostView(this);
 
@@ -175,6 +176,10 @@ function loadCanvasKitPages() {
   return new Promise((resolve) => {
     require("../../canvaskit/pages/index", resolve);
   });
+}
+
+async function loadPlugins() {
+  // loadPlugins
 }
 
 function setupFlutterHostView(self) {

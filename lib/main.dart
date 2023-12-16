@@ -34,7 +34,8 @@ void init() {
   final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
   (pkgConfigData["packages"] as List).forEach((it) {
     if (it['name'] == "mpflutter_build_tools") {
-      mpflutterSrcRoot = Directory.fromUri(Uri.parse(it['rootUri']));
+      mpflutterSrcRoot =
+          Directory.fromUri(Uri.parse(_fixRootUri(it['rootUri'])));
     }
   });
 }
@@ -115,6 +116,7 @@ class WechatBuilder {
     _copyAssets(arguments);
     _compressAssets(arguments);
     _copyDartJS(arguments);
+    _copyPubPackagesToWechat(arguments);
     _removeMPJS(arguments);
     wechatOut.deleteSync();
     wechatTmp.renameSync(wechatOut.path);
@@ -256,6 +258,64 @@ $subPkgJS
     );
   }
 
+  void _copyPubPackagesToWechat(List<String> arguments) {
+    Map<String, Directory> maybeWeChatPkgs = {};
+    final pkgConfig = File(join('.dart_tool', 'package_config.json'));
+    final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
+    (pkgConfigData["packages"] as List).forEach((it) {
+      final name = it['name'];
+      if (name is String && name.startsWith('mpflutter_')) {
+        final rootUri = _fixRootUri(it['rootUri']);
+        if (rootUri.isEmpty) return;
+        if (File(
+          join(Directory.fromUri(Uri.parse(rootUri)).path, 'wechat', 'main.js'),
+        ).existsSync()) {
+          maybeWeChatPkgs[name] = Directory.fromUri(Uri.parse(rootUri));
+        }
+      }
+    });
+    if (maybeWeChatPkgs.length > 0) {
+      print("发现 ${maybeWeChatPkgs.length} 个 MPFlutter 微信插件，它们将被添加到产物中。");
+    }
+    maybeWeChatPkgs.forEach((name, dir) {
+      _copyPubPackageToWechat(name, dir);
+    });
+    // rewrite the app.json of subPackages
+    final appJSONData = json.decode(
+        File(join('build', 'wechat_tmp', 'app.json')).readAsStringSync());
+    final appJSONSubpackages = appJSONData['subpackages'] as List<dynamic>;
+    maybeWeChatPkgs.forEach((name, dir) {
+      appJSONSubpackages.add({
+        "name": name,
+        "root": name,
+        "pages": ["pages/index"]
+      });
+    });
+    appJSONData["subpackages"] = appJSONSubpackages;
+    File(join('build', 'wechat_tmp', 'app.json'))
+        .writeAsStringSync(json.encode(appJSONData));
+    // load main.js in index.js
+    final indexJSFile =
+        File(join("build", 'wechat_tmp', 'pages', 'index', 'index.js'));
+    var indexJS = indexJSFile.readAsStringSync();
+    indexJS = indexJS.replaceAll("// loadPlugins", """
+${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve) => {require("../../$key/pages/main", resolve);});')).values.join("\n")}
+""");
+    indexJSFile.writeAsStringSync(indexJS);
+  }
+
+  void _copyPubPackageToWechat(String pkgName, Directory pkgSrc) {
+    final pkgOut = Directory(join('build', 'wechat_tmp', pkgName, 'pages'));
+    pkgOut.createSync(recursive: true);
+    File(join(pkgOut.path, 'index.js')).writeAsStringSync('Page({})');
+    File(join(pkgOut.path, 'index.json')).writeAsStringSync('{}');
+    File(join(pkgOut.path, 'index.wxml')).writeAsStringSync('<view></view>');
+    _copyDirectory(
+      Directory(join(pkgSrc.path, 'wechat')),
+      Directory(pkgOut.path),
+    );
+  }
+
   void _removeMPJS(List<String> arguments) {
     if (arguments.contains('--mpjs')) {
       return;
@@ -305,4 +365,16 @@ $subPkgJS
       }
     });
   }
+}
+
+String _fixRootUri(String rootUriOrigin) {
+  var rootUri = rootUriOrigin;
+  if (rootUri.isEmpty) return rootUri;
+  if (rootUri.startsWith("../")) {
+    rootUri = rootUri.replaceFirst('../', '');
+  }
+  if (rootUri.startsWith("..\\")) {
+    rootUri = rootUri.replaceFirst('..\\', '');
+  }
+  return rootUri;
 }

@@ -93,7 +93,12 @@ class MPJSClientImpl {
   onNewObject(params) {
     const clazz = params.clazz;
     const args = params.arguments;
-    const realClazz = globalThis[clazz];
+    let realClazz = globalThis[clazz];
+    if (!realClazz) {
+      if (typeof wx === "object") {
+        realClazz = wx[clazz];
+      }
+    }
     const result = new realClazz(
       ...(args ? args.map((it) => this.tranformRefToObject(it)) : [])
     );
