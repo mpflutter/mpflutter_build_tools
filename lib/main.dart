@@ -122,6 +122,7 @@ class WechatBuilder {
     _copyDartJS(arguments);
     _copyPubPackagesToWechat(arguments);
     _removeMPJS(arguments);
+    _addLogStack(arguments);
     wechatOut.deleteSync();
     wechatTmp.renameSync(wechatOut.path);
   }
@@ -363,6 +364,21 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
           runInShell: true);
       element.deleteSync();
     });
+  }
+
+  void _addLogStack(List<String> arguments) {
+    if (!arguments.contains('--debug')) {
+      return;
+    }
+    final mainDartJSFile =
+        File(join("build", 'wechat_tmp', 'pages', 'index', 'main.dart.js'));
+    var content = mainDartJSFile.readAsStringSync();
+    content = content.replaceAll("console.log(string);",
+        'const error = new Error();console.log(string);console.info("Here\'s Log Stack：", error);');
+    content = content.replaceAll(
+        "return A.initializeExceptionWrapper(new Error(), ex);",
+        "console.error(ex, new Error()); return ex;");
+    mainDartJSFile.writeAsStringSync(content);
   }
 
   void _copyDirectory(Directory source, Directory destination) {
