@@ -67,7 +67,7 @@ class WechatBuilder {
           ...[
             '--web-renderer',
             'canvaskit',
-            '--dart-define=<mpflutter.library.core=true>'
+            '--dart-define=mpflutter.library.core=true'
           ],
           ...arguments.contains('--debug')
               ? ['--source-maps', '--dart2js-optimization', 'O1']
@@ -319,6 +319,20 @@ $subPkgJS
 ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve) => {require("../../$key/pages/main", resolve);});')).values.join("\n")}
 """);
     indexJSFile.writeAsStringSync(indexJS);
+    // add main.wxml to index.wxml
+    final indexWxmlFile =
+        File(join("build", 'wechat_tmp', 'pages', 'index', 'index.wxml'));
+    var indexWxmlContent = indexWxmlFile.readAsStringSync();
+    indexWxmlContent += maybeWeChatPkgs
+        .map((key, value) => MapEntry(key,
+            File(join(value.path, 'wechat', 'main.wxml')).readAsStringSync()))
+        .values
+        .join("\n");
+    indexWxmlContent = indexWxmlContent.replaceAll(
+      'style="{{item.wrapper}}"',
+      'style="{{item.wrapper}};z-index:9999;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2"',
+    );
+    indexWxmlFile.writeAsStringSync(indexWxmlContent);
   }
 
   void _copyPubPackageToWechat(String pkgName, Directory pkgSrc) {

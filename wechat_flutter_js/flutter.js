@@ -215,6 +215,10 @@ globalThis.FlutterHostView = FlutterHostView;
     Promise: Promise,
     Array: Array,
     Uint8Array: Uint8Array,
+    platformViewManager:
+      new (require("./platform_view").FlutterPlatformViewManager)(
+        FlutterHostView
+      ),
     crypto: require("./flutter_bom/crypto"),
     _flutter: _flutter,
     window: _flutter.window,
