@@ -1,10 +1,26 @@
 import 'dart:io';
+import 'dart:convert';
+import 'package:path/path.dart';
 
-final flutterRoot = "/Users/saiakirahui/flutter/";
+String flutterRoot = (() {
+  final pkgConfig = File(join('.dart_tool', 'package_config.json'));
+  final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
+  final pkgs = (pkgConfigData["packages"] as List);
+  for (var i = 0; i < pkgs.length; i++) {
+    final it = pkgs[i];
+    if (it['name'] == "flutter") {
+      return File(join(
+              Directory.fromUri(Uri.parse(it['rootUri'])).path, '../', '../'))
+          .path;
+    }
+  }
+  throw '找不到 Flutter 路径';
+})();
 final dartSDKRoot = flutterRoot + "bin/cache/dart-sdk/";
 final webSDKRoot = flutterRoot + "bin/cache/flutter_web_sdk/";
 
 void runSourceMapServer() {
+  print(flutterRoot);
   HttpServer.bind('localhost', 10706).then((server) {
     print('已创建 sourcemap 代码阅读服务 => localhost:${server.port}');
     print('你可以在微信开发者工具 > Source Tab 中，针对 dart 代码进行断点调试。');

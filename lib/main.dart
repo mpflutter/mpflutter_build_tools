@@ -63,7 +63,8 @@ class WechatBuilder {
           ...([...arguments]..removeWhere((element) =>
               element == "--mpjs" ||
               element == "--wechat" ||
-              element == "--debug")),
+              element == "--debug" ||
+              element == '--printstack')),
           ...[
             '--web-renderer',
             'canvaskit',
@@ -384,11 +385,14 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
     if (!arguments.contains('--debug')) {
       return;
     }
+    if (!arguments.contains('--printstack')) {
+      return;
+    }
     final mainDartJSFile =
         File(join("build", 'wechat_tmp', 'pages', 'index', 'main.dart.js'));
     var content = mainDartJSFile.readAsStringSync();
     content = content.replaceAll("console.log(string);",
-        'const error = new Error();console.log(string);console.info("Here\'s Log Stack：", error);');
+        'const error = new Error();console.log(string);console.info("=== 这是本次 Log 堆栈信息（不是错误） ===", error);');
     content = content.replaceAll(
         "return A.initializeExceptionWrapper(new Error(), ex);",
         "console.error(ex, new Error()); return ex;");
