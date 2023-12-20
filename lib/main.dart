@@ -1,10 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:mpflutter_build_tools/non-compatibles.dart';
 import 'package:path/path.dart';
 import './sourcemap.server.dart';
 
 late Directory mpflutterSrcRoot;
+
+void addNonCompatiblesPackage(String pkgName) {
+  nonCompatiblesPackages[pkgName] = [];
+}
 
 void main(List<String> arguments) async {
   init();
@@ -21,6 +26,7 @@ void main(List<String> arguments) async {
     print("[INFO] 正在构建 wechat 小程序");
     final builder = WechatBuilder();
     try {
+      builder.disableNonCompatiblesPackages(arguments);
       await builder.buildFlutterWeb(arguments);
       await builder.buildFlutterWechat(arguments);
       print("[INFO] 构建成功，产物在 build/wechat 目录，使用微信开发者工具导入预览、上传、发布。");
@@ -45,6 +51,46 @@ void init() {
 }
 
 class WechatBuilder {
+  void disableNonCompatiblesPackages(List<String> arguments) {
+    final pkgConfig = File(join('.dart_tool', 'package_config.json'));
+    final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
+    (pkgConfigData["packages"] as List).forEach((it) {
+      if (nonCompatiblesPackages[it['name']] != null) {
+        final disableLines = nonCompatiblesPackages[it['name']];
+        final srcRoot =
+            Directory.fromUri(Uri.parse(_fixRootUri(it['rootUri'])));
+        final yamlFile = File(join(srcRoot.path, "pubspec.yaml"));
+        if (yamlFile.existsSync()) {
+          String yamlContent = yamlFile.readAsStringSync();
+          final originContent = yamlContent;
+          if (disableLines!.isEmpty) {
+            yamlContent = yamlContent.replaceAllMapped(
+              RegExp('(pluginClass.*)'),
+              (match) => '#disable_by_mpflutter#${match.group(1)}',
+            );
+            yamlContent = yamlContent.replaceAllMapped(
+              RegExp('(fileName.*)'),
+              (match) => '#disable_by_mpflutter#${match.group(1)}',
+            );
+          } else {
+            disableLines.forEach((element) {
+              yamlContent = yamlContent.replaceAll(
+                element,
+                '#disable_by_mpflutter#$element',
+              );
+            });
+          }
+
+          yamlFile.writeAsStringSync(yamlContent);
+          print("Flutter Package [${it['name']}] 被标记为[不兼容的包]，本次构建已被临时禁用。");
+          Timer(Duration(seconds: 2), () {
+            yamlFile.writeAsStringSync(originContent);
+          });
+        }
+      }
+    });
+  }
+
   Future buildFlutterWeb(List<String> arguments) async {
     print("[INFO] 正在构建 flutter for web 产物");
     // create wechat dir
