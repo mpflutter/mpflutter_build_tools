@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 export class FlutterMiniProgramMockElement {
+  constructor() {
+    this.$$clazz$$ = "Element";
+  }
+
   tagName = "";
   attachShadow = () => {
     return new FlutterMiniProgramMockElement();

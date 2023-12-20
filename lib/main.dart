@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:mpflutter_build_tools/non-compatibles.dart';
 import 'package:path/path.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 import './sourcemap.server.dart';
 
 late Directory mpflutterSrcRoot;
@@ -63,25 +64,9 @@ class WechatBuilder {
         if (yamlFile.existsSync()) {
           String yamlContent = yamlFile.readAsStringSync();
           final originContent = yamlContent;
-          if (disableLines!.isEmpty) {
-            yamlContent = yamlContent.replaceAllMapped(
-              RegExp('(pluginClass.*)'),
-              (match) => '#disable_by_mpflutter#${match.group(1)}',
-            );
-            yamlContent = yamlContent.replaceAllMapped(
-              RegExp('(fileName.*)'),
-              (match) => '#disable_by_mpflutter#${match.group(1)}',
-            );
-          } else {
-            disableLines.forEach((element) {
-              yamlContent = yamlContent.replaceAll(
-                element,
-                '#disable_by_mpflutter#$element',
-              );
-            });
-          }
-
-          yamlFile.writeAsStringSync(yamlContent);
+          final yamlEditor = YamlEditor(yamlContent);
+          yamlEditor.remove(['flutter', 'plugin', 'platforms', 'web']);
+          yamlFile.writeAsStringSync(yamlEditor.toString());
           print("Flutter Package [${it['name']}] 被标记为[不兼容的包]，本次构建已被临时禁用。");
           Timer(Duration(seconds: 2), () {
             yamlFile.writeAsStringSync(originContent);

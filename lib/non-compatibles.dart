@@ -1,3 +1,6 @@
 Map<String, List<String>> nonCompatiblesPackages = {
-  "fluwx": ["pluginClass: FluwxWeb", "fileName: src/fluwx_web.dart"],
+  "fluwx": [],
+  "file_picker": [],
+  "image_picker_for_web": [],
+  "flutter_inappwebview_web": [],
 };

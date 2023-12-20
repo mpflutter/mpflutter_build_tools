@@ -10,3 +10,4 @@ dependencies:
   flutter:
     sdk: flutter
   path: ">=1.8.0"
+  yaml_edit: ^2.1.1
