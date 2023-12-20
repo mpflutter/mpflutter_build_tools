@@ -164,6 +164,19 @@ Page({
       promise: wx.mpcb.onShareAppMessage(),
     };
   },
+
+  onPVCB(e) {
+    if (e.target) {
+      const event = e.type;
+      const pvid = e.target.id;
+      const detail = e.detail;
+      getApp()._flutter.self.platformViewManager.onPVCB({
+        pvid,
+        event,
+        detail,
+      });
+    }
+  },
 });
 
 function loadAssetPages() {
