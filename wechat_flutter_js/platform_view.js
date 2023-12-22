@@ -18,55 +18,126 @@ export class FlutterPlatformViewManager {
     const self = this.FlutterHostView.shared.self;
     const blockName = viewOption.viewClazz + "_Block";
     const viewInstances = self.data[blockName] ?? [];
-    let found = false;
     let targetElement;
-    for (let index = 0; index < viewInstances.length; index++) {
+    let targetIndex;
+    let nextIndex;
+    for (let index = 0; index < 100; index++) {
       const element = viewInstances[index];
-      if (element.pvid === viewOption.pvid) {
+      if (element === undefined && nextIndex === undefined) {
+        nextIndex = index;
+      }
+      if (element && element.pvid === viewOption.pvid) {
         targetElement = element;
-        found = true;
+        targetIndex = index;
         break;
       }
     }
-    if (!found) {
+    if (!targetElement) {
       targetElement = { pvid: viewOption.pvid };
-      viewInstances.push(targetElement);
+      targetIndex = nextIndex;
+      targetElement.style =
+        `position: absolute;` +
+        `left:${viewOption.frame.x}px;` +
+        `top:${viewOption.frame.y}px;` +
+        `width:${viewOption.frame.width}px;` +
+        `height:${viewOption.frame.height}px;` +
+        `opacity: ${viewOption.opacity};`;
+      const windowHeight = wx.getSystemInfoSync().windowHeight;
+      let wrapperTop = viewOption.wrapper.top / windowHeight;
+      let wrapperBottom = viewOption.wrapper.bottom / windowHeight;
+      targetElement.wrapper = `position: absolute;top:0px;left:0px;width:100%;height:100%;mask-image: linear-gradient(to bottom, transparent, transparent ${(
+        wrapperTop * 100
+      ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(
+        0
+      )}%);-webkit-mask-image: linear-gradient(to bottom, transparent, transparent ${(
+        wrapperTop * 100
+      ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(0)}%);`;
+      if (viewOption.ignorePlatformTouch === true) {
+        targetElement.wrapper += `pointer-events:none;`;
+      }
+      if (viewOption.opacity <= 0.01) {
+        targetElement.wrapper += "visibility:hidden;pointer-events:none;";
+      }
+      targetElement.props = viewOption.props;
+      const keyPath = blockName + `.[${targetIndex}]`;
+      self.setData({ [keyPath]: targetElement });
+    } else {
+      // style
+      const styleKeyPath = blockName + `.[${targetIndex}].style`;
+      let style =
+        `position: absolute;` +
+        `left:${viewOption.frame.x}px;` +
+        `top:${viewOption.frame.y}px;` +
+        `width:${viewOption.frame.width}px;` +
+        `height:${viewOption.frame.height}px;` +
+        `opacity: ${viewOption.opacity};`;
+      if (targetElement.style !== style) {
+        self.setData({
+          [styleKeyPath]: style,
+        });
+      }
+      // wrapper
+      const wrapperKeyPath = blockName + `.[${targetIndex}].wrapper`;
+      const windowHeight = wx.getSystemInfoSync().windowHeight;
+      let wrapperTop = viewOption.wrapper.top / windowHeight;
+      let wrapperBottom = viewOption.wrapper.bottom / windowHeight;
+      let wrapper = `position: absolute;top:0px;left:0px;width:100%;height:100%;mask-image: linear-gradient(to bottom, transparent, transparent ${(
+        wrapperTop * 100
+      ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(
+        0
+      )}%);-webkit-mask-image: linear-gradient(to bottom, transparent, transparent ${(
+        wrapperTop * 100
+      ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(0)}%);`;
+      if (viewOption.ignorePlatformTouch === true) {
+        wrapper += `pointer-events:none;`;
+      }
+      if (viewOption.opacity <= 0.01) {
+        wrapper += "visibility:hidden;pointer-events:none;";
+      }
+      if (targetElement.wrapper !== wrapper) {
+        self.setData({
+          [wrapperKeyPath]: wrapper,
+        });
+      }
+      // props
+      if (targetElement.props) {
+        for (const targetKey in targetElement.props) {
+          if (
+            JSON.stringify(targetElement.props[targetKey]) !==
+            JSON.stringify(viewOption.props[targetKey])
+          ) {
+            const keyPath = blockName + `.[${targetIndex}].props.${targetKey}`;
+            console.log(
+              "set keypath",
+              keyPath,
+              targetElement.props[targetKey],
+              viewOption.props[targetKey]
+            );
+            self.setData({
+              [keyPath]: viewOption.props[targetKey],
+            });
+          }
+        }
+      }
     }
-    targetElement.style =
-      `position: absolute;` +
-      `left:${viewOption.frame.x}px;` +
-      `top:${viewOption.frame.y}px;` +
-      `width:${viewOption.frame.width}px;` +
-      `height:${viewOption.frame.height}px;` +
-      `opacity: ${viewOption.opacity};`;
-    const windowHeight = wx.getSystemInfoSync().windowHeight;
-    let wrapperTop = viewOption.wrapper.top / windowHeight;
-    let wrapperBottom = viewOption.wrapper.bottom / windowHeight;
-    targetElement.wrapper = `position: absolute;top:0px;left:0px;width:100%;height:100%;mask-image: linear-gradient(to bottom, transparent, transparent ${(
-      wrapperTop * 100
-    ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(
-      0
-    )}%);-webkit-mask-image: linear-gradient(to bottom, transparent, transparent ${(
-      wrapperTop * 100
-    ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(0)}%);`;
-    if (viewOption.ignorePlatformTouch === true) {
-      targetElement.wrapper += `pointer-events:none;`;
-    }
-    if (viewOption.opacity <= 0.01) {
-      targetElement.wrapper += "visibility:hidden;pointer-events:none;";
-    }
-    targetElement.props = viewOption.props;
-    self.setData({ [blockName]: viewInstances });
   }
 
   disposeView(viewOption) {
     const self = this.FlutterHostView.shared.self;
     const blockName = viewOption.viewClazz + "_Block";
-    let viewInstances = self.data[blockName] ?? [];
-    viewInstances = viewInstances.filter((item) => {
-      return item.pvid !== viewOption.pvid;
-    });
-    self.setData({ [blockName]: viewInstances });
+    const viewInstances = self.data[blockName] ?? [];
+    let targetIndex;
+    for (let index = 0; index < 100; index++) {
+      const element = viewInstances[index];
+      if (element && element.pvid === viewOption.pvid) {
+        targetIndex = index;
+        break;
+      }
+    }
+    if (targetIndex !== undefined) {
+      const keyPath = blockName + `.[${targetIndex}]`;
+      self.setData({ [keyPath]: undefined });
+    }
     delete this[viewOption.pvid + "_pvcb"];
   }
 }
