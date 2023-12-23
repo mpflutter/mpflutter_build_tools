@@ -92,7 +92,7 @@ class WechatBuilder {
           'build',
           'web',
           ...([...arguments]..removeWhere((element) =>
-              element == "--mpjs" ||
+              element == "--devmode" ||
               element == "--wechat" ||
               element == "--debug" ||
               element == '--printstack')),
@@ -153,7 +153,7 @@ class WechatBuilder {
     _compressAssets(arguments);
     _copyDartJS(arguments);
     _copyPubPackagesToWechat(arguments);
-    _removeMPJS(arguments);
+    await _removeMPJS(arguments);
     _addLogStack(arguments);
     wechatOut.deleteSync();
     wechatTmp.renameSync(wechatOut.path);
@@ -379,8 +379,28 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
     );
   }
 
-  void _removeMPJS(List<String> arguments) {
-    if (arguments.contains('--mpjs')) {
+  Future<void> _removeMPJS(List<String> arguments) async {
+    if (arguments.contains('--devmode')) {
+      // add ip to mpjs
+      final myIP = await _getIP();
+      if (myIP == null) {
+        print(
+          "[WARN] 无法获取本地局域网 IP 地址，请自行在 build/wechat/pages/index/mpjs.js 中修改 127.0.0.1 为你的 IP。",
+        );
+        return;
+      }
+      print(
+        "[INFO] 已获取到你的局域网 IP：$myIP",
+      );
+      print(
+        "[INFO] 已替换 build/wechat/pages/index/mpjs.js 文件中的 IP 地址",
+      );
+      var content =
+          File(join('build', 'wechat_tmp', 'pages', 'index', 'mpjs.js'))
+              .readAsStringSync();
+      content = content.replaceAll("127.0.0.1", myIP);
+      File(join('build', 'wechat_tmp', 'pages', 'index', 'mpjs.js'))
+          .writeAsStringSync(content);
       return;
     }
     File(join('build', 'wechat_tmp', 'pages', 'index', 'mpjs.js'))
@@ -472,4 +492,19 @@ String _fixSourceMap(String content) {
     }
   }
   return json.encode(obj);
+}
+
+Future<String?> _getIP() async {
+  try {
+    final addresses = await NetworkInterface.list();
+    for (var interface in addresses) {
+      for (var address in interface.addresses) {
+        if (address.type == InternetAddressType.IPv4) {
+          return address.address;
+        }
+      }
+    }
+  } catch (e) {
+    return null;
+  }
 }
