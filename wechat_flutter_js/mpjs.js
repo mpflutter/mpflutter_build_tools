@@ -18,13 +18,18 @@ class MPJSClientImpl {
     this.socket = wx.connectSocket({
       url: "ws://127.0.0.1:9898/",
     });
-    this.socket.onClose(() => {
+    let socketError = () => {
+      wx.showToast({ title: "正在尝试连接到调试器...", icon: "none" });
       console.info("正在尝试连接到调试器...");
       setTimeout(() => {
         this.connectSocket();
       }, 1000);
-    });
+    };
+    this.socket.onError(socketError);
+    this.socket.onClose(socketError);
     this.socket.onOpen(() => {
+      wx.showToast({ title: "已连接到调试器", icon: "success" });
+      wx.setKeepScreenOn({ keepScreenOn: true });
       console.info("已连接到调试器");
     });
     this.socket.onMessage(this.onSocketMessage.bind(this));

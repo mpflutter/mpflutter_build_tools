@@ -153,7 +153,7 @@ class WechatBuilder {
     _compressAssets(arguments);
     _copyDartJS(arguments);
     _copyPubPackagesToWechat(arguments);
-    await _removeMPJS(arguments);
+    await _openDevMode(arguments);
     _addLogStack(arguments);
     wechatOut.deleteSync();
     wechatTmp.renameSync(wechatOut.path);
@@ -379,7 +379,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
     );
   }
 
-  Future<void> _removeMPJS(List<String> arguments) async {
+  Future<void> _openDevMode(List<String> arguments) async {
     if (arguments.contains('--devmode')) {
       // add ip to mpjs
       final myIP = await _getIP();
@@ -401,6 +401,28 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
       content = content.replaceAll("127.0.0.1", myIP);
       File(join('build', 'wechat_tmp', 'pages', 'index', 'mpjs.js'))
           .writeAsStringSync(content);
+      if (File(join('macos', 'Runner', 'DebugProfile.entitlements'))
+          .existsSync()) {
+        File(join('macos', 'Runner', 'DebugProfile.entitlements'))
+            .writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+	<key>com.apple.security.files.downloads.read-write</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<key>com.apple.security.network.server</key>
+	<true/>
+</dict>
+</plist>
+''');
+      }
       return;
     }
     File(join('build', 'wechat_tmp', 'pages', 'index', 'mpjs.js'))
