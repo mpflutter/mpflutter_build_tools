@@ -4,8 +4,14 @@
   <page-container show="{{shouldCatchBack}}" duration="0" overlay="false" overlay-style="width:100vw;height:100vh;background-color:transparent" custom-style="width:100vw;height:100vh;background-color:transparent" bind:afterleave="onPageContainerHide">
     <view style="width: 100vw; height: 100vh; background-color: transparent;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2" />
   </page-container>
-  <input key="my_input" id="my_input" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" value="{{inputValue}}" type="{{inputType}}" password="{{inputPassword}}" confirm-type="{{inputConfirmType}}" focus="{{inputFocus}}" selection-start="{{inputSelectionStart}}" selection-end="{{inputSelectionEnd}}" adjust-position="false" confirm-hold="false" hold-keyboard="true" bindinput="oninputinput" bindblur="oninputblur" bindconfirm="oninputconfirm" bindkeyboardheightchange="onkeyboardheightchange" />
-  <textarea key="my_textarea" id="my_textarea" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" value="{{inputValue}}" 	show-confirm-bar="false" type="{{inputType}}" password="{{inputPassword}}" confirm-type="{{inputConfirmType}}" focus="{{textareaFocus}}" selection-start="{{inputSelectionStart}}" selection-end="{{inputSelectionEnd}}" adjust-position="false" confirm-hold="false" hold-keyboard="true" bindinput="oninputinput" bindblur="oninputblur" bindconfirm="oninputconfirm" bindkeyboardheightchange="onkeyboardheightchange" />
+
+  <block wx:for="{{MPFlutter_Wechat_Input_Block}}" wx:key="pvid">
+    <input key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" value="{{item.props.value}}" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="false" confirm-hold="false" hold-keyboard="true" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange"></input>
+  </block>
+  <block wx:for="{{MPFlutter_Wechat_TextArea_Block}}" wx:key="pvid">
+    <textarea key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" value="{{item.props.value}}" show-confirm-bar="false" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="false" confirm-hold="false" hold-keyboard="true" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange" />
+  </block>
+
   <image style="position: absolute;right:0;top:0;width:66px;height:66px;z-index: 10000" src="{{licenseUrl}}" />
   <include src="splash.wxml"/>
 </view>

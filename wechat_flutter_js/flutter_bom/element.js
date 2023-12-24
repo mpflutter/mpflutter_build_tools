@@ -23,6 +23,9 @@ export class FlutterMiniProgramMockElement {
   appendChild = () => {
     return {};
   };
+  getAttribute = (key) => {
+    return this[key];
+  };
   setAttribute = (key, value) => {
     this[key] = value;
   };

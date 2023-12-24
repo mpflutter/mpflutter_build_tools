@@ -6,9 +6,41 @@ const FlutterMiniProgramMockElement =
   require("./element").FlutterMiniProgramMockElement;
 
 export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockElement {
-  constructor() {
+  constructor(viewClazz) {
     super();
-    globalThis.FlutterHostView.shared.resetInputValues?.();
+    if (viewClazz === "Form") return;
+    this.viewOption = {
+      viewClazz: viewClazz ?? "MPFlutter_Wechat_Input",
+      pvid: Math.random().toString(),
+      frame: {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      },
+      opacity: 0.0,
+      wrapper: {
+        top: 0,
+        bottom: 0,
+      },
+      props: {},
+    };
+    this.platformViewManager = getApp()._flutter.self.platformViewManager;
+    this.platformViewManager.updateView(this.viewOption);
+    this.platformViewManager.addCBListenner(
+      this.viewOption.pvid,
+      (event, detail) => {
+        if (event === "input") {
+          this.onInput?.(detail);
+        } else if (event === "blur") {
+          this.onBlur?.(detail);
+        } else if (event === "confirm") {
+          const keyboardEvent = new globalThis.KeyboardEvent();
+          keyboardEvent.keyCode = 13;
+          this.onKeydown?.(keyboardEvent);
+        }
+      }
+    );
   }
 
   _value = "";
@@ -19,11 +51,12 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
 
   set value(v) {
     this._value = v;
-    globalThis.FlutterHostView.shared.requireSetInputValue(v);
+    this.viewOption.props.value = v;
+    this.platformViewManager.updateView(this.viewOption);
   }
 
   get inputmode() {
-    return "";
+    return this.viewOption.props.type;
   }
 
   set inputmode(v) {
@@ -35,60 +68,89 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     } else {
       newValue = "text";
     }
-    FlutterHostView.shared.requireSetInputType(newValue);
+    this.viewOption.props.type = newValue;
+    this.platformViewManager.updateView(this.viewOption);
   }
 
   set type(v) {
     if (v === "password") {
-      FlutterHostView.shared.requireSetInputPassword(true);
+      this.viewOption.props.password = true;
     } else {
-      FlutterHostView.shared.requireSetInputPassword(false);
+      this.viewOption.props.password = false;
     }
+    this.platformViewManager.updateView(this.viewOption);
   }
 
   get enterkeyhint() {
-    return "";
+    return "none";
   }
 
   set enterkeyhint(v) {
-    FlutterHostView.shared.requireSetConfirmType(v);
+    this.viewOption.props.confirmType = v;
+    this.platformViewManager.updateView(this.viewOption);
   }
 
   selectionStart = 0;
   selectionEnd = 0;
   setSelectionRange(start, end) {
-    FlutterHostView.shared.requireSelectionRange(start, end);
+    this.preventDispose = true;
+    this.selectionStart = start;
+    this.selectionEnd = end;
+    this.viewOption.props.selectionStart = start;
+    this.viewOption.props.selectionEnd = end;
+    this.viewOption.props.focus = false;
+    this.platformViewManager.updateView(this.viewOption);
+    setTimeout(() => {
+      this.preventDispose = false;
+      this.viewOption.props.focus = true;
+      this.platformViewManager.updateView(this.viewOption);
+    }, 64);
   }
   focus = () => {
-    FlutterHostView.shared.requireInputFocus(true);
+    this.viewOption.props.focus = true;
+    this.platformViewManager.updateView(this.viewOption);
   };
   blur = () => {
-    FlutterHostView.shared.requireInputFocus(false);
+    if (this.preventDispose) return;
+    this.viewOption.props.focus = false;
+    this.platformViewManager.updateView(this.viewOption);
+  };
+  remove = () => {
+    if (this.preventDispose) return;
+    this.viewOption.props.focus = false;
+    this.platformViewManager.updateView(this.viewOption);
+    setTimeout(() => {
+      this.platformViewManager.disposeView(this.viewOption);
+    }, 32);
   };
   addEventListener = (event, callback) => {
     let self = this;
     if (event === "input") {
-      FlutterHostView.shared.oninputinput = function () {
-        self.value = arguments[0].detail.value;
-        self.selectionStart = arguments[0].detail.cursor;
-        self.selectionEnd = arguments[0].detail.cursor;
-        callback.apply(callback, arguments);
+      this.onInput = (detail) => {
+        self.value = detail.value;
+        self.selectionStart = detail.cursor;
+        self.selectionEnd = detail.cursor;
+        callback.apply(callback, [detail]);
       };
     } else if (event === "blur") {
-      FlutterHostView.shared.oninputblur = callback;
+      this.onBlur = callback;
     } else if (event === "keydown") {
-      FlutterHostView.shared.oninputkeydown = callback;
+      this.onKeydown = callback;
     }
   };
 }
 
 export class FlutterMiniProgramMockTextAreaElement extends FlutterMiniProgramMockInputElement {
-  focus = () => {
-    FlutterHostView.shared.requireInputFocus(true, "textarea");
-  };
+  constructor() {
+    super("MPFlutter_Wechat_TextArea");
+  }
 }
 
 export class FlutterMiniProgramMockFormElement extends FlutterMiniProgramMockElement {
+  constructor() {
+    super("Form");
+  }
+
   focus() {}
   addEventListener = (event, callback) => {};
 }

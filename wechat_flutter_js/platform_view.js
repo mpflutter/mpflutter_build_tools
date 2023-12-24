@@ -58,7 +58,7 @@ export class FlutterPlatformViewManager {
       if (viewOption.opacity <= 0.01) {
         targetElement.wrapper += "visibility:hidden;pointer-events:none;";
       }
-      targetElement.props = viewOption.props;
+      targetElement.props = { ...viewOption.props };
       const keyPath = blockName + `.[${targetIndex}]`;
       self.setData({ [keyPath]: targetElement });
     } else {
@@ -101,18 +101,15 @@ export class FlutterPlatformViewManager {
       }
       // props
       if (targetElement.props) {
-        for (const targetKey in targetElement.props) {
+        for (const targetKey in {
+          ...targetElement.props,
+          ...viewOption.props,
+        }) {
           if (
             JSON.stringify(targetElement.props[targetKey]) !==
             JSON.stringify(viewOption.props[targetKey])
           ) {
             const keyPath = blockName + `.[${targetIndex}].props.${targetKey}`;
-            console.log(
-              "set keypath",
-              keyPath,
-              targetElement.props[targetKey],
-              viewOption.props[targetKey]
-            );
             self.setData({
               [keyPath]: viewOption.props[targetKey],
             });
