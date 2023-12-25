@@ -6,15 +6,6 @@ let resumeTimer = undefined;
 
 Page({
   data: {
-    inputValue: "",
-    inputType: "",
-    inputPassword: false,
-    inputConfirmType: "",
-    inputFocus: false,
-    textareaFocus: false,
-    inputHoldKeyboard: true,
-    inputSelectionStart: -1,
-    inputSelectionEnd: -1,
     readyToDisplay: false,
     shouldCatchBack: false,
   },
@@ -85,32 +76,6 @@ Page({
     FlutterHostView.shared.touching = false;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
     callFlutterTouchEvent("ontouchcancel", arguments);
-  },
-
-  oninputinput() {
-    const self = FlutterHostView.shared.self;
-    self.setData({
-      inputValue: arguments[0].detail.value,
-    });
-    FlutterHostView.shared.oninputinput.apply(null, arguments);
-    simulateKeyDownEvent(arguments[0].detail.keyCode);
-  },
-
-  oninputblur() {
-    let a = arguments;
-    if (shouldDelayBlurEvent(arguments[0])) {
-      setTimeout(() => {
-        if (!FlutterHostView.shared.inputHasFocus) {
-          FlutterHostView.shared.oninputblur.apply(null, a);
-        }
-      }, 100);
-      return;
-    }
-    FlutterHostView.shared.oninputblur.apply(null, arguments);
-  },
-
-  oninputconfirm() {
-    simulateKeyDownEvent(13);
   },
 
   onkeyboardheightchange() {
@@ -197,94 +162,6 @@ async function loadPlugins() {
 
 function setupFlutterHostView(self) {
   FlutterHostView.shared.self = self;
-  FlutterHostView.shared.resetInputValues = () => {
-    self.setData({
-      inputType: "text",
-      inputConfirmType: "",
-      inputValue: "",
-      inputSelectionStart: -1,
-      inputSelectionEnd: -1,
-      inputPassword: false,
-    });
-  };
-
-  FlutterHostView.shared.requireSetInputValue = (value) => {
-    const self = FlutterHostView.shared.self;
-    if (self.data.inputValue === value) return;
-    self.setData({ inputValue: value });
-  };
-
-  FlutterHostView.shared.requireInputFocus = (value, tag) => {
-    const self = FlutterHostView.shared.self;
-    FlutterHostView.shared.inputHasFocus = value;
-    if (self.data.inputFocus === value) return;
-    if (value) {
-      if (tag === "textarea") {
-        self.setData({
-          inputHoldKeyboard: true,
-          inputFocus: false,
-          textareaFocus: true,
-        });
-      } else {
-        self.setData({
-          inputHoldKeyboard: true,
-          inputFocus: true,
-          textareaFocus: false,
-        });
-      }
-    } else {
-      self.setData({
-        inputHoldKeyboard: true,
-        inputFocus: false,
-        textareaFocus: false,
-      });
-    }
-  };
-
-  FlutterHostView.shared.requireSetInputType = (value) => {
-    const self = FlutterHostView.shared.self;
-    if (self.data.inputType === value) return;
-    self.setData({ inputType: value });
-  };
-
-  FlutterHostView.shared.requireSetInputPassword = (value) => {
-    const self = FlutterHostView.shared.self;
-    if (self.data.inputPassword === value) return;
-    self.setData({ inputPassword: value });
-  };
-
-  FlutterHostView.shared.requireSetConfirmType = (value) => {
-    const self = FlutterHostView.shared.self;
-    if (self.data.inputConfirmType === value) return;
-    self.setData({ inputConfirmType: value });
-  };
-
-  FlutterHostView.shared.requireSelectionRange = (start, end) => {
-    const self = FlutterHostView.shared.self;
-    const oldInputFocus = self.data.inputFocus;
-    const oldTextareaFocus = self.data.textareaFocus;
-    self.setData({
-      inputSelectionStart: start,
-      inputSelectionEnd: end,
-      inputFocus: false,
-    });
-
-    const setupResumeTimer = () => {
-      if (resumeTimer) return;
-      resumeTimer = setTimeout(() => {
-        resumeTimer = null;
-        if (FlutterHostView.shared.touching) {
-          setupResumeTimer();
-          return;
-        }
-        self.setData({
-          inputFocus: oldInputFocus,
-          textareaFocus: oldTextareaFocus,
-        });
-      }, 64);
-    };
-    setupResumeTimer();
-  };
 
   FlutterHostView.shared.requireCatchBack = (shouldCatchBack) => {
     FlutterHostView.shared.shouldCatchBack = shouldCatchBack;
@@ -339,18 +216,6 @@ function callFlutterTouchEvent(eventName, args) {
       FlutterHostView.transformTouchEvent(args[0]),
     ]);
   }
-}
-
-function simulateKeyDownEvent(keyCode) {
-  const keyboardEvent = new globalThis.KeyboardEvent();
-  keyboardEvent.keyCode = keyCode;
-  FlutterHostView.shared.oninputkeydown.apply(null, [keyboardEvent]);
-}
-
-function shouldDelayBlurEvent() {
-  return (
-    FlutterHostView.shared.inputHasFocus && arguments[0].detail.height <= 0
-  );
 }
 
 function shouldDelayKeyboardHeightChange() {
