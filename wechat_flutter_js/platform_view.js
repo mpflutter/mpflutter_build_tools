@@ -1,3 +1,52 @@
+function deepCompare(value1, value2) {
+  if (typeof value1 !== typeof value2) {
+    return false;
+  }
+
+  if (
+    typeof value1 === "number" ||
+    typeof value1 === "string" ||
+    typeof value1 === "boolean" ||
+    value1 === null ||
+    value1 === undefined
+  ) {
+    return value1 === value2;
+  }
+
+  if (Array.isArray(value1)) {
+    if (value1.length !== value2.length) {
+      return false;
+    }
+
+    for (let i = 0; i < value1.length; i++) {
+      if (!deepCompare(value1[i], value2[i])) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  if (typeof value1 === "object") {
+    const keys1 = Object.keys(value1);
+    const keys2 = Object.keys(value2);
+
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+
+    for (let key of keys1) {
+      if (!deepCompare(value1[key], value2[key])) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
 export class FlutterPlatformViewManager {
   constructor(FlutterHostView) {
     this.FlutterHostView = FlutterHostView;
@@ -106,8 +155,10 @@ export class FlutterPlatformViewManager {
           ...viewOption.props,
         }) {
           if (
-            JSON.stringify(targetElement.props[targetKey]) !==
-            JSON.stringify(viewOption.props[targetKey])
+            !deepCompare(
+              targetElement.props[targetKey],
+              viewOption.props[targetKey]
+            )
           ) {
             const keyPath = blockName + `.[${targetIndex}].props.${targetKey}`;
             self.setData({

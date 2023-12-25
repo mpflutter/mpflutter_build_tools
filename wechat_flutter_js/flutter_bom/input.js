@@ -127,7 +127,7 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     let self = this;
     if (event === "input") {
       this.onInput = (detail) => {
-        self.value = detail.value;
+        self._value = detail.value;
         self.selectionStart = detail.cursor;
         self.selectionEnd = detail.cursor;
         callback.apply(callback, [detail]);
