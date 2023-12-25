@@ -64,7 +64,6 @@ export class FlutterMiniProgramMockWindow {
     };
   }
   fetch = (url, options) => {
-    console.log("fetch", url, options);
     if (!options) {
       options = {};
     }
@@ -73,10 +72,17 @@ export class FlutterMiniProgramMockWindow {
         url.startsWith("https://fonts.gstatic.com/s/notosanssc/") &&
         (url.endsWith(".otf") || url.endsWith(".ttf"))
       ) {
+        let mUrl = "/assets/fonts/NotoSansSC-Regular.ttf";
+        let subPackageUrl = require("../assets").default[mUrl] ?? mUrl;
+        await new Promise((resolve) => {
+          require(`../../../${
+            subPackageUrl.split("/")[1]
+          }/pages/index`, resolve);
+        });
         const fs = wx.getFileSystemManager();
         const brExists = await new Promise((resolve) => {
           fs.getFileInfo({
-            filePath: "/assets/fonts/NotoSansSC-Regular.ttf" + ".br",
+            filePath: subPackageUrl + ".br",
             success: () => {
               resolve(true);
             },
@@ -86,16 +92,22 @@ export class FlutterMiniProgramMockWindow {
           });
         });
         if (brExists) {
-          url = "/assets/fonts/NotoSansSC-Regular.ttf";
+          url = mUrl;
         }
       }
       if (url.startsWith("/")) {
+        let subPackageUrl = require("../assets").default[url] ?? url;
+        await new Promise((resolve) => {
+          require(`../../../${
+            subPackageUrl.split("/")[1]
+          }/pages/index`, resolve);
+        });
         let br = false;
         const fs = wx.getFileSystemManager();
 
         const brExists = await new Promise((resolve) => {
           fs.getFileInfo({
-            filePath: url + ".br",
+            filePath: subPackageUrl + ".br",
             success: () => {
               resolve(true);
             },
@@ -106,7 +118,7 @@ export class FlutterMiniProgramMockWindow {
         });
         if (brExists) {
           br = true;
-          url = url + ".br";
+          subPackageUrl = subPackageUrl + ".br";
         }
         let bodyReadDone = false;
         const body = {
@@ -123,10 +135,10 @@ export class FlutterMiniProgramMockWindow {
                   value: new Uint8Array(
                     br
                       ? fs.readCompressedFileSync({
-                          filePath: url,
+                          filePath: subPackageUrl,
                           compressionAlgorithm: "br",
                         })
-                      : fs.readFileSync(url)
+                      : fs.readFileSync(subPackageUrl)
                   ),
                 };
                 bodyReadDone = true;
@@ -138,10 +150,10 @@ export class FlutterMiniProgramMockWindow {
         const arrayBuffer = async () => {
           const originBuffer = br
             ? fs.readCompressedFileSync({
-                filePath: url,
+                filePath: subPackageUrl,
                 compressionAlgorithm: "br",
               })
-            : fs.readFileSync(url);
+            : fs.readFileSync(subPackageUrl);
           const newBuffer = new ArrayBuffer(originBuffer.byteLength);
           const sourceArray = new Uint8Array(originBuffer);
           const targetArray = new Uint8Array(newBuffer);
@@ -154,7 +166,7 @@ export class FlutterMiniProgramMockWindow {
             fs.writeFileSync(
               tmpFile,
               fs.readCompressedFileSync({
-                filePath: url,
+                filePath: subPackageUrl,
                 compressionAlgorithm: "br",
               })
             );
@@ -164,7 +176,7 @@ export class FlutterMiniProgramMockWindow {
             });
             return localFileText;
           }
-          const localFileText = fs.readFileSync(url, "utf-8");
+          const localFileText = fs.readFileSync(subPackageUrl, "utf-8");
           return localFileText;
         };
         const json = async () => {
@@ -172,7 +184,7 @@ export class FlutterMiniProgramMockWindow {
           return JSON.parse(localFileText);
         };
 
-        const clone = async () => fetch(url, options);
+        const clone = async () => fetch(subPackageUrl, options);
 
         const responseData = {
           ok: true,

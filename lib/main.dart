@@ -178,16 +178,97 @@ class WechatBuilder {
 
   void _copyAssets(List<String> arguments) {
     final assetsSrc = Directory(join('build', 'web', 'assets'));
-    final assetsOut = Directory(join('build', 'wechat_tmp', 'assets'));
-    assetsOut.createSync();
-    Directory(join(assetsOut.path, 'pages')).createSync();
-    File(join(assetsOut.path, 'pages', 'index.js'))
-        .writeAsStringSync('Page({})');
-    File(join(assetsOut.path, 'pages', 'index.json')).writeAsStringSync('{}');
-    File(join(assetsOut.path, 'pages', 'index.wxml'))
-        .writeAsStringSync('<view></view>');
-    _copyDirectory(assetsSrc, assetsOut);
-    File(join(assetsOut.path, 'NOTICES')).deleteSync();
+    File(join(assetsSrc.path, 'NOTICES')).deleteSync();
+
+    List<List<String>> subPkgs = [];
+    List<String> currentPkgFiles = [];
+    var currentPkgSize = 0;
+    final firstly = ["Manifest", "fonts"];
+    final files =
+        Directory(join('build', 'web', 'assets')).listSync(recursive: true);
+    files.sort((a, b) {
+      for (var i = 0; i < firstly.length; i++) {
+        if (a.path.contains(firstly[i]) && !b.path.contains(firstly[i])) {
+          return -1;
+        } else if (b.path.contains(firstly[i]) &&
+            !a.path.contains(firstly[i])) {
+          return 1;
+        } else if (b.path.contains(firstly[i]) && a.path.contains(firstly[i])) {
+          return -1;
+        }
+      }
+      return 1;
+    });
+    files.forEach((element) {
+      if (element.statSync().type == FileSystemEntityType.directory) return;
+      if (element.path.endsWith(".DS_Store")) return;
+      if (element.path.contains('/packages/window_manager/')) return;
+      if (currentPkgSize + element.statSync().size > 2.5 * 1000 * 1000) {
+        // brotli 压缩，预估 2.5M -> 2.0M。
+        subPkgs.add(currentPkgFiles);
+        currentPkgFiles = [];
+        currentPkgSize = 0;
+      }
+      currentPkgFiles.add(element.path);
+      currentPkgSize += element.statSync().size;
+    });
+    if (currentPkgFiles.isNotEmpty) {
+      subPkgs.add(currentPkgFiles);
+    }
+
+    subPkgs.asMap().forEach((key, value) {
+      final keyId = key == 0 ? "" : key.toString();
+      final pkgDirRoot = join('build', 'wechat_tmp', 'assets' + keyId);
+      Directory(pkgDirRoot).createSync();
+      Directory(join(pkgDirRoot, 'pages')).createSync();
+      File(join(pkgDirRoot, 'pages', 'index.js')).writeAsStringSync('Page({})');
+      File(join(pkgDirRoot, 'pages', 'index.json')).writeAsStringSync('{}');
+      File(join(pkgDirRoot, 'pages', 'index.wxml'))
+          .writeAsStringSync('<view></view>');
+      value.forEach((element) {
+        final srcOut = element.replaceFirst(
+            "build/web/assets/", "build/wechat_tmp/assets${keyId}/");
+        Directory(srcOut).parent.createSync(recursive: true);
+        File(element).copySync(srcOut);
+      });
+    });
+
+    var subPkgAsset = '';
+    subPkgs.asMap().forEach((key, value) {
+      final keyId = key == 0 ? "" : key.toString();
+      value.forEach((element) {
+        subPkgAsset +=
+            '"${element.replaceFirst("build/web/", "/")}": "${element.replaceFirst("build/web/assets/", "/assets${keyId}/")}",\n';
+      });
+    });
+    File(join('build', 'wechat_tmp', 'pages', 'index', 'assets.js'))
+        .writeAsStringSync('''
+export default {
+$subPkgAsset
+}
+''');
+
+    final appJSONData = json.decode(
+        File(join('build', 'wechat_tmp', 'app.json')).readAsStringSync());
+    final appJSONSubpackages = appJSONData["subpackages"] ??
+        [
+          {
+            "name": "canvaskit",
+            "root": "canvaskit",
+            "pages": ["pages/index"]
+          },
+        ];
+    subPkgs.asMap().forEach((key, value) {
+      final keyId = key == 0 ? "" : key.toString();
+      appJSONSubpackages.add({
+        "name": "assets" + keyId.toString(),
+        "root": "assets" + keyId.toString(),
+        "pages": ["pages/index"]
+      });
+    });
+    appJSONData["subpackages"] = appJSONSubpackages;
+    File(join('build', 'wechat_tmp', 'app.json'))
+        .writeAsStringSync(json.encode(appJSONData));
   }
 
   void _copyDartJS(List<String> arguments) {
@@ -202,10 +283,9 @@ class WechatBuilder {
         subPkgs.add(currentPkgFiles);
         currentPkgFiles = [];
         currentPkgSize = 0;
-      } else {
-        currentPkgFiles.add(element.path.split(separator).last);
-        currentPkgSize += element.statSync().size;
       }
+      currentPkgFiles.add(element.path.split(separator).last);
+      currentPkgSize += element.statSync().size;
     });
     if (currentPkgFiles.isNotEmpty) {
       subPkgs.add(currentPkgFiles);
@@ -259,18 +339,19 @@ $subPkgJS
 ''');
     final appJSONData = json.decode(
         File(join('build', 'wechat_tmp', 'app.json')).readAsStringSync());
-    final appJSONSubpackages = [
-      {
-        "name": "canvaskit",
-        "root": "canvaskit",
-        "pages": ["pages/index"]
-      },
-      {
-        "name": "assets",
-        "root": "assets",
-        "pages": ["pages/index"]
-      }
-    ];
+    final appJSONSubpackages = appJSONData["subpackages"] ??
+        [
+          {
+            "name": "canvaskit",
+            "root": "canvaskit",
+            "pages": ["pages/index"]
+          },
+          {
+            "name": "assets",
+            "root": "assets",
+            "pages": ["pages/index"]
+          }
+        ];
     subPkgs.asMap().forEach((key, value) {
       appJSONSubpackages.add({
         "name": "pkg" + key.toString(),
@@ -442,17 +523,21 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
   }
 
   void _compressAssets(List<String> arguments) {
-    Directory(join('build', 'wechat_tmp', 'assets'))
-        .listSync(recursive: true)
-        .forEach((element) {
-      if (element.statSync().type == FileSystemEntityType.directory) return;
-      if (element.path.endsWith('index.js') ||
-          element.path.endsWith('index.json') ||
-          element.path.endsWith('index.wxml')) return;
-      Process.runSync('brotli', [element.path, '-o', element.path + ".br"],
-          runInShell: true);
-      element.deleteSync();
-    });
+    for (var i = 0; i < 100; i++) {
+      final keyId = i == 0 ? "" : i.toString();
+      final dir = Directory(join('build', 'wechat_tmp', 'assets${keyId}'));
+      if (dir.existsSync()) {
+        dir.listSync(recursive: true).forEach((element) {
+          if (element.statSync().type == FileSystemEntityType.directory) return;
+          if (element.path.endsWith('index.js') ||
+              element.path.endsWith('index.json') ||
+              element.path.endsWith('index.wxml')) return;
+          Process.runSync('brotli', [element.path, '-o', element.path + ".br"],
+              runInShell: true);
+          element.deleteSync();
+        });
+      }
+    }
   }
 
   void _addLogStack(List<String> arguments) {
