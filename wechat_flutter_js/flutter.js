@@ -292,9 +292,11 @@ globalThis.FlutterHostView = FlutterHostView;
 
   let originObjectStringFunction = Object.prototype.toString;
   Object.prototype.toString = function () {
-    if (this.$$clazz$$) {
-      return `[object ${this.$$clazz$$}]`;
-    }
+    try {
+      if (this.$$clazz$$) {
+        return `[object ${this.$$clazz$$}]`;
+      }
+    } catch (error) {}
     return originObjectStringFunction.apply(this, arguments);
   };
 })();
