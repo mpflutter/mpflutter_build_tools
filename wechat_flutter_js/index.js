@@ -123,10 +123,9 @@ Page({
     wx.mpcb?.onHide?.();
   },
 
-  onShareAppMessage() {
+  onShareAppMessage(detail) {
     return {
-      ...wx.mpcb.onShareAppMessage(),
-      promise: wx.mpcb.onShareAppMessage(),
+      ...wx.mpcb.onShareAppMessage(detail),
     };
   },
 
