@@ -51,6 +51,7 @@ Page({
         let canvas = res[0].node;
         resizeCanvas(canvas);
         getApp()._flutter.activeCanvas = canvas;
+        FlutterHostView.shared.onwebglcontextlost?.();
         FlutterHostView.shared.onwebglcontextrestored?.();
       });
   },
