@@ -10,7 +10,16 @@ Page({
     shouldCatchBack: false,
   },
 
+  onUnload() {
+    FlutterHostView.shared.onwebglcontextlost?.();
+  },
+
   async onLoad() {
+    if (FlutterHostView.shared.onwebglcontextrestored) {
+      this.restoreCanvas();
+      this.setData({ readyToDisplay: true });
+      return;
+    }
     require("./mpjs");
     await loadAssetPages();
     await loadCanvasKitPages();
@@ -30,6 +39,19 @@ Page({
         setTimeout(() => {
           this.setData({ readyToDisplay: true });
         }, 1000);
+      });
+  },
+
+  restoreCanvas() {
+    wx.createSelectorQuery()
+      .select("#my_canvas") // 在 WXML 中填入的 id
+      .fields({ node: true, size: true })
+      .exec(async (res) => {
+        // Canvas 对象
+        let canvas = res[0].node;
+        resizeCanvas(canvas);
+        getApp()._flutter.activeCanvas = canvas;
+        FlutterHostView.shared.onwebglcontextrestored?.();
       });
   },
 

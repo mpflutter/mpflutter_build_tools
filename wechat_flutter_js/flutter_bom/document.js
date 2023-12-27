@@ -38,6 +38,7 @@ export class FlutterMiniProgramMockDocument {
       let canvas = _flutter.activeCanvas;
       let mockElement =
         new (require("./element").FlutterMiniProgramMockElement)();
+      mockElement.tagName = "canvas";
       for (const key in mockElement) {
         canvas[key] = mockElement[key];
       }
@@ -45,30 +46,27 @@ export class FlutterMiniProgramMockDocument {
       canvas.getContext = function (type) {
         if (GLVersion > 1) {
           if (type !== "webgl2") return null;
-          return oriGetContext("webgl2")
-        }
-        else {
+          return oriGetContext("webgl2");
+        } else {
           if (type !== "webgl") return null;
-          return oriGetContext("webgl")
+          return oriGetContext("webgl");
         }
       };
       Object.defineProperty(canvas, "width", {
-        get: function() {
+        get: function () {
           return canvas.width;
         },
-        set: function(value) {
-        },
+        set: function (value) {},
         enumerable: true,
-        configurable: true
+        configurable: true,
       });
       Object.defineProperty(canvas, "height", {
-        get: function() {
+        get: function () {
           return canvas.height;
         },
-        set: function(value) {
-        },
+        set: function (value) {},
         enumerable: true,
-        configurable: true
+        configurable: true,
       });
       return canvas;
     } else if (tag === "flutter-view") {
@@ -80,7 +78,8 @@ export class FlutterMiniProgramMockDocument {
       el.tagName = "input";
       return el;
     } else if (tag === "textarea") {
-      const el = new (require("./input").FlutterMiniProgramMockTextAreaElement)();
+      const el =
+        new (require("./input").FlutterMiniProgramMockTextAreaElement)();
       el.tagName = "textarea";
       return el;
     } else if (tag === "form") {

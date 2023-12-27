@@ -53,6 +53,28 @@ export class FlutterMiniProgramMockElement {
       } else if (event === "touchcancel") {
         FlutterHostView.shared.ontouchcancel = callback;
       }
+    } else if (this.tagName === "canvas") {
+      if (event === "webglcontextlost") {
+        FlutterHostView.shared.onwebglcontextlost = () => {
+          const event = {
+            $$clazz$$: "Event",
+            target: this,
+            preventDefault: function () {},
+            stopPropagation: function () {},
+          };
+          callback(event);
+        };
+      } else if (event === "webglcontextrestored") {
+        FlutterHostView.shared.onwebglcontextrestored = () => {
+          const event = {
+            $$clazz$$: "Event",
+            target: this,
+            preventDefault: function () {},
+            stopPropagation: function () {},
+          };
+          callback(event);
+        };
+      }
     }
   };
   removeEventListener = () => {};
