@@ -17,7 +17,12 @@ Page({
   async onLoad() {
     if (FlutterHostView.shared.onwebglcontextrestored) {
       this.restoreCanvas();
-      this.setData({ readyToDisplay: true });
+      setupFlutterHostView(this);
+      this.setData({
+        readyToDisplay: true,
+        shouldCatchBack: FlutterHostView.shared.shouldCatchBack,
+      });
+      this.onEnter();
       return;
     }
     require("./mpjs");
@@ -40,6 +45,11 @@ Page({
           this.setData({ readyToDisplay: true });
         }, 1000);
       });
+  },
+
+  onEnter() {
+    const enterQuery = wx.getEnterOptionsSync().query;
+    wx.mpcb.onEnter(enterQuery);
   },
 
   restoreCanvas() {
