@@ -21,7 +21,10 @@ class MPJSClientImpl {
     let socketError = () => {
       wx.showToast({ title: "正在尝试连接到调试器...", icon: "none" });
       console.info("正在尝试连接到调试器...");
-      setTimeout(() => {
+      if (this.reconnectTimer) {
+        clearTimeout(this.reconnectTimer);
+      }
+      this.reconnectTimer = setTimeout(() => {
         this.connectSocket();
       }, 1000);
     };
