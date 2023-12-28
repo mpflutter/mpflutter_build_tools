@@ -1,5 +1,12 @@
 # ChangeLog
 
+## 2.0.0-alpha.7
+
+feat: 添加 PlatformView 支持
+feat: 添加 Flutter Plugin 支持
+feat: 添加微信分享等能力支持
+feat: 添加 Hot Reload 联机调试支持
+
 ## 2.0.0-alpha.5
 
 fix: 默认字体加载未加载内置字体的问题
