@@ -72,7 +72,10 @@ export class FlutterPlatformViewManager {
     let nextIndex;
     for (let index = 0; index < 100; index++) {
       const element = viewInstances[index];
-      if (element === undefined && nextIndex === undefined) {
+      if (
+        (element === undefined && nextIndex === undefined) ||
+        element?.removed === true
+      ) {
         nextIndex = index;
       }
       if (element && element.pvid === viewOption.pvid) {
@@ -84,13 +87,15 @@ export class FlutterPlatformViewManager {
     if (!targetElement) {
       targetElement = { pvid: viewOption.pvid };
       targetIndex = nextIndex;
+      targetElement.removed = false;
       targetElement.style =
         `position: absolute;` +
         `left:${viewOption.frame.x}px;` +
         `top:${viewOption.frame.y}px;` +
         `width:${viewOption.frame.width}px;` +
         `height:${viewOption.frame.height}px;` +
-        `opacity: ${viewOption.opacity};`;
+        `opacity: ${viewOption.opacity};` +
+        `z-index: 9999;`;
       const windowHeight = wx.getSystemInfoSync().windowHeight;
       let wrapperTop = viewOption.wrapper.top / windowHeight;
       let wrapperBottom = viewOption.wrapper.bottom / windowHeight;
@@ -183,8 +188,8 @@ export class FlutterPlatformViewManager {
       }
     }
     if (targetIndex !== undefined) {
-      const keyPath = blockName + `.[${targetIndex}]`;
-      self.setData({ [keyPath]: undefined });
+      const keyPath = blockName + `.[${targetIndex}].removed`;
+      self.setData({ [keyPath]: true });
     }
     delete this[viewOption.pvid + "_pvcb"];
   }

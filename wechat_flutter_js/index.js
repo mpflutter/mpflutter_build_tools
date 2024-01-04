@@ -1,6 +1,7 @@
 // index.ts
 // 获取应用实例
 const { FlutterHostView } = require("./flutter");
+const { FlutterMiniProgramMockInputElement } = require("./flutter_bom/input");
 
 let resumeTimer = undefined;
 
@@ -12,6 +13,7 @@ Page({
 
   onUnload() {
     FlutterHostView.shared.onwebglcontextlost?.();
+    wx.offKeyboardHeightChange(this.onkeyboardheightchange.bind(this));
   },
 
   async onLoad() {
@@ -45,6 +47,8 @@ Page({
           this.setData({ readyToDisplay: true });
         }, 1000);
       });
+
+    wx.onKeyboardHeightChange(this.onkeyboardheightchange.bind(this));
   },
 
   onEnter() {
@@ -111,17 +115,17 @@ Page({
     callFlutterTouchEvent("ontouchcancel", arguments);
   },
 
-  onkeyboardheightchange() {
-    let a = arguments;
+  onkeyboardheightchange(detail) {
+    let a = { detail: detail };
     if (shouldDelayKeyboardHeightChange()) {
       setTimeout(() => {
         if (!FlutterHostView.shared.inputHasFocus) {
-          FlutterHostView.shared.onkeyboardheightchange.apply(null, a);
+          FlutterHostView.shared.onkeyboardheightchange.apply(null, [a]);
         }
       }, 100);
       return;
     }
-    FlutterHostView.shared.onkeyboardheightchange.apply(null, arguments);
+    FlutterHostView.shared.onkeyboardheightchange.apply(null, [a]);
   },
 
   onPageContainerHide() {

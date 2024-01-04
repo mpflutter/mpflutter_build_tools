@@ -110,4 +110,8 @@ export class FlutterMiniProgramMockDocument {
   createMockElement() {
     // 实现 createMockElement 函数的逻辑
   }
+
+  execCommand(command) {
+    console.log("execCommand", command);
+  }
 }

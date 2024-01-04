@@ -34,6 +34,7 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
           this.onInput?.(detail);
         } else if (event === "blur") {
           this.onBlur?.(detail);
+          this.blur();
         } else if (event === "confirm") {
           const keyboardEvent = new globalThis.KeyboardEvent();
           keyboardEvent.keyCode = 13;
@@ -110,6 +111,7 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     this.viewOption.props.focus = true;
     this.platformViewManager.updateView(this.viewOption);
   };
+  select = () => {};
   blur = () => {
     if (this.preventDispose) return;
     this.viewOption.props.focus = false;
