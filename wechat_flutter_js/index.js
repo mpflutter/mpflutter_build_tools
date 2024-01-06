@@ -94,22 +94,26 @@ Page({
   },
 
   ontouchstart2() {
+    if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = true;
     callFlutterTouchEvent("ontouchstart", arguments);
   },
 
   ontouchmove2() {
+    if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
     callFlutterTouchEvent("ontouchmove", arguments);
   },
 
   ontouchend2() {
+    if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = false;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
     callFlutterTouchEvent("ontouchend", arguments);
   },
 
   ontouchcancel2() {
+    if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = false;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
     callFlutterTouchEvent("ontouchcancel", arguments);
