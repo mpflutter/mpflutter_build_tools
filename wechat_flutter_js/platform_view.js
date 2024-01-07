@@ -1,3 +1,7 @@
+// Copyright 2023 The MPFlutter Authors. All rights reserved.
+// Use of this source code is governed by a Apache License Version 2.0 that can be
+// found in the LICENSE file.
+
 function deepCompare(value1, value2) {
   if (typeof value1 !== typeof value2) {
     return false;
