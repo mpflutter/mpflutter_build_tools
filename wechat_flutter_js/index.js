@@ -43,9 +43,6 @@ Page({
         resizeCanvas(canvas);
 
         await setupFlutterApp(canvas);
-        setTimeout(() => {
-          this.setData({ readyToDisplay: true });
-        }, 1000);
       });
 
     wx.onKeyboardHeightChange(this.onkeyboardheightchange.bind(this));
