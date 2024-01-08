@@ -230,8 +230,8 @@ class WechatBuilder {
       File(join(pkgDirRoot, 'pages', 'index.wxml'))
           .writeAsStringSync('<view></view>');
       value.forEach((element) {
-        final srcOut = element.replaceFirst(
-            "build/web/assets/", "build/wechat_tmp/assets${keyId}/");
+        final srcOut = element.replaceFirst(join("build", "web", "assets"),
+            join("build", "wechat_tmp", "assets${keyId}"));
         Directory(srcOut).parent.createSync(recursive: true);
         File(element).copySync(srcOut);
       });
