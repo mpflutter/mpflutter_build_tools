@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:es_compression/brotli.dart';
 import 'package:mpflutter_build_tools/non-compatibles.dart';
 import 'package:path/path.dart';
 import 'package:yaml_edit/yaml_edit.dart';
@@ -541,15 +542,26 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
           if (element.path.endsWith('index.js') ||
               element.path.endsWith('index.json') ||
               element.path.endsWith('index.wxml')) return;
-          Process.runSync(
-            'brotli',
-            [element.path, '-o', element.path + ".br"],
-            runInShell: true,
-          );
-          if (!File(element.path + ".br").existsSync()) {
-            throw 'brotli 执行失败，请检查 brotli 是否正确安装。\n参考文档：https://mpflutter.feishu.cn/wiki/HsMzwcGKNioPlAkh9pPc8NfznIf';
+          try {
+            final codec = BrotliCodec(level: BrotliOption.maxLevel);
+            final encoded = codec.encode(
+              File(element.path).readAsBytesSync().toList(),
+            );
+            File(element.path + ".br").writeAsBytesSync(encoded);
+            element.deleteSync();
+          } catch (e) {
+            print(
+                "[INFO] 内置 brotli 压缩 ${element.path} 失败，回退至 native command 执行。");
+            Process.runSync(
+              'brotli',
+              [element.path, '-o', element.path + ".br"],
+              runInShell: true,
+            );
+            if (!File(element.path + ".br").existsSync()) {
+              throw 'brotli 执行失败，请检查 brotli 是否正确安装。\n参考文档：https://mpflutter.feishu.cn/wiki/HsMzwcGKNioPlAkh9pPc8NfznIf';
+            }
+            element.deleteSync();
           }
-          element.deleteSync();
         });
       }
     }
