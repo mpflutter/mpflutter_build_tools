@@ -541,8 +541,14 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
           if (element.path.endsWith('index.js') ||
               element.path.endsWith('index.json') ||
               element.path.endsWith('index.wxml')) return;
-          Process.runSync('brotli', [element.path, '-o', element.path + ".br"],
-              runInShell: true);
+          Process.runSync(
+            'brotli',
+            [element.path, '-o', element.path + ".br"],
+            runInShell: true,
+          );
+          if (!File(element.path + ".br").existsSync()) {
+            throw 'brotli 执行失败，请检查 brotli 是否正确安装。\n参考文档：https://mpflutter.feishu.cn/wiki/HsMzwcGKNioPlAkh9pPc8NfznIf';
+          }
           element.deleteSync();
         });
       }
