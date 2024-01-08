@@ -1,5 +1,9 @@
 # ChangeLog
 
+## 2.0.1
+
+修正 windows 资源编译问题
+
 ## 2.0.0
 
 MPFlutter 2.0.0 正式发布
