@@ -241,8 +241,13 @@ class WechatBuilder {
     subPkgs.asMap().forEach((key, value) {
       final keyId = key == 0 ? "" : key.toString();
       value.forEach((element) {
-        subPkgAsset +=
-            '"${element.replaceFirst("build/web/", "/")}": "${element.replaceFirst("build/web/assets/", "/assets${keyId}/")}",\n';
+        if (element.contains("\\")) {
+          subPkgAsset +=
+              '"${element.replaceAll("\\", "/").replaceFirst("build/web/", "/")}": "${element.replaceAll("\\", "/").replaceFirst("build/web/assets/", "/assets${keyId}/")}",\n';
+        } else {
+          subPkgAsset +=
+              '"${element.replaceFirst("build/web/", "/")}": "${element.replaceFirst("build/web/assets/", "/assets${keyId}/")}",\n';
+        }
       });
     });
     File(join('build', 'wechat_tmp', 'pages', 'index', 'assets.js'))
