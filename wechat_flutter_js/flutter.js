@@ -13,6 +13,8 @@ if (!_flutter) {
 }
 
 _flutter.loader = null;
+_flutter.imageCache = {};
+_flutter.imageCacheNextIndex = 0;
 
 export class FlutterHostView {
   static shared = new FlutterHostView();

@@ -4,9 +4,9 @@ const GLVersion = 2
 
 var CanvasKitInit = (() => {
   var _scriptDir =
-    typeof document !== "undefined" && document.currentScript
-      ? document.currentScript.src
-      : undefined;
+    typeof document !== "undefined" && document.currentScript ?
+    document.currentScript.src :
+    undefined;
   if (typeof __filename !== "undefined") _scriptDir = _scriptDir || __filename;
   return function (moduleArg = {}) {
     var w = moduleArg,
@@ -22,8 +22,8 @@ var CanvasKitInit = (() => {
         a.MakeSWCanvasSurface = function (b) {
           var c = b,
             f =
-              "undefined" !== typeof OffscreenCanvas &&
-              c instanceof OffscreenCanvas;
+            "undefined" !== typeof OffscreenCanvas &&
+            c instanceof OffscreenCanvas;
           if (
             !(
               ("undefined" !== typeof HTMLCanvasElement &&
@@ -49,11 +49,11 @@ var CanvasKitInit = (() => {
             m = a._malloc(h);
           if ((f = a.Surface._makeRasterDirect(f, m, 4 * b)))
             (f.Jd = null),
-              (f.Ff = b),
-              (f.Bf = c),
-              (f.Df = h),
-              (f.$e = m),
-              f.getCanvas().clear(a.TRANSPARENT);
+            (f.Ff = b),
+            (f.Bf = c),
+            (f.Df = h),
+            (f.$e = m),
+            f.getCanvas().clear(a.TRANSPARENT);
           return f;
         };
         a.MakeRasterDirectSurface = function (b, c, f) {
@@ -66,16 +66,17 @@ var CanvasKitInit = (() => {
             var c = new Uint8ClampedArray(a.HEAPU8.buffer, this.$e, this.Df);
             c = new ImageData(c, this.Ff, this.Bf);
             b
-              ? this.Jd.getContext("2d").putImageData(
-                  c,
-                  0,
-                  0,
-                  b[0],
-                  b[1],
-                  b[2] - b[0],
-                  b[3] - b[1]
-                )
-              : this.Jd.getContext("2d").putImageData(c, 0, 0);
+              ?
+              this.Jd.getContext("2d").putImageData(
+                c,
+                0,
+                0,
+                b[0],
+                b[1],
+                b[2] - b[0],
+                b[3] - b[1]
+              ) :
+              this.Jd.getContext("2d").putImageData(c, 0, 0);
           }
         };
         a.Surface.prototype.dispose = function () {
@@ -96,19 +97,23 @@ var CanvasKitInit = (() => {
         function b(n, q, v) {
           return n && n.hasOwnProperty(q) ? n[q] : v;
         }
+
         function c(n) {
           var q = ha(ia);
           ia[q] = n;
           return q;
         }
+
         function f(n) {
           return (
             n.naturalHeight || n.videoHeight || n.displayHeight || n.height
           );
         }
+
         function h(n) {
           return n.naturalWidth || n.videoWidth || n.displayWidth || n.width;
         }
+
         function m(n, q, v, E) {
           n.bindTexture(n.TEXTURE_2D, q);
           E ||
@@ -116,6 +121,7 @@ var CanvasKitInit = (() => {
             n.pixelStorei(n.UNPACK_PREMULTIPLY_ALPHA_WEBGL, !0);
           return q;
         }
+
         function u(n, q, v) {
           v ||
             q.alphaType !== a.AlphaType.Premul ||
@@ -150,11 +156,11 @@ var CanvasKitInit = (() => {
             ),
           };
           v.majorVersion =
-            q && q.majorVersion
-              ? q.majorVersion
-              : GLVersion > 1
-              ? 2
-              : 1;
+            q && q.majorVersion ?
+            q.majorVersion :
+            GLVersion > 1 ?
+            2 :
+            1;
           if (v.explicitSwapControl)
             throw "explicitSwapControl is not supported";
           n = na(n, v);
@@ -209,9 +215,9 @@ var CanvasKitInit = (() => {
         a.MakeOnScreenGLSurface = function (n, q, v, E, I, L) {
           if (!this.Kd(n.Id)) return null;
           q =
-            void 0 === I || void 0 === L
-              ? this._MakeOnScreenGLSurface(n, q, v, E)
-              : this._MakeOnScreenGLSurface(n, q, v, E, I, L);
+            void 0 === I || void 0 === L ?
+            this._MakeOnScreenGLSurface(n, q, v, E) :
+            this._MakeOnScreenGLSurface(n, q, v, E, I, L);
           if (!q) return null;
           q.Id = n.Id;
           return q;
@@ -237,9 +243,9 @@ var CanvasKitInit = (() => {
           if (!n || 0 > n) throw "failed to create webgl context: err " + n;
           n = this.MakeWebGLContext(n);
           q = this.MakeOnScreenGLSurface(n, E.width, E.height, q);
-          return q
-            ? q
-            : ((q = E.cloneNode(!0)),
+          return q ?
+            q :
+            ((q = E.cloneNode(!0)),
               E.parentNode.replaceChild(q, E),
               q.classList.add("ck-replaced"),
               a.MakeSWCanvasSurface(q));
@@ -263,19 +269,19 @@ var CanvasKitInit = (() => {
           a.Kd(this.Id);
           var E = A.de;
           v = m(E, E.createTexture(), q, v);
-          2 === A.version
-            ? E.texImage2D(
-                E.TEXTURE_2D,
-                0,
-                E.RGBA,
-                q.width,
-                q.height,
-                0,
-                E.RGBA,
-                E.UNSIGNED_BYTE,
-                n
-              )
-            : E.texImage2D(E.TEXTURE_2D, 0, E.RGBA, E.RGBA, E.UNSIGNED_BYTE, n);
+          2 === A.version ?
+            E.texImage2D(
+              E.TEXTURE_2D,
+              0,
+              E.RGBA,
+              q.width,
+              q.height,
+              0,
+              E.RGBA,
+              E.UNSIGNED_BYTE,
+              n
+            ) :
+            E.texImage2D(E.TEXTURE_2D, 0, E.RGBA, E.RGBA, E.UNSIGNED_BYTE, n);
           u(E, q);
           this._resetContext();
           return this.makeImageFromTexture(v, q);
@@ -286,26 +292,26 @@ var CanvasKitInit = (() => {
             var E = n.getImageInfo(),
               I = A.de,
               L = m(I, ia[n.Je], E, v);
-            2 === A.version
-              ? I.texImage2D(
-                  I.TEXTURE_2D,
-                  0,
-                  I.RGBA,
-                  h(q),
-                  f(q),
-                  0,
-                  I.RGBA,
-                  I.UNSIGNED_BYTE,
-                  q
-                )
-              : I.texImage2D(
-                  I.TEXTURE_2D,
-                  0,
-                  I.RGBA,
-                  I.RGBA,
-                  I.UNSIGNED_BYTE,
-                  q
-                );
+            2 === A.version ?
+              I.texImage2D(
+                I.TEXTURE_2D,
+                0,
+                I.RGBA,
+                h(q),
+                f(q),
+                0,
+                I.RGBA,
+                I.UNSIGNED_BYTE,
+                q
+              ) :
+              I.texImage2D(
+                I.TEXTURE_2D,
+                0,
+                I.RGBA,
+                I.RGBA,
+                I.UNSIGNED_BYTE,
+                q
+              );
             u(I, E, v);
             this._resetContext();
             ia[n.Je] = null;
@@ -336,26 +342,26 @@ var CanvasKitInit = (() => {
               var I = A,
                 L = I.de,
                 y = m(L, L.createTexture(), q, v);
-              2 === I.version
-                ? L.texImage2D(
-                    L.TEXTURE_2D,
-                    0,
-                    L.RGBA,
-                    q.width,
-                    q.height,
-                    0,
-                    L.RGBA,
-                    L.UNSIGNED_BYTE,
-                    n
-                  )
-                : L.texImage2D(
-                    L.TEXTURE_2D,
-                    0,
-                    L.RGBA,
-                    L.RGBA,
-                    L.UNSIGNED_BYTE,
-                    n
-                  );
+              2 === I.version ?
+                L.texImage2D(
+                  L.TEXTURE_2D,
+                  0,
+                  L.RGBA,
+                  q.width,
+                  q.height,
+                  0,
+                  L.RGBA,
+                  L.UNSIGNED_BYTE,
+                  n
+                ) :
+                L.texImage2D(
+                  L.TEXTURE_2D,
+                  0,
+                  L.RGBA,
+                  L.RGBA,
+                  L.UNSIGNED_BYTE,
+                  n
+                );
               u(L, q, v);
               return c(y);
             },
@@ -381,14 +387,17 @@ var CanvasKitInit = (() => {
           d[x * g + ((x * t + l + g) % g)] = e[x];
         return d;
       }
+
       function c(e) {
-        for (var d = e * e, g = Array(d); d--; )
+        for (var d = e * e, g = Array(d); d--;)
           g[d] = 0 === d % (e + 1) ? 1 : 0;
         return g;
       }
+
       function f(e) {
         return e ? e.constructor === Float32Array && 4 === e.length : !1;
       }
+
       function h(e) {
         return (
           ((n(255 * e[3]) << 24) |
@@ -398,13 +407,12 @@ var CanvasKitInit = (() => {
           0
         );
       }
+
       function m(e) {
         if (e && e._ck) return e;
         if (e instanceof Float32Array) {
           for (
-            var d = Math.floor(e.length / 4), g = new Uint32Array(d), l = 0;
-            l < d;
-            l++
+            var d = Math.floor(e.length / 4), g = new Uint32Array(d), l = 0; l < d; l++
           )
             g[l] = h(e.slice(4 * l, 4 * (l + 1)));
           return g;
@@ -412,17 +420,21 @@ var CanvasKitInit = (() => {
         if (e instanceof Uint32Array) return e;
         if (e instanceof Array && e[0] instanceof Float32Array) return e.map(h);
       }
+
       function u(e) {
         if (void 0 === e) return 1;
         var d = parseFloat(e);
         return e && -1 !== e.indexOf("%") ? d / 100 : d;
       }
+
       function n(e) {
         return Math.round(Math.max(0, Math.min(e || 0, 255)));
       }
+
       function q(e, d) {
         (d && d._ck) || a._free(e);
       }
+
       function v(e, d, g) {
         if (!e || !e.length) return W;
         if (e && e._ck) return e.byteOffset;
@@ -431,8 +443,13 @@ var CanvasKitInit = (() => {
         a[d].set(e, g / l);
         return g;
       }
+
       function E(e) {
-        var d = { $d: W, count: e.length, colorType: a.ColorType.RGBA_F32 };
+        var d = {
+          $d: W,
+          count: e.length,
+          colorType: a.ColorType.RGBA_F32
+        };
         if (e instanceof Float32Array)
           (d.$d = v(e, "HEAPF32")), (d.count = e.length / 4);
         else if (e instanceof Uint32Array)
@@ -440,11 +457,9 @@ var CanvasKitInit = (() => {
         else if (e instanceof Array) {
           if (e && e.length) {
             for (
-              var g = a._malloc(16 * e.length), l = 0, t = g / 4, x = 0;
-              x < e.length;
-              x++
+              var g = a._malloc(16 * e.length), l = 0, t = g / 4, x = 0; x < e.length; x++
             )
-              for (var C = 0; 4 > C; C++) (a.HEAPF32[t + l] = e[x][C]), l++;
+              for (var C = 0; 4 > C; C++)(a.HEAPF32[t + l] = e[x][C]), l++;
             e = g;
           } else e = W;
           d.$d = e;
@@ -455,6 +470,7 @@ var CanvasKitInit = (() => {
           );
         return d;
       }
+
       function I(e) {
         if (!e) return W;
         var d = Vb.toTypedArray();
@@ -492,6 +508,7 @@ var CanvasKitInit = (() => {
         d[8] = e.m44;
         return Na;
       }
+
       function L(e) {
         if (!e) return W;
         var d = Wb.toTypedArray();
@@ -532,9 +549,11 @@ var CanvasKitInit = (() => {
         d[15] = e.m44;
         return $a;
       }
+
       function y(e, d) {
         return v(e, "HEAPF32", d || Ta);
       }
+
       function N(e, d, g, l) {
         var t = Xb.toTypedArray();
         t[0] = e;
@@ -543,22 +562,27 @@ var CanvasKitInit = (() => {
         t[3] = l;
         return Ta;
       }
+
       function T(e) {
         for (var d = new Float32Array(4), g = 0; 4 > g; g++)
           d[g] = a.HEAPF32[e / 4 + g];
         return d;
       }
+
       function S(e, d) {
         return v(e, "HEAPF32", d || ja);
       }
+
       function pa(e, d) {
         return v(e, "HEAPF32", d || Yb);
       }
+
       function la() {
         for (var e = 0, d = 0; d < arguments.length - 1; d += 2)
           e += arguments[d] * arguments[d + 1];
         return e;
       }
+
       function gb(e, d, g) {
         for (var l = Array(e.length), t = 0; t < g; t++)
           for (var x = 0; x < g; x++) {
@@ -567,8 +591,9 @@ var CanvasKitInit = (() => {
           }
         return l;
       }
+
       function hb(e, d) {
-        for (var g = gb(d[0], d[1], e), l = 2; l < d.length; )
+        for (var g = gb(d[0], d[1], e), l = 2; l < d.length;)
           (g = gb(g, d[l], e)), l++;
         return g;
       }
@@ -659,25 +684,25 @@ var CanvasKitInit = (() => {
               d = 17 * parseInt(e.slice(4, 5), 16);
             case 4:
               (g = 17 * parseInt(e.slice(1, 2), 16)),
-                (l = 17 * parseInt(e.slice(2, 3), 16)),
-                (t = 17 * parseInt(e.slice(3, 4), 16));
+              (l = 17 * parseInt(e.slice(2, 3), 16)),
+              (t = 17 * parseInt(e.slice(3, 4), 16));
           }
           return a.Color(g, l, t, d / 255);
         }
-        return e.startsWith("rgba")
-          ? ((e = e.slice(5, -1)),
+        return e.startsWith("rgba") ?
+          ((e = e.slice(5, -1)),
             (e = e.split(",")),
-            a.Color(+e[0], +e[1], +e[2], u(e[3])))
-          : e.startsWith("rgb")
-          ? ((e = e.slice(4, -1)),
+            a.Color(+e[0], +e[1], +e[2], u(e[3]))) :
+          e.startsWith("rgb") ?
+          ((e = e.slice(4, -1)),
             (e = e.split(",")),
-            a.Color(+e[0], +e[1], +e[2], u(e[3])))
-          : e.startsWith("gray(") ||
-            e.startsWith("hsl") ||
-            !d ||
-            ((e = d[e]), void 0 === e)
-          ? a.BLACK
-          : e;
+            a.Color(+e[0], +e[1], +e[2], u(e[3]))) :
+          e.startsWith("gray(") ||
+          e.startsWith("hsl") ||
+          !d ||
+          ((e = d[e]), void 0 === e) ?
+          a.BLACK :
+          e;
       };
       a.multiplyByAlpha = function (e, d) {
         e = e.slice();
@@ -736,9 +761,9 @@ var CanvasKitInit = (() => {
         function e(d, g, l, t, x, C, J) {
           C ||
             ((C = 4 * t.width),
-            t.colorType === a.ColorType.RGBA_F16
-              ? (C *= 2)
-              : t.colorType === a.ColorType.RGBA_F32 && (C *= 4));
+              t.colorType === a.ColorType.RGBA_F16 ?
+              (C *= 2) :
+              t.colorType === a.ColorType.RGBA_F32 && (C *= 4));
           var P = C * t.height;
           var O = x ? x.byteOffset : a._malloc(P);
           if (
@@ -783,7 +808,9 @@ var CanvasKitInit = (() => {
         a.ColorSpace.SRGB = a.ColorSpace._MakeSRGB();
         a.ColorSpace.DISPLAY_P3 = a.ColorSpace._MakeDisplayP3();
         a.ColorSpace.ADOBE_RGB = a.ColorSpace._MakeAdobeRGB();
-        a.GlyphRunFlags = { IsWhiteSpace: a._GlyphRunFlags_isWhiteSpace };
+        a.GlyphRunFlags = {
+          IsWhiteSpace: a._GlyphRunFlags_isWhiteSpace
+        };
         a.Path.MakeFromCmds = function (d) {
           var g = v(d, "HEAPF32"),
             l = a.Path._MakeFromCmds(g, d.length);
@@ -830,19 +857,19 @@ var CanvasKitInit = (() => {
           if (1 === d.length) this._addPath(g, 1, 0, 0, 0, 1, 0, 0, 0, 1, l);
           else if (2 === d.length)
             (d = d[1]),
-              this._addPath(
-                g,
-                d[0],
-                d[1],
-                d[2],
-                d[3],
-                d[4],
-                d[5],
-                d[6] || 0,
-                d[7] || 0,
-                d[8] || 1,
-                l
-              );
+            this._addPath(
+              g,
+              d[0],
+              d[1],
+              d[2],
+              d[3],
+              d[4],
+              d[5],
+              d[6] || 0,
+              d[7] || 0,
+              d[8] || 1,
+              l
+            );
           else if (7 === d.length || 10 === d.length)
             this._addPath(
               g,
@@ -1004,17 +1031,17 @@ var CanvasKitInit = (() => {
             );
           } else if (6 === arguments.length || 9 === arguments.length)
             (d = arguments),
-              this._transform(
-                d[0],
-                d[1],
-                d[2],
-                d[3],
-                d[4],
-                d[5],
-                d[6] || 0,
-                d[7] || 0,
-                d[8] || 1
-              );
+            this._transform(
+              d[0],
+              d[1],
+              d[2],
+              d[3],
+              d[4],
+              d[5],
+              d[6] || 0,
+              d[7] || 0,
+              d[8] || 1
+            );
           else
             throw (
               "transform expected to take 1 or 9 arguments. Got " +
@@ -1275,8 +1302,13 @@ var CanvasKitInit = (() => {
           P = P || a.ColorSpace.SRGB;
           var Y = O * g;
           O = v(d, "HEAPU8");
-          g = this._writePixels(
-            { width: g, height: l, colorType: J, alphaType: C, colorSpace: P },
+          g = this._writePixels({
+              width: g,
+              height: l,
+              colorType: J,
+              alphaType: C,
+              colorSpace: P
+            },
             O,
             Y,
             t,
@@ -1558,7 +1590,10 @@ var CanvasKitInit = (() => {
         var d = v(e.ambient, "HEAPF32"),
           g = v(e.spot, "HEAPF32");
         this._computeTonalColors(d, g);
-        var l = { ambient: T(d), spot: T(g) };
+        var l = {
+          ambient: T(d),
+          spot: T(g)
+        };
         q(d, e.ambient);
         q(g, e.spot);
         return l;
@@ -1580,11 +1615,35 @@ var CanvasKitInit = (() => {
       };
       a.MakeAnimatedImageFromEncoded = function (e) {
         e = new Uint8Array(e);
+        if (e[0] === 1 && e[1] === 6 && e[2] === 0 && e[3] === 7) {
+          const imageIndex = (e[4] << 24) | (e[5] << 16) | (e[6] << 8) | e[7];
+          const image = getApp()._flutter.imageCache[imageIndex];
+          if (image && image.width > 0 && image.height > 0) {
+            try {
+              const skimage = a.MakeLazyImageFromTextureSource(image);
+              const animatedImage = {
+                delete: () => {},
+                getFrameCount: () => 1,
+                getRepetitionCount: () => 1,
+                currentFrameDuration: () => 1000,
+                getCurrentFrame: () => skimage,
+                makeImageAtCurrentFrame: () => skimage,
+                decodeNextFrame: () => -1,
+              };
+              getApp()._flutter.imageCache[imageIndex] = undefined;
+              return animatedImage;
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        }
         var d = a._malloc(e.byteLength);
         a.HEAPU8.set(e, d);
-        return (e = a._decodeAnimatedImage(d, e.byteLength)) ? e : null;
+        const eee = (e = a._decodeAnimatedImage(d, e.byteLength)) ? e : null;
+        return eee;
       };
       a.MakeImageFromEncoded = function (e) {
+        console.log("MakeImageFromEncoded", e);
         e = new Uint8Array(e);
         var d = a._malloc(e.byteLength);
         a.HEAPU8.set(e, d);
@@ -1597,11 +1656,12 @@ var CanvasKitInit = (() => {
         jb || (jb = document.createElement("canvas"));
         jb.width = d;
         jb.height = g;
-        var l = jb.getContext("2d", { willReadFrequently: !0 });
+        var l = jb.getContext("2d", {
+          willReadFrequently: !0
+        });
         l.drawImage(e, 0, 0);
         e = l.getImageData(0, 0, d, g);
-        return a.MakeImage(
-          {
+        return a.MakeImage({
             width: d,
             height: g,
             alphaType: a.AlphaType.Unpremul,
@@ -1642,19 +1702,19 @@ var CanvasKitInit = (() => {
           e[2] * e[4] * e[6] -
           e[1] * e[3] * e[8] -
           e[0] * e[5] * e[7];
-        return d
-          ? [
-              (e[4] * e[8] - e[5] * e[7]) / d,
-              (e[2] * e[7] - e[1] * e[8]) / d,
-              (e[1] * e[5] - e[2] * e[4]) / d,
-              (e[5] * e[6] - e[3] * e[8]) / d,
-              (e[0] * e[8] - e[2] * e[6]) / d,
-              (e[2] * e[3] - e[0] * e[5]) / d,
-              (e[3] * e[7] - e[4] * e[6]) / d,
-              (e[1] * e[6] - e[0] * e[7]) / d,
-              (e[0] * e[4] - e[1] * e[3]) / d,
-            ]
-          : null;
+        return d ?
+          [
+            (e[4] * e[8] - e[5] * e[7]) / d,
+            (e[2] * e[7] - e[1] * e[8]) / d,
+            (e[1] * e[5] - e[2] * e[4]) / d,
+            (e[5] * e[6] - e[3] * e[8]) / d,
+            (e[0] * e[8] - e[2] * e[6]) / d,
+            (e[2] * e[3] - e[0] * e[5]) / d,
+            (e[3] * e[7] - e[4] * e[6]) / d,
+            (e[1] * e[6] - e[0] * e[7]) / d,
+            (e[0] * e[4] - e[1] * e[3]) / d,
+          ] :
+          null;
       };
       a.Matrix.mapPoints = function (e, d) {
         for (var g = 0; g < d.length; g += 2) {
@@ -1881,10 +1941,10 @@ var CanvasKitInit = (() => {
           O * ma - Y * va + aa * ka,
         ];
         return d.every(function (Ia) {
-          return !isNaN(Ia) && Infinity !== Ia && -Infinity !== Ia;
-        })
-          ? d
-          : null;
+            return !isNaN(Ia) && Infinity !== Ia && -Infinity !== Ia;
+          }) ?
+          d :
+          null;
       };
       a.M44.transpose = function (e) {
         return [
@@ -1963,10 +2023,10 @@ var CanvasKitInit = (() => {
         for (var g = new Float32Array(20), l = 0, t = 0; 20 > t; t += 5) {
           for (var x = 0; 4 > x; x++)
             g[l++] =
-              e[t] * d[x] +
-              e[t + 1] * d[x + 5] +
-              e[t + 2] * d[x + 10] +
-              e[t + 3] * d[x + 15];
+            e[t] * d[x] +
+            e[t + 1] * d[x + 5] +
+            e[t + 2] * d[x + 10] +
+            e[t + 3] * d[x + 15];
           g[l++] =
             e[t] * d[4] +
             e[t + 1] * d[9] +
@@ -1984,17 +2044,22 @@ var CanvasKitInit = (() => {
               (r.dir = 0 === r.dir ? e.TextDirection.RTL : e.TextDirection.LTR);
             return r;
           }
+
           function g(r) {
             if (!r || !r.length) return [];
             for (var D = [], U = 0; U < r.length; U += 5) {
               var ca = e.LTRBRect(r[U], r[U + 1], r[U + 2], r[U + 3]),
                 ka = e.TextDirection.LTR;
               0 === r[U + 4] && (ka = e.TextDirection.RTL);
-              D.push({ rect: ca, dir: ka });
+              D.push({
+                rect: ca,
+                dir: ka
+              });
             }
             e._free(r.byteOffset);
             return D;
           }
+
           function l(r) {
             r = r || {};
             void 0 === r.weight && (r.weight = e.FontWeight.Normal);
@@ -2002,6 +2067,7 @@ var CanvasKitInit = (() => {
             r.slant = r.slant || e.FontSlant.Upright;
             return r;
           }
+
           function t(r) {
             if (!r || !r.length) return W;
             for (var D = [], U = 0; U < r.length; U++) {
@@ -2010,6 +2076,7 @@ var CanvasKitInit = (() => {
             }
             return v(D, "HEAPU32");
           }
+
           function x(r) {
             if (P[r]) return P[r];
             var D = ra(r) + 1,
@@ -2017,6 +2084,7 @@ var CanvasKitInit = (() => {
             sa(r, K, U, D);
             return (P[r] = U);
           }
+
           function C(r) {
             r._colorPtr = y(r.color);
             r._foregroundColorPtr = W;
@@ -2028,15 +2096,15 @@ var CanvasKitInit = (() => {
               (r._backgroundColorPtr = y(r.backgroundColor, Y));
             r.decorationColor &&
               (r._decorationColorPtr = y(r.decorationColor, aa));
-            Array.isArray(r.fontFamilies) && r.fontFamilies.length
-              ? ((r._fontFamiliesPtr = t(r.fontFamilies)),
-                (r._fontFamiliesLen = r.fontFamilies.length))
-              : ((r._fontFamiliesPtr = W), (r._fontFamiliesLen = 0));
+            Array.isArray(r.fontFamilies) && r.fontFamilies.length ?
+              ((r._fontFamiliesPtr = t(r.fontFamilies)),
+                (r._fontFamiliesLen = r.fontFamilies.length)) :
+              ((r._fontFamiliesPtr = W), (r._fontFamiliesLen = 0));
             if (r.locale) {
               var D = r.locale;
               r._localePtr = x(D);
               r._localeLen = ra(D) + 1;
-            } else (r._localePtr = W), (r._localeLen = 0);
+            } else(r._localePtr = W), (r._localeLen = 0);
             if (Array.isArray(r.shadows) && r.shadows.length) {
               D = r.shadows;
               var U = D.map(function (G) {
@@ -2047,9 +2115,7 @@ var CanvasKitInit = (() => {
                 });
               r._shadowLen = D.length;
               for (
-                var ka = e._malloc(8 * D.length), va = ka / 4, wa = 0;
-                wa < D.length;
-                wa++
+                var ka = e._malloc(8 * D.length), va = ka / 4, wa = 0; wa < D.length; wa++
               ) {
                 var ma = D[wa].offset || [0, 0];
                 e.HEAPF32[va] = ma[0];
@@ -2059,9 +2125,9 @@ var CanvasKitInit = (() => {
               r._shadowColorsPtr = E(U).$d;
               r._shadowOffsetsPtr = ka;
               r._shadowBlurRadiiPtr = v(ca, "HEAPF32");
-            } else (r._shadowLen = 0), (r._shadowColorsPtr = W), (r._shadowOffsetsPtr = W), (r._shadowBlurRadiiPtr = W);
-            Array.isArray(r.fontFeatures) && r.fontFeatures.length
-              ? ((D = r.fontFeatures),
+            } else(r._shadowLen = 0), (r._shadowColorsPtr = W), (r._shadowOffsetsPtr = W), (r._shadowBlurRadiiPtr = W);
+            Array.isArray(r.fontFeatures) && r.fontFeatures.length ?
+              ((D = r.fontFeatures),
                 (U = D.map(function (G) {
                   return G.name;
                 })),
@@ -2070,12 +2136,12 @@ var CanvasKitInit = (() => {
                 })),
                 (r._fontFeatureLen = D.length),
                 (r._fontFeatureNamesPtr = t(U)),
-                (r._fontFeatureValuesPtr = v(ca, "HEAPU32")))
-              : ((r._fontFeatureLen = 0),
+                (r._fontFeatureValuesPtr = v(ca, "HEAPU32"))) :
+              ((r._fontFeatureLen = 0),
                 (r._fontFeatureNamesPtr = W),
                 (r._fontFeatureValuesPtr = W));
-            Array.isArray(r.fontVariations) && r.fontVariations.length
-              ? ((D = r.fontVariations),
+            Array.isArray(r.fontVariations) && r.fontVariations.length ?
+              ((D = r.fontVariations),
                 (U = D.map(function (G) {
                   return G.axis;
                 })),
@@ -2084,11 +2150,12 @@ var CanvasKitInit = (() => {
                 })),
                 (r._fontVariationLen = D.length),
                 (r._fontVariationAxesPtr = t(U)),
-                (r._fontVariationValuesPtr = v(ca, "HEAPF32")))
-              : ((r._fontVariationLen = 0),
+                (r._fontVariationValuesPtr = v(ca, "HEAPF32"))) :
+              ((r._fontVariationLen = 0),
                 (r._fontVariationAxesPtr = W),
                 (r._fontVariationValuesPtr = W));
           }
+
           function J(r) {
             e._free(r._fontFamiliesPtr);
             e._free(r._shadowColorsPtr);
@@ -2128,18 +2195,18 @@ var CanvasKitInit = (() => {
               var D = r.ellipsis;
               r._ellipsisPtr = x(D);
               r._ellipsisLen = ra(D) + 1;
-            } else (r._ellipsisPtr = W), (r._ellipsisLen = 0);
+            } else(r._ellipsisPtr = W), (r._ellipsisLen = 0);
             null == r.heightMultiplier && (r.heightMultiplier = -1);
             r.maxLines = r.maxLines || 0;
             r.replaceTabCharacters = r.replaceTabCharacters || !1;
             D = (D = r.strutStyle) || {};
             D.strutEnabled = D.strutEnabled || !1;
             D.strutEnabled &&
-            Array.isArray(D.fontFamilies) &&
-            D.fontFamilies.length
-              ? ((D._fontFamiliesPtr = t(D.fontFamilies)),
-                (D._fontFamiliesLen = D.fontFamilies.length))
-              : ((D._fontFamiliesPtr = W), (D._fontFamiliesLen = 0));
+              Array.isArray(D.fontFamilies) &&
+              D.fontFamilies.length ?
+              ((D._fontFamiliesPtr = t(D.fontFamilies)),
+                (D._fontFamiliesLen = D.fontFamilies.length)) :
+              ((D._fontFamiliesPtr = W), (D._fontFamiliesLen = 0));
             D.fontStyle = l(D.fontStyle);
             null == D.fontSize && (D.fontSize = -1);
             null == D.heightMultiplier && (D.heightMultiplier = -1);
@@ -2351,9 +2418,9 @@ var CanvasKitInit = (() => {
         a.Typeface.MakeFreeTypeFaceFromData = function (e) {
           e = new Uint8Array(e);
           var d = v(e, "HEAPU8");
-          return (e = a.Typeface._MakeFreeTypeFaceFromData(d, e.byteLength))
-            ? e
-            : null;
+          return (e = a.Typeface._MakeFreeTypeFaceFromData(d, e.byteLength)) ?
+            e :
+            null;
         };
         a.Typeface.prototype.getGlyphIDs = function (e, d, g) {
           d || (d = e.length);
@@ -2379,9 +2446,7 @@ var CanvasKitInit = (() => {
             var x = [];
             d = new a.ContourMeasureIter(d, !1, 1);
             for (
-              var C = d.next(), J = new Float32Array(4), P = 0;
-              P < e.length && C;
-              P++
+              var C = d.next(), J = new Float32Array(4), P = 0; P < e.length && C; P++
             ) {
               var O = t[P];
               l += O / 2;
@@ -2453,8 +2518,7 @@ var CanvasKitInit = (() => {
       a.Rd.push(function () {
         a.RuntimeEffect.Make = function (e, d) {
           return a.RuntimeEffect._Make(e, {
-            onError:
-              d ||
+            onError: d ||
               function (g) {
                 console.log("RuntimeEffect error", g);
               },
@@ -2462,8 +2526,7 @@ var CanvasKitInit = (() => {
         };
         a.RuntimeEffect.MakeForBlender = function (e, d) {
           return a.RuntimeEffect._MakeForBlender(e, {
-            onError:
-              d ||
+            onError: d ||
               function (g) {
                 console.log("RuntimeEffect error", g);
               },
@@ -2502,6 +2565,7 @@ var CanvasKitInit = (() => {
             if (void 0 !== G[k] && !Number.isFinite(G[k])) return !1;
           return !0;
         }
+
         function d(G) {
           var k = a.getColorComponents(G);
           G = k[0];
@@ -2521,9 +2585,11 @@ var CanvasKitInit = (() => {
           k = 0 === k || 1 === k ? k : k.toFixed(8);
           return "rgba(" + G + ", " + p + ", " + z + ", " + k + ")";
         }
+
         function g(G) {
           return a.parseColorString(G, va);
         }
+
         function l(G) {
           G = wa.exec(G);
           if (!G) return null;
@@ -2566,6 +2632,7 @@ var CanvasKitInit = (() => {
             family: G[6].trim(),
           };
         }
+
         function t(G) {
           this.Jd = G;
           this.Md = new a.Paint();
@@ -2631,19 +2698,19 @@ var CanvasKitInit = (() => {
             set: function (k) {
               var p = l(k),
                 z = p.family;
-              p.typeface = ma[z]
-                ? ma[z][
-                    (p.style || "normal") +
-                      "|" +
-                      (p.variant || "normal") +
-                      "|" +
-                      (p.weight || "normal")
-                  ] || ma[z]["*"]
-                : null;
+              p.typeface = ma[z] ?
+                ma[z][
+                  (p.style || "normal") +
+                  "|" +
+                  (p.variant || "normal") +
+                  "|" +
+                  (p.weight || "normal")
+                ] || ma[z]["*"] :
+                null;
               p &&
                 (this.ke.setSize(p.sizePx),
-                this.ke.setTypeface(p.typeface),
-                (this.Pe = k));
+                  this.ke.setTypeface(p.typeface),
+                  (this.Pe = k));
             },
           });
           Object.defineProperty(this, "globalAlpha", {
@@ -2973,13 +3040,14 @@ var CanvasKitInit = (() => {
           };
           this.clip = function (k, p) {
             "string" === typeof k
-              ? ((p = k), (k = this.Od))
-              : k && k.Ze && (k = k.Sd);
+              ?
+              ((p = k), (k = this.Od)) :
+              k && k.Ze && (k = k.Sd);
             k || (k = this.Od);
             k = k.copy();
-            p && "evenodd" === p.toLowerCase()
-              ? k.setFillType(a.FillType.EvenOdd)
-              : k.setFillType(a.FillType.Winding);
+            p && "evenodd" === p.toLowerCase() ?
+              k.setFillType(a.FillType.EvenOdd) :
+              k.setFillType(a.FillType.Winding);
             this.Jd.clipPath(k, a.ClipOp.Intersect, !0);
             k.delete();
           };
@@ -3042,12 +3110,12 @@ var CanvasKitInit = (() => {
                 arguments[7],
                 arguments[8]
               )),
-                (B = a.XYWHRect(
-                  arguments[1],
-                  arguments[2],
-                  arguments[3],
-                  arguments[4]
-                ));
+              (B = a.XYWHRect(
+                arguments[1],
+                arguments[2],
+                arguments[3],
+                arguments[4]
+              ));
             else
               throw (
                 "invalid number of args for drawImage, need 3, 5, or 9; got " +
@@ -3067,8 +3135,8 @@ var CanvasKitInit = (() => {
               k.setColor(p);
             } else
               (p = this.Zd.re(this.Qd)),
-                k.setColor(a.Color(0, 0, 0, this.ge)),
-                k.setShader(p);
+              k.setColor(a.Color(0, 0, 0, this.ge)),
+              k.setShader(p);
             k.dispose = function () {
               this.delete();
             };
@@ -3076,8 +3144,9 @@ var CanvasKitInit = (() => {
           };
           this.fill = function (k, p) {
             "string" === typeof k
-              ? ((p = k), (k = this.Od))
-              : k && k.Ze && (k = k.Sd);
+              ?
+              ((p = k), (k = this.Od)) :
+              k && k.Ze && (k = k.Sd);
             if ("evenodd" === p) this.Od.setFillType(a.FillType.EvenOdd);
             else {
               if ("nonzero" !== p && p) throw "invalid fill rule";
@@ -3088,10 +3157,10 @@ var CanvasKitInit = (() => {
             var z = this.we(p);
             z &&
               (this.Jd.save(),
-              this.pe(),
-              this.Jd.drawPath(k, z),
-              this.Jd.restore(),
-              z.dispose());
+                this.pe(),
+                this.Jd.drawPath(k, z),
+                this.Jd.restore(),
+                z.dispose());
             this.Jd.drawPath(k, p);
             p.dispose();
           };
@@ -3100,10 +3169,10 @@ var CanvasKitInit = (() => {
               H = this.we(F);
             H &&
               (this.Jd.save(),
-              this.pe(),
-              this.Jd.drawRect(a.XYWHRect(k, p, z, B), H),
-              this.Jd.restore(),
-              H.dispose());
+                this.pe(),
+                this.Jd.drawRect(a.XYWHRect(k, p, z, B), H),
+                this.Jd.restore(),
+                H.dispose());
             this.Jd.drawRect(a.XYWHRect(k, p, z, B), F);
             F.dispose();
           };
@@ -3113,24 +3182,24 @@ var CanvasKitInit = (() => {
             var F = this.we(B);
             F &&
               (this.Jd.save(),
-              this.pe(),
-              this.Jd.drawTextBlob(k, p, z, F),
-              this.Jd.restore(),
-              F.dispose());
+                this.pe(),
+                this.Jd.drawTextBlob(k, p, z, F),
+                this.Jd.restore(),
+                F.dispose());
             this.Jd.drawTextBlob(k, p, z, B);
             k.delete();
             B.dispose();
           };
           this.getImageData = function (k, p, z, B) {
             return (k = this.Jd.readPixels(k, p, {
-              width: z,
-              height: B,
-              colorType: a.ColorType.RGBA_8888,
-              alphaType: a.AlphaType.Unpremul,
-              colorSpace: a.ColorSpace.SRGB,
-            }))
-              ? new J(new Uint8ClampedArray(k.buffer), z, B)
-              : null;
+                width: z,
+                height: B,
+                colorType: a.ColorType.RGBA_8888,
+                alphaType: a.AlphaType.Unpremul,
+                colorSpace: a.ColorSpace.SRGB,
+              })) ?
+              new J(new Uint8ClampedArray(k.buffer), z, B) :
+              null;
           };
           this.getLineDash = function () {
             return this.se.slice();
@@ -3160,7 +3229,7 @@ var CanvasKitInit = (() => {
           this.isPointInStroke = function (k, p) {
             var z = arguments;
             if (2 === z.length) var B = this.Od;
-            else if (3 === z.length) (B = z[0]), (k = z[1]), (p = z[2]);
+            else if (3 === z.length)(B = z[0]), (k = z[1]), (p = z[2]);
             else throw "invalid arg count, need 2 or 3, got " + z.length;
             if (!isFinite(k) || !isFinite(p)) return !1;
             z = this.kf([k, p]);
@@ -3187,7 +3256,9 @@ var CanvasKitInit = (() => {
             k = this.ke.getGlyphWidths(k);
             let p = 0;
             for (const z of k) p += z;
-            return { width: p };
+            return {
+              width: p
+            };
           };
           this.moveTo = function (k, p) {
             var z = this.Od;
@@ -3198,7 +3269,7 @@ var CanvasKitInit = (() => {
               if (void 0 === B)
                 this.Jd.writePixels(k.data, k.width, k.height, p, z);
               else if (
-                ((B = B || 0),
+              ((B = B || 0),
                 (F = F || 0),
                 (H = H || k.width),
                 (M = M || k.height),
@@ -3207,27 +3278,26 @@ var CanvasKitInit = (() => {
                 0 > B && ((H += B), (B = 0)),
                 0 > F && ((M += F), (F = 0)),
                 !(0 >= H || 0 >= M))
-              ) {
-                k = a.MakeImage(
-                  {
-                    width: k.width,
-                    height: k.height,
-                    alphaType: a.AlphaType.Unpremul,
-                    colorType: a.ColorType.RGBA_8888,
-                    colorSpace: a.ColorSpace.SRGB,
-                  },
-                  k.data,
-                  4 * k.width
-                );
-                var da = a.XYWHRect(B, F, H, M);
-                p = a.XYWHRect(p + B, z + F, H, M);
-                z = a.Matrix.invert(this.Qd);
-                this.Jd.save();
-                this.Jd.concat(z);
-                this.Jd.drawImageRect(k, da, p, null, !1);
-                this.Jd.restore();
-                k.delete();
-              }
+            ) {
+              k = a.MakeImage({
+                  width: k.width,
+                  height: k.height,
+                  alphaType: a.AlphaType.Unpremul,
+                  colorType: a.ColorType.RGBA_8888,
+                  colorSpace: a.ColorSpace.SRGB,
+                },
+                k.data,
+                4 * k.width
+              );
+              var da = a.XYWHRect(B, F, H, M);
+              p = a.XYWHRect(p + B, z + F, H, M);
+              z = a.Matrix.invert(this.Qd);
+              this.Jd.save();
+              this.Jd.concat(z);
+              this.Jd.drawImageRect(k, da, p, null, !1);
+              this.Jd.restore();
+              k.delete();
+            }
           };
           this.quadraticCurveTo = function (k, p, z, B) {
             var F = this.Od;
@@ -3349,8 +3419,8 @@ var CanvasKitInit = (() => {
               k.setColor(p);
             } else
               (p = this.ee.re(this.Qd)),
-                k.setColor(a.Color(0, 0, 0, this.ge)),
-                k.setShader(p);
+              k.setColor(a.Color(0, 0, 0, this.ge)),
+              k.setShader(p);
             k.setStrokeWidth(this.Ie);
             if (this.se.length) {
               var z = a.PathEffect.MakeDash(this.se, this.Ge);
@@ -3368,10 +3438,10 @@ var CanvasKitInit = (() => {
               z = this.we(p);
             z &&
               (this.Jd.save(),
-              this.pe(),
-              this.Jd.drawPath(k, z),
-              this.Jd.restore(),
-              z.dispose());
+                this.pe(),
+                this.Jd.drawPath(k, z),
+                this.Jd.restore(),
+                z.dispose());
             this.Jd.drawPath(k, p);
             p.dispose();
           };
@@ -3380,10 +3450,10 @@ var CanvasKitInit = (() => {
               H = this.we(F);
             H &&
               (this.Jd.save(),
-              this.pe(),
-              this.Jd.drawRect(a.XYWHRect(k, p, z, B), H),
-              this.Jd.restore(),
-              H.dispose());
+                this.pe(),
+                this.Jd.drawRect(a.XYWHRect(k, p, z, B), H),
+                this.Jd.restore(),
+                H.dispose());
             this.Jd.drawRect(a.XYWHRect(k, p, z, B), F);
             F.dispose();
           };
@@ -3393,10 +3463,10 @@ var CanvasKitInit = (() => {
             var F = this.we(B);
             F &&
               (this.Jd.save(),
-              this.pe(),
-              this.Jd.drawTextBlob(k, p, z, F),
-              this.Jd.restore(),
-              F.dispose());
+                this.pe(),
+                this.Jd.drawTextBlob(k, p, z, F),
+                this.Jd.restore(),
+                F.dispose());
             this.Jd.drawTextBlob(k, p, z, B);
             k.delete();
             B.dispose();
@@ -3421,8 +3491,12 @@ var CanvasKitInit = (() => {
           this.drawFocusIfNeeded = function () {};
           this.removeHitRegion = function () {};
           this.scrollPathIntoView = function () {};
-          Object.defineProperty(this, "canvas", { value: null, writable: !1 });
+          Object.defineProperty(this, "canvas", {
+            value: null,
+            writable: !1
+          });
         }
+
         function x(G) {
           this.bf = G;
           this.Id = new t(G.getCanvas());
@@ -3444,7 +3518,9 @@ var CanvasKitInit = (() => {
               "|" +
               (p.weight || "normal");
             p = p.family;
-            ma[p] || (ma[p] = { "*": k });
+            ma[p] || (ma[p] = {
+              "*": k
+            });
             ma[p][z] = k;
           };
           this.makePath2D = function (k) {
@@ -3470,10 +3546,10 @@ var CanvasKitInit = (() => {
                 else {
                   z = 0;
                   B = p.length;
-                  for (var F = "", H; z < B; )
+                  for (var F = "", H; z < B;)
                     (H = p.slice(z, Math.min(z + 32768, B))),
-                      (F += String.fromCharCode.apply(null, H)),
-                      (z += 32768);
+                    (F += String.fromCharCode.apply(null, H)),
+                    (z += 32768);
                   p = btoa(F);
                 }
                 return k + p;
@@ -3488,6 +3564,7 @@ var CanvasKitInit = (() => {
             this.bf.dispose();
           };
         }
+
         function C(G) {
           this.width = G.width();
           this.height = G.height();
@@ -3497,15 +3574,26 @@ var CanvasKitInit = (() => {
             return G;
           };
         }
+
         function J(G, k, p) {
           if (!k || 0 === p)
             throw "invalid dimensions, width and height must be non-zero";
           if (G.length % 4) throw "arr must be a multiple of 4";
           p = p || G.length / (4 * k);
-          Object.defineProperty(this, "data", { value: G, writable: !1 });
-          Object.defineProperty(this, "height", { value: p, writable: !1 });
-          Object.defineProperty(this, "width", { value: k, writable: !1 });
+          Object.defineProperty(this, "data", {
+            value: G,
+            writable: !1
+          });
+          Object.defineProperty(this, "height", {
+            value: p,
+            writable: !1
+          });
+          Object.defineProperty(this, "width", {
+            value: k,
+            writable: !1
+          });
         }
+
         function P(G, k, p, z) {
           this.Ud = null;
           this.ae = [];
@@ -3548,6 +3636,7 @@ var CanvasKitInit = (() => {
             ));
           };
         }
+
         function O(G, k, p, z, B, F) {
           if (e([k, p, z, B, F])) {
             if (0 > F) throw "radii cannot be negative";
@@ -3555,22 +3644,25 @@ var CanvasKitInit = (() => {
             G.arcToTangent(k, p, z, B, F);
           }
         }
+
         function Y(G) {
           if (!G.isEmpty()) {
             var k = G.getBounds();
             (k[3] - k[1] || k[2] - k[0]) && G.close();
           }
         }
+
         function aa(G, k, p, z, B, F, H) {
           H = ((H - F) / Math.PI) * 180;
           F = (F / Math.PI) * 180;
           k = a.LTRBRect(k - z, p - B, k + z, p + B);
-          1e-5 > Math.abs(Math.abs(H) - 360)
-            ? ((p = H / 2),
+          1e-5 > Math.abs(Math.abs(H) - 360) ?
+            ((p = H / 2),
               G.arcToOval(k, F, p, !1),
-              G.arcToOval(k, F + p, p, !1))
-            : G.arcToOval(k, F, H, !1);
+              G.arcToOval(k, F + p, p, !1)) :
+            G.arcToOval(k, F, H, !1);
         }
+
         function r(G, k, p, z, B, F, H, M, da) {
           if (e([k, p, z, B, F, H, M])) {
             if (0 > z || 0 > B) throw "radii cannot be negative";
@@ -3580,38 +3672,48 @@ var CanvasKitInit = (() => {
             var ab = Ia - H;
             H = Ia;
             M += ab;
-            !da && M - H >= ea
-              ? (M = H + ea)
-              : da && H - M >= ea
-              ? (M = H - ea)
-              : !da && H > M
-              ? (M = H + (ea - ((H - M) % ea)))
-              : da && H < M && (M = H - (ea - ((M - H) % ea)));
+            !da && M - H >= ea ?
+              (M = H + ea) :
+              da && H - M >= ea ?
+              (M = H - ea) :
+              !da && H > M ?
+              (M = H + (ea - ((H - M) % ea))) :
+              da && H < M && (M = H - (ea - ((M - H) % ea)));
             F
-              ? ((da = a.Matrix.rotated(F, k, p)),
+              ?
+              ((da = a.Matrix.rotated(F, k, p)),
                 (F = a.Matrix.rotated(-F, k, p)),
                 G.transform(F),
                 aa(G, k, p, z, B, H, M),
-                G.transform(da))
-              : aa(G, k, p, z, B, H, M);
+                G.transform(da)) :
+              aa(G, k, p, z, B, H, M);
           }
         }
+
         function D(G, k, p) {
           e([k, p]) && (G.isEmpty() && G.moveTo(k, p), G.lineTo(k, p));
         }
+
         function U(G) {
           this.Sd = null;
           this.Sd =
-            "string" === typeof G
-              ? a.Path.MakeFromSVGString(G)
-              : G && G.Ze
-              ? G.Sd.copy()
-              : new a.Path();
+            "string" === typeof G ?
+            a.Path.MakeFromSVGString(G) :
+            G && G.Ze ?
+            G.Sd.copy() :
+            new a.Path();
           this.Ze = function () {
             return this.Sd;
           };
           this.addPath = function (k, p) {
-            p || (p = { a: 1, c: 0, e: 0, b: 0, d: 1, f: 0 });
+            p || (p = {
+              a: 1,
+              c: 0,
+              e: 0,
+              b: 0,
+              d: 1,
+              f: 0
+            });
             this.Sd.addPath(k.Sd, [p.a, p.c, p.e, p.b, p.d, p.f]);
           };
           this.arc = function (k, p, z, B, F, H) {
@@ -3649,6 +3751,7 @@ var CanvasKitInit = (() => {
             e(k) && F.addRect(k);
           };
         }
+
         function ca(G, k) {
           this.Ud = null;
           G instanceof C && (G = G.rf());
@@ -3697,6 +3800,7 @@ var CanvasKitInit = (() => {
             ));
           };
         }
+
         function ka(G, k, p, z, B, F) {
           this.Ud = null;
           this.ae = [];
@@ -3901,7 +4005,14 @@ var CanvasKitInit = (() => {
         var wa = RegExp(
             "(italic|oblique|normal|)\\s*(small-caps|normal|)\\s*(bold|bolder|lighter|[1-9]00|normal|)\\s*([\\d\\.]+)(px|pt|pc|in|cm|mm|%|em|ex|ch|rem|q)(.+)"
           ),
-          ma = { "Noto Mono": { "*": null }, monospace: { "*": null } };
+          ma = {
+            "Noto Mono": {
+              "*": null
+            },
+            monospace: {
+              "*": null
+            }
+          };
         a._testing.parseFontString = l;
         a.MakeCanvas = function (G, k) {
           return (G = a.MakeSurface(G, k)) ? new x(G) : null;
@@ -3938,9 +4049,9 @@ var CanvasKitInit = (() => {
       ya = "object" == typeof window,
       za = "function" == typeof importScripts,
       Aa =
-        "object" == typeof process &&
-        "object" == typeof process.versions &&
-        "string" == typeof process.versions.node,
+      "object" == typeof process &&
+      "object" == typeof process.versions &&
+      "string" == typeof process.versions.node,
       Ca = "",
       Da,
       Ea,
@@ -3974,41 +4085,41 @@ var CanvasKitInit = (() => {
       };
       w.inspect = () => "[Emscripten Module object]";
     } else if (ya || za)
-      za
-        ? (Ca = self.location.href)
-        : "undefined" != typeof document &&
-          document.currentScript &&
-          (Ca = document.currentScript.src),
-        _scriptDir && (Ca = _scriptDir),
-        0 !== Ca.indexOf("blob:")
-          ? (Ca = Ca.substr(0, Ca.replace(/[?#].*/, "").lastIndexOf("/") + 1))
-          : (Ca = ""),
-        (Da = (a) => {
-          var b = new XMLHttpRequest();
-          b.open("GET", a, !1);
-          b.send(null);
-          return b.responseText;
-        }),
-        za &&
-          (Fa = (a) => {
-            var b = new XMLHttpRequest();
-            b.open("GET", a, !1);
-            b.responseType = "arraybuffer";
-            b.send(null);
-            return new Uint8Array(b.response);
-          }),
-        (Ea = (a, b, c) => {
-          var f = new XMLHttpRequest();
-          f.open("GET", a, !0);
-          f.responseType = "arraybuffer";
-          f.onload = () => {
-            200 == f.status || (0 == f.status && f.response)
-              ? b(f.response)
-              : c();
-          };
-          f.onerror = c;
-          f.send(null);
-        });
+      za ?
+      (Ca = self.location.href) :
+      "undefined" != typeof document &&
+      document.currentScript &&
+      (Ca = document.currentScript.src),
+      _scriptDir && (Ca = _scriptDir),
+      0 !== Ca.indexOf("blob:") ?
+      (Ca = Ca.substr(0, Ca.replace(/[?#].*/, "").lastIndexOf("/") + 1)) :
+      (Ca = ""),
+      (Da = (a) => {
+        var b = new XMLHttpRequest();
+        b.open("GET", a, !1);
+        b.send(null);
+        return b.responseText;
+      }),
+      za &&
+      (Fa = (a) => {
+        var b = new XMLHttpRequest();
+        b.open("GET", a, !1);
+        b.responseType = "arraybuffer";
+        b.send(null);
+        return new Uint8Array(b.response);
+      }),
+      (Ea = (a, b, c) => {
+        var f = new XMLHttpRequest();
+        f.open("GET", a, !0);
+        f.responseType = "arraybuffer";
+        f.onload = () => {
+          200 == f.status || (0 == f.status && f.response) ?
+            b(f.response) :
+            c();
+        };
+        f.onerror = c;
+        f.send(null);
+      });
     var Ha = w.print || console.log.bind(console),
       Ja = w.printErr || console.error.bind(console);
     Object.assign(w, ta);
@@ -4030,6 +4141,7 @@ var CanvasKitInit = (() => {
       Ua,
       V,
       Va;
+
     function Wa() {
       var a = Ma.buffer;
       w.HEAP8 = Qa = new Int8Array(a);
@@ -4045,6 +4157,7 @@ var CanvasKitInit = (() => {
       Ya = [],
       Za = [],
       bb = [];
+
     function cb() {
       var a = w.preRun.shift();
       Ya.unshift(a);
@@ -4052,6 +4165,7 @@ var CanvasKitInit = (() => {
     var db = 0,
       eb = null,
       fb = null;
+
     function La(a) {
       if (w.onAbort) w.onAbort(a);
       a = "Aborted(" + a + ")";
@@ -4063,6 +4177,7 @@ var CanvasKitInit = (() => {
       fa(a);
       throw a;
     }
+
     function kb(a) {
       return a.startsWith("data:application/octet-stream;base64,");
     }
@@ -4072,15 +4187,19 @@ var CanvasKitInit = (() => {
       var mb = lb;
       lb = w.locateFile ? w.locateFile(mb, Ca) : Ca + mb;
     }
+
     function nb(a) {
       if (a == lb && Ka) return new Uint8Array(Ka);
       if (Fa) return Fa(a);
       throw "both async and sync fetching of the wasm failed";
     }
+
     function ob(a) {
       if (!Ka && (ya || za)) {
         if ("function" == typeof fetch && !a.startsWith("file://"))
-          return fetch(a, { credentials: "same-origin" })
+          return fetch(a, {
+              credentials: "same-origin"
+            })
             .then((b) => {
               if (!b.ok) throw "failed to load wasm binary file at '" + a + "'";
               return b.arrayBuffer();
@@ -4093,6 +4212,7 @@ var CanvasKitInit = (() => {
       }
       return Promise.resolve().then(() => nb(a));
     }
+
     function pb(a, b, c) {
       return WebAssembly.instantiate('/canvaskit/pages/canvaskit.wasm.br', b)
         .then((f) => f)
@@ -4101,6 +4221,7 @@ var CanvasKitInit = (() => {
           La(f);
         });
     }
+
     function qb(a, b) {
       var c = lb;
       return Ka ||
@@ -4108,30 +4229,33 @@ var CanvasKitInit = (() => {
         kb(c) ||
         c.startsWith("file://") ||
         Aa ||
-        "function" != typeof fetch
-        ? pb(c, a, b)
-        : fetch(c, { credentials: "same-origin" }).then((f) =>
-            WebAssembly.instantiateStreaming(f, a).then(b, function (h) {
-              Ja("wasm streaming compile failed: " + h);
-              Ja("falling back to ArrayBuffer instantiation");
-              return pb(c, a, b);
-            })
-          );
+        "function" != typeof fetch ?
+        pb(c, a, b) :
+        fetch(c, {
+          credentials: "same-origin"
+        }).then((f) =>
+          WebAssembly.instantiateStreaming(f, a).then(b, function (h) {
+            Ja("wasm streaming compile failed: " + h);
+            Ja("falling back to ArrayBuffer instantiation");
+            return pb(c, a, b);
+          })
+        );
     }
+
     function rb(a) {
       this.name = "ExitStatus";
       this.message = `Program terminated with exit(${a})`;
       this.status = a;
     }
     var sb = (a) => {
-        for (; 0 < a.length; ) a.shift()(w);
+        for (; 0 < a.length;) a.shift()(w);
       },
       tb = "undefined" != typeof TextDecoder ? new TextDecoder("utf8") : void 0,
       ub = (a, b, c) => {
         var f = b + c;
-        for (c = b; a[c] && !(c >= f); ) ++c;
+        for (c = b; a[c] && !(c >= f);) ++c;
         if (16 < c - b && a.buffer && tb) return tb.decode(a.subarray(b, c));
-        for (f = ""; b < c; ) {
+        for (f = ""; b < c;) {
           var h = a[b++];
           if (h & 128) {
             var m = a[b++] & 63;
@@ -4139,12 +4263,12 @@ var CanvasKitInit = (() => {
             else {
               var u = a[b++] & 63;
               h =
-                224 == (h & 240)
-                  ? ((h & 15) << 12) | (m << 6) | u
-                  : ((h & 7) << 18) | (m << 12) | (u << 6) | (a[b++] & 63);
-              65536 > h
-                ? (f += String.fromCharCode(h))
-                : ((h -= 65536),
+                224 == (h & 240) ?
+                ((h & 15) << 12) | (m << 6) | u :
+                ((h & 7) << 18) | (m << 12) | (u << 6) | (a[b++] & 63);
+              65536 > h ?
+                (f += String.fromCharCode(h)) :
+                ((h -= 65536),
                   (f += String.fromCharCode(
                     55296 | (h >> 10),
                     56320 | (h & 1023)
@@ -4155,12 +4279,14 @@ var CanvasKitInit = (() => {
         return f;
       },
       vb = {};
+
     function wb(a) {
-      for (; a.length; ) {
+      for (; a.length;) {
         var b = a.pop();
         a.pop()(b);
       }
     }
+
     function xb(a) {
       return this.fromWireType(R[a >> 2]);
     }
@@ -4168,9 +4294,11 @@ var CanvasKitInit = (() => {
       Ab = {},
       Bb = {},
       Cb = void 0;
+
     function Db(a) {
       throw new Cb(a);
     }
+
     function Eb(a, b, c) {
       function f(n) {
         n = c(n);
@@ -4184,9 +4312,9 @@ var CanvasKitInit = (() => {
         m = [],
         u = 0;
       b.forEach((n, q) => {
-        Ab.hasOwnProperty(n)
-          ? (h[q] = Ab[n])
-          : (m.push(n),
+        Ab.hasOwnProperty(n) ?
+          (h[q] = Ab[n]) :
+          (m.push(n),
             zb.hasOwnProperty(n) || (zb[n] = []),
             zb[n].push(() => {
               h[q] = Ab[n];
@@ -4196,6 +4324,7 @@ var CanvasKitInit = (() => {
       });
       0 === m.length && f(h);
     }
+
     function Gb(a) {
       switch (a) {
         case 1:
@@ -4211,14 +4340,17 @@ var CanvasKitInit = (() => {
       }
     }
     var Hb = void 0;
+
     function Ib(a) {
-      for (var b = ""; K[a]; ) b += Hb[K[a++]];
+      for (var b = ""; K[a];) b += Hb[K[a++]];
       return b;
     }
     var Jb = void 0;
+
     function X(a) {
       throw new Jb(a);
     }
+
     function Kb(a, b, c = {}) {
       var f = b.name;
       a || X(`type "${f}" must have a positive integer typeid pointer`);
@@ -4231,6 +4363,7 @@ var CanvasKitInit = (() => {
       zb.hasOwnProperty(a) &&
         ((b = zb[a]), delete zb[a], b.forEach((h) => h()));
     }
+
     function Fb(a, b, c = {}) {
       if (!("argPackAdvance" in b))
         throw new TypeError(
@@ -4238,15 +4371,19 @@ var CanvasKitInit = (() => {
         );
       Kb(a, b, c);
     }
+
     function Lb(a) {
       X(a.Hd.Td.Nd.name + " instance already deleted");
     }
     var Mb = !1;
+
     function Nb() {}
+
     function Ob(a) {
       --a.count.value;
       0 === a.count.value && (a.Wd ? a.ce.ie(a.Wd) : a.Td.Nd.ie(a.Pd));
     }
+
     function Pb(a, b, c) {
       if (b === c) return a;
       if (void 0 === c.Yd) return null;
@@ -4255,8 +4392,9 @@ var CanvasKitInit = (() => {
     }
     var Qb = {},
       Rb = [];
+
     function Sb() {
-      for (; Rb.length; ) {
+      for (; Rb.length;) {
         var a = Rb.pop();
         a.Hd.Ce = !1;
         a["delete"]();
@@ -4264,18 +4402,27 @@ var CanvasKitInit = (() => {
     }
     var Tb = void 0,
       Ub = {};
+
     function ac(a, b) {
-      for (void 0 === b && X("ptr should not be undefined"); a.Yd; )
+      for (void 0 === b && X("ptr should not be undefined"); a.Yd;)
         (b = a.Me(b)), (a = a.Yd);
       return Ub[b];
     }
+
     function bc(a, b) {
       (b.Td && b.Pd) || Db("makeClassHandle requires ptr and ptrType");
       !!b.ce !== !!b.Wd &&
         Db("Both smartPtrType and smartPtr must be specified");
-      b.count = { value: 1 };
-      return cc(Object.create(a, { Hd: { value: b } }));
+      b.count = {
+        value: 1
+      };
+      return cc(Object.create(a, {
+        Hd: {
+          value: b
+        }
+      }));
     }
+
     function cc(a) {
       if ("undefined" === typeof FinalizationRegistry)
         return (cc = (b) => b), a;
@@ -4284,7 +4431,9 @@ var CanvasKitInit = (() => {
       });
       cc = (b) => {
         var c = b.Hd;
-        c.Wd && Mb.register(b, { Hd: c }, b);
+        c.Wd && Mb.register(b, {
+          Hd: c
+        }, b);
         return b;
       };
       Nb = (b) => {
@@ -4292,21 +4441,25 @@ var CanvasKitInit = (() => {
       };
       return cc(a);
     }
+
     function dc() {}
+
     function ec(a) {
       if (void 0 === a) return "_unknown";
       a = a.replace(/[^a-zA-Z0-9_]/g, "$");
       var b = a.charCodeAt(0);
       return 48 <= b && 57 >= b ? `_${a}` : a;
     }
+
     function fc(a, b) {
       a = ec(a);
       return {
         [a]: function () {
           return b.apply(this, arguments);
         },
-      }[a];
+      } [a];
     }
+
     function gc(a, b, c) {
       if (void 0 === a[b].Vd) {
         var f = a[b];
@@ -4321,18 +4474,20 @@ var CanvasKitInit = (() => {
         a[b].Vd[f.Ae] = f;
       }
     }
+
     function hc(a, b, c) {
-      w.hasOwnProperty(a)
-        ? ((void 0 === c || (void 0 !== w[a].Vd && void 0 !== w[a].Vd[c])) &&
-            X(`Cannot register public name '${a}' twice`),
+      w.hasOwnProperty(a) ?
+        ((void 0 === c || (void 0 !== w[a].Vd && void 0 !== w[a].Vd[c])) &&
+          X(`Cannot register public name '${a}' twice`),
           gc(w, a, a),
           w.hasOwnProperty(c) &&
-            X(
-              `Cannot register multiple overloads of a function with the same number of arguments (${c})!`
-            ),
-          (w[a].Vd[c] = b))
-        : ((w[a] = b), void 0 !== c && (w[a].rg = c));
+          X(
+            `Cannot register multiple overloads of a function with the same number of arguments (${c})!`
+          ),
+          (w[a].Vd[c] = b)) :
+        ((w[a] = b), void 0 !== c && (w[a].rg = c));
     }
+
     function ic(a, b, c, f, h, m, u, n) {
       this.name = a;
       this.constructor = b;
@@ -4344,16 +4499,18 @@ var CanvasKitInit = (() => {
       this.Kf = n;
       this.ag = [];
     }
+
     function jc(a, b, c) {
-      for (; b !== c; )
+      for (; b !== c;)
         b.Me ||
-          X(
-            `Expected null or instance of ${c.name}, got an instance of ${b.name}`
-          ),
-          (a = b.Me(a)),
-          (b = b.Yd);
+        X(
+          `Expected null or instance of ${c.name}, got an instance of ${b.name}`
+        ),
+        (a = b.Me(a)),
+        (b = b.Yd);
       return a;
     }
+
     function kc(a, b) {
       if (null === b)
         return this.ef && X(`null is not a valid ${this.name}`), 0;
@@ -4362,6 +4519,7 @@ var CanvasKitInit = (() => {
         X(`Cannot pass deleted object as a pointer of type ${this.name}`);
       return jc(b.Hd.Pd, b.Hd.Td.Nd, this.Nd);
     }
+
     function mc(a, b) {
       if (null === b) {
         this.ef && X(`null is not a valid ${this.name}`);
@@ -4387,16 +4545,16 @@ var CanvasKitInit = (() => {
         switch (
           (void 0 === b.Hd.Wd &&
             X("Passing raw pointer to smart pointer is illegal"),
-          this.fg)
+            this.fg)
         ) {
           case 0:
-            b.Hd.ce === this
-              ? (c = b.Hd.Wd)
-              : X(
-                  `Cannot convert argument of type ${
+            b.Hd.ce === this ?
+              (c = b.Hd.Wd) :
+              X(
+                `Cannot convert argument of type ${
                     b.Hd.ce ? b.Hd.ce.name : b.Hd.Td.name
                   } to parameter type ${this.name}`
-                );
+              );
             break;
           case 1:
             c = b.Hd.Wd;
@@ -4419,6 +4577,7 @@ var CanvasKitInit = (() => {
         }
       return c;
     }
+
     function oc(a, b) {
       if (null === b)
         return this.ef && X(`null is not a valid ${this.name}`), 0;
@@ -4431,6 +4590,7 @@ var CanvasKitInit = (() => {
         );
       return jc(b.Hd.Pd, b.Hd.Td.Nd, this.Nd);
     }
+
     function pc(a, b, c, f, h, m, u, n, q, v, E) {
       this.name = a;
       this.Nd = b;
@@ -4443,15 +4603,16 @@ var CanvasKitInit = (() => {
       this.ff = q;
       this.bg = v;
       this.ie = E;
-      h || void 0 !== b.Yd
-        ? (this.toWireType = mc)
-        : ((this.toWireType = f ? kc : oc), (this.be = null));
+      h || void 0 !== b.Yd ?
+        (this.toWireType = mc) :
+        ((this.toWireType = f ? kc : oc), (this.be = null));
     }
+
     function qc(a, b, c) {
       w.hasOwnProperty(a) || Db("Replacing nonexistant public symbol");
-      void 0 !== w[a].Vd && void 0 !== c
-        ? (w[a].Vd[c] = b)
-        : ((w[a] = b), (w[a].Ae = c));
+      void 0 !== w[a].Vd && void 0 !== c ?
+        (w[a].Vd[c] = b) :
+        ((w[a] = b), (w[a].Ae = c));
     }
     var rc = (a, b) => {
       var c = [];
@@ -4465,6 +4626,7 @@ var CanvasKitInit = (() => {
         return f;
       };
     };
+
     function sc(a, b) {
       a = Ib(a);
       var c = a.includes("j") ? rc(a, b) : Xa.get(b);
@@ -4473,12 +4635,14 @@ var CanvasKitInit = (() => {
       return c;
     }
     var tc = void 0;
+
     function uc(a) {
       a = vc(a);
       var b = Ib(a);
       wc(a);
       return b;
     }
+
     function Dc(a, b) {
       function c(m) {
         h[m] || Ab[m] || (Bb[m] ? Bb[m].forEach(c) : (f.push(m), (h[m] = !0)));
@@ -4488,6 +4652,7 @@ var CanvasKitInit = (() => {
       b.forEach(c);
       throw new tc(`${a}: ` + f.map(uc).join([", "]));
     }
+
     function Ec(a, b, c, f, h) {
       var m = b.length;
       2 > m &&
@@ -4531,15 +4696,18 @@ var CanvasKitInit = (() => {
         return y;
       };
     }
+
     function Fc(a, b) {
       for (var c = [], f = 0; f < a; f++) c.push(Ua[(b + 4 * f) >> 2]);
       return c;
     }
+
     function Gc() {
       this.he = [void 0];
       this.qf = [];
     }
     var Hc = new Gc();
+
     function Ic(a) {
       a >= Hc.Ee && 0 === --Hc.get(a).uf && Hc.zf(a);
     }
@@ -4558,9 +4726,13 @@ var CanvasKitInit = (() => {
           case !1:
             return 4;
           default:
-            return Hc.yf({ uf: 1, value: a });
+            return Hc.yf({
+              uf: 1,
+              value: a
+            });
         }
       };
+
     function Kc(a, b, c) {
       switch (b) {
         case 0:
@@ -4579,18 +4751,21 @@ var CanvasKitInit = (() => {
           throw new TypeError("Unknown integer type: " + a);
       }
     }
+
     function Lc(a, b) {
       var c = Ab[a];
       void 0 === c && X(b + " has unknown type " + uc(a));
       return c;
     }
+
     function lc(a) {
       if (null === a) return "null";
       var b = typeof a;
-      return "object" === b || "array" === b || "function" === b
-        ? a.toString()
-        : "" + a;
+      return "object" === b || "array" === b || "function" === b ?
+        a.toString() :
+        "" + a;
     }
+
     function Mc(a, b) {
       switch (b) {
         case 2:
@@ -4605,32 +4780,33 @@ var CanvasKitInit = (() => {
           throw new TypeError("Unknown float type: " + a);
       }
     }
+
     function Nc(a, b, c) {
       switch (b) {
         case 0:
-          return c
-            ? function (f) {
-                return Qa[f];
-              }
-            : function (f) {
-                return K[f];
-              };
+          return c ?
+            function (f) {
+              return Qa[f];
+            } :
+            function (f) {
+              return K[f];
+            };
         case 1:
-          return c
-            ? function (f) {
-                return Ra[f >> 1];
-              }
-            : function (f) {
-                return Sa[f >> 1];
-              };
+          return c ?
+            function (f) {
+              return Ra[f >> 1];
+            } :
+            function (f) {
+              return Sa[f >> 1];
+            };
         case 2:
-          return c
-            ? function (f) {
-                return R[f >> 2];
-              }
-            : function (f) {
-                return Ua[f >> 2];
-              };
+          return c ?
+            function (f) {
+              return R[f >> 2];
+            } :
+            function (f) {
+              return Ua[f >> 2];
+            };
         default:
           throw new TypeError("Unknown integer type: " + a);
       }
@@ -4672,23 +4848,24 @@ var CanvasKitInit = (() => {
       ra = (a) => {
         for (var b = 0, c = 0; c < a.length; ++c) {
           var f = a.charCodeAt(c);
-          127 >= f
-            ? b++
-            : 2047 >= f
-            ? (b += 2)
-            : 55296 <= f && 57343 >= f
-            ? ((b += 4), ++c)
-            : (b += 3);
+          127 >= f ?
+            b++
+            :
+            2047 >= f ?
+            (b += 2) :
+            55296 <= f && 57343 >= f ?
+            ((b += 4), ++c) :
+            (b += 3);
         }
         return b;
       },
       Oc =
-        "undefined" != typeof TextDecoder
-          ? new TextDecoder("utf-16le")
-          : void 0,
+      "undefined" != typeof TextDecoder ?
+      new TextDecoder("utf-16le") :
+      void 0,
       Pc = (a, b) => {
         var c = a >> 1;
-        for (var f = c + b / 2; !(c >= f) && Sa[c]; ) ++c;
+        for (var f = c + b / 2; !(c >= f) && Sa[c];) ++c;
         c <<= 1;
         if (32 < c - a && Oc) return Oc.decode(K.subarray(a, c));
         c = "";
@@ -4705,20 +4882,20 @@ var CanvasKitInit = (() => {
         c -= 2;
         var f = b;
         c = c < 2 * a.length ? c / 2 : a.length;
-        for (var h = 0; h < c; ++h) (Ra[b >> 1] = a.charCodeAt(h)), (b += 2);
+        for (var h = 0; h < c; ++h)(Ra[b >> 1] = a.charCodeAt(h)), (b += 2);
         Ra[b >> 1] = 0;
         return b - f;
       },
       Rc = (a) => 2 * a.length,
       Sc = (a, b) => {
-        for (var c = 0, f = ""; !(c >= b / 4); ) {
+        for (var c = 0, f = ""; !(c >= b / 4);) {
           var h = R[(a + 4 * c) >> 2];
           if (0 == h) break;
           ++c;
-          65536 <= h
-            ? ((h -= 65536),
-              (f += String.fromCharCode(55296 | (h >> 10), 56320 | (h & 1023))))
-            : (f += String.fromCharCode(h));
+          65536 <= h ?
+            ((h -= 65536),
+              (f += String.fromCharCode(55296 | (h >> 10), 56320 | (h & 1023)))) :
+            (f += String.fromCharCode(h));
         }
         return f;
       },
@@ -4749,11 +4926,13 @@ var CanvasKitInit = (() => {
         return b;
       },
       Vc = {};
+
     function Wc(a) {
       var b = Vc[a];
       return void 0 === b ? Ib(a) : b;
     }
     var Xc = [];
+
     function Yc() {
       function a(b) {
         b.$$$embind_global$$$ = b;
@@ -4764,23 +4943,26 @@ var CanvasKitInit = (() => {
       }
       if ("object" == typeof globalThis) return globalThis;
       if ("object" == typeof $$$embind_global$$$) return $$$embind_global$$$;
-      "object" == typeof global && a(global)
-        ? ($$$embind_global$$$ = global)
-        : "object" == typeof self && a(self) && ($$$embind_global$$$ = self);
+      "object" == typeof global && a(global) ?
+        ($$$embind_global$$$ = global) :
+        "object" == typeof self && a(self) && ($$$embind_global$$$ = self);
       if ("object" == typeof $$$embind_global$$$) return $$$embind_global$$$;
       throw Error("unable to get global object.");
     }
+
     function Zc(a) {
       var b = Xc.length;
       Xc.push(a);
       return b;
     }
+
     function $c(a, b) {
       for (var c = Array(a), f = 0; f < a; ++f)
         c[f] = Lc(Ua[(b + 4 * f) >> 2], "parameter " + f);
       return c;
     }
     var ad = [];
+
     function bd(a) {
       var b = Array(a + 1);
       return function (c, f, h) {
@@ -4790,40 +4972,43 @@ var CanvasKitInit = (() => {
           b[m + 1] = u.readValueFromPointer(h);
           h += u.argPackAdvance;
         }
-        c = new (c.bind.apply(c, b))();
+        c = new(c.bind.apply(c, b))();
         return nc(c);
       };
     }
     var cd = {};
+
     function dd(a) {
       var b = a.getExtension("ANGLE_instanced_arrays");
       b &&
         ((a.vertexAttribDivisor = function (c, f) {
-          b.vertexAttribDivisorANGLE(c, f);
-        }),
-        (a.drawArraysInstanced = function (c, f, h, m) {
-          b.drawArraysInstancedANGLE(c, f, h, m);
-        }),
-        (a.drawElementsInstanced = function (c, f, h, m, u) {
-          b.drawElementsInstancedANGLE(c, f, h, m, u);
-        }));
+            b.vertexAttribDivisorANGLE(c, f);
+          }),
+          (a.drawArraysInstanced = function (c, f, h, m) {
+            b.drawArraysInstancedANGLE(c, f, h, m);
+          }),
+          (a.drawElementsInstanced = function (c, f, h, m, u) {
+            b.drawElementsInstancedANGLE(c, f, h, m, u);
+          }));
     }
+
     function ed(a) {
       var b = a.getExtension("OES_vertex_array_object");
       b &&
         ((a.createVertexArray = function () {
-          return b.createVertexArrayOES();
-        }),
-        (a.deleteVertexArray = function (c) {
-          b.deleteVertexArrayOES(c);
-        }),
-        (a.bindVertexArray = function (c) {
-          b.bindVertexArrayOES(c);
-        }),
-        (a.isVertexArray = function (c) {
-          return b.isVertexArrayOES(c);
-        }));
+            return b.createVertexArrayOES();
+          }),
+          (a.deleteVertexArray = function (c) {
+            b.deleteVertexArrayOES(c);
+          }),
+          (a.bindVertexArray = function (c) {
+            b.bindVertexArrayOES(c);
+          }),
+          (a.isVertexArray = function (c) {
+            return b.isVertexArrayOES(c);
+          }));
     }
+
     function fd(a) {
       var b = a.getExtension("WEBGL_draw_buffers");
       b &&
@@ -4845,30 +5030,41 @@ var CanvasKitInit = (() => {
       qd = {},
       rd = {},
       sd = 4;
+
     function td(a) {
       ud || (ud = a);
     }
+
     function ha(a) {
       for (var b = gd++, c = a.length; c < b; c++) a[c] = null;
       return b;
     }
+
     function na(a, b) {
       var c = a.getContext(GLVersion > 1 ? "webgl2" : "webgl", b);
       return c ? vd(c, b) : 0;
     }
+
     function vd(a, b) {
       var c = ha(qa),
-        f = { handle: c, attributes: b, version: b.majorVersion, de: a };
+        f = {
+          handle: c,
+          attributes: b,
+          version: b.majorVersion,
+          de: a
+        };
       a.canvas && (a.canvas.xf = f);
       qa[c] = f;
       ("undefined" == typeof b.Lf || b.Lf) && yd(f);
       return c;
     }
+
     function oa(a) {
       A = qa[a];
       w.pg = Z = A && A.de;
       return !(a && !Z);
     }
+
     function yd(a) {
       a || (a = A);
       if (!a.Vf) {
@@ -4904,13 +5100,12 @@ var CanvasKitInit = (() => {
               PATH: "/",
               PWD: "/",
               HOME: "/home/web_user",
-              LANG:
-                (
-                  ("object" == typeof navigator &&
-                    navigator.languages &&
-                    navigator.languages[0]) ||
-                  "C"
-                ).replace("-", "_") + ".UTF-8",
+              LANG: (
+                ("object" == typeof navigator &&
+                  navigator.languages &&
+                  navigator.languages[0]) ||
+                "C"
+              ).replace("-", "_") + ".UTF-8",
               _: ua || "./this.program",
             },
             b;
@@ -4922,10 +5117,14 @@ var CanvasKitInit = (() => {
         return Ad;
       },
       Ad,
-      Cd = [null, [], []];
+      Cd = [null, [],
+        []
+      ];
+
     function Dd(a) {
       Z.bindVertexArray(nd[a]);
     }
+
     function Ed(a, b) {
       for (var c = 0; c < a; c++) {
         var f = R[(b + 4 * c) >> 2];
@@ -4934,9 +5133,11 @@ var CanvasKitInit = (() => {
       }
     }
     var Fd = [];
+
     function Gd(a, b, c, f) {
       Z.drawElements(a, b, c, f);
     }
+
     function Hd(a, b, c, f) {
       for (var h = 0; h < a; h++) {
         var m = Z[c](),
@@ -4945,9 +5146,11 @@ var CanvasKitInit = (() => {
         R[(b + 4 * h) >> 2] = u;
       }
     }
+
     function Id(a, b) {
       Hd(a, b, "createVertexArray", nd);
     }
+
     function Jd(a, b, c) {
       if (b) {
         var f = void 0;
@@ -5046,12 +5249,12 @@ var CanvasKitInit = (() => {
                   td(1280);
                   Ja(
                     "GL_INVALID_ENUM in glGet" +
-                      c +
-                      "v: Unknown object returned from WebGL getParameter(" +
-                      a +
-                      ")! (error: " +
-                      m +
-                      ")"
+                    c +
+                    "v: Unknown object returned from WebGL getParameter(" +
+                    a +
+                    ")! (error: " +
+                    m +
+                    ")"
                   );
                   return;
                 }
@@ -5061,16 +5264,16 @@ var CanvasKitInit = (() => {
               td(1280);
               Ja(
                 "GL_INVALID_ENUM in glGet" +
-                  c +
-                  "v: Native code calling glGet" +
-                  c +
-                  "v(" +
-                  a +
-                  ") and it returns " +
-                  h +
-                  " of type " +
-                  typeof h +
-                  "!"
+                c +
+                "v: Native code calling glGet" +
+                c +
+                "v(" +
+                a +
+                ") and it returns " +
+                h +
+                " of type " +
+                typeof h +
+                "!"
               );
               return;
           }
@@ -5097,25 +5300,28 @@ var CanvasKitInit = (() => {
       c && sa(a, K, c, b);
       return c;
     };
+
     function Md(a) {
       return "]" == a.slice(-1) && a.lastIndexOf("[");
     }
+
     function Nd(a) {
       a -= 5120;
-      return 0 == a
-        ? Qa
-        : 1 == a
-        ? K
-        : 2 == a
-        ? Ra
-        : 4 == a
-        ? R
-        : 6 == a
-        ? V
-        : 5 == a || 28922 == a || 28520 == a || 30779 == a || 30782 == a
-        ? Ua
-        : Sa;
+      return 0 == a ?
+        Qa :
+        1 == a ?
+        K :
+        2 == a ?
+        Ra :
+        4 == a ?
+        R :
+        6 == a ?
+        V :
+        5 == a || 28922 == a || 28520 == a || 30779 == a || 30782 == a ?
+        Ua :
+        Sa;
     }
+
     function Od(a, b, c, f, h) {
       a = Nd(a);
       var m = 31 - Math.clz32(a.BYTES_PER_ELEMENT),
@@ -5124,7 +5330,7 @@ var CanvasKitInit = (() => {
         h >> m,
         (h +
           f *
-            ((c *
+          ((c *
               ({
                 5: 3,
                 6: 4,
@@ -5135,14 +5341,15 @@ var CanvasKitInit = (() => {
                 26918: 2,
                 29846: 3,
                 29847: 4,
-              }[b - 6402] || 1) *
+              } [b - 6402] || 1) *
               (1 << m) +
               u -
               1) &
-              -u)) >>
-          m
+            -u)) >>
+        m
       );
     }
+
     function Pd(a) {
       var b = Z.If;
       if (b) {
@@ -5159,6 +5366,7 @@ var CanvasKitInit = (() => {
       Sd = (a) => 0 === a % 4 && (0 !== a % 100 || 0 === a % 400),
       Td = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
       Ud = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
     function Vd(a) {
       var b = Array(ra(a) + 1);
       sa(a, b, 0, b.length);
@@ -5166,13 +5374,15 @@ var CanvasKitInit = (() => {
     }
     var Wd = (a, b, c, f) => {
       function h(y, N, T) {
-        for (y = "number" == typeof y ? y.toString() : y || ""; y.length < N; )
+        for (y = "number" == typeof y ? y.toString() : y || ""; y.length < N;)
           y = T[0] + y;
         return y;
       }
+
       function m(y, N) {
         return h(y, N, "0");
       }
+
       function u(y, N) {
         function T(pa) {
           return 0 > pa ? -1 : 0 < pa ? 1 : 0;
@@ -5183,6 +5393,7 @@ var CanvasKitInit = (() => {
           (S = T(y.getDate() - N.getDate()));
         return S;
       }
+
       function n(y) {
         switch (y.getDay()) {
           case 0:
@@ -5201,17 +5412,18 @@ var CanvasKitInit = (() => {
             return new Date(y.getFullYear() - 1, 11, 30);
         }
       }
+
       function q(y) {
         var N = y.me;
-        for (y = new Date(new Date(y.ne + 1900, 0, 1).getTime()); 0 < N; ) {
+        for (y = new Date(new Date(y.ne + 1900, 0, 1).getTime()); 0 < N;) {
           var T = y.getMonth(),
             S = (Sd(y.getFullYear()) ? Td : Ud)[T];
           if (N > S - y.getDate())
             (N -= S - y.getDate() + 1),
-              y.setDate(1),
-              11 > T
-                ? y.setMonth(T + 1)
-                : (y.setMonth(0), y.setFullYear(y.getFullYear() + 1));
+            y.setDate(1),
+            11 > T ?
+            y.setMonth(T + 1) :
+            (y.setMonth(0), y.setFullYear(y.getFullYear() + 1));
           else {
             y.setDate(y.getDate() + N);
             break;
@@ -5220,11 +5432,11 @@ var CanvasKitInit = (() => {
         T = new Date(y.getFullYear() + 1, 0, 4);
         N = n(new Date(y.getFullYear(), 0, 4));
         T = n(T);
-        return 0 >= u(N, y)
-          ? 0 >= u(T, y)
-            ? y.getFullYear() + 1
-            : y.getFullYear()
-          : y.getFullYear() - 1;
+        return 0 >= u(N, y) ?
+          0 >= u(T, y) ?
+          y.getFullYear() + 1 :
+          y.getFullYear() :
+          y.getFullYear() - 1;
       }
       var v = R[(f + 40) >> 2];
       f = {
@@ -5276,9 +5488,9 @@ var CanvasKitInit = (() => {
           " "
         ),
         L =
-          "January February March April May June July August September October November December".split(
-            " "
-          );
+        "January February March April May June July August September October November December".split(
+          " "
+        );
       v = {
         "%a": (y) => I[y.fe].substring(0, 3),
         "%A": (y) => I[y.fe],
@@ -5297,9 +5509,7 @@ var CanvasKitInit = (() => {
         },
         "%j": (y) => {
           for (
-            var N = 0, T = 0;
-            T <= y.Ye - 1;
-            N += (Sd(y.ne + 1900) ? Td : Ud)[T++]
+            var N = 0, T = 0; T <= y.Ye - 1; N += (Sd(y.ne + 1900) ? Td : Ud)[T++]
           );
           return m(y.gf + N, 3);
         },
@@ -5316,7 +5526,7 @@ var CanvasKitInit = (() => {
           2 >= (y.fe + 371 - y.me - 2) % 7 && N++;
           if (N)
             53 == N &&
-              ((T = (y.fe + 371 - y.me) % 7),
+            ((T = (y.fe + 371 - y.me) % 7),
               4 == T || (3 == T && Sd(y.ne)) || (N = 1));
           else {
             N = 52;
@@ -5370,8 +5580,8 @@ var CanvasKitInit = (() => {
       var b = this.Hd.Td.Nd,
         c = this.Hd.Pd,
         f = a.Hd.Td.Nd;
-      for (a = a.Hd.Pd; b.Yd; ) (c = b.Me(c)), (b = b.Yd);
-      for (; f.Yd; ) (a = f.Me(a)), (f = f.Yd);
+      for (a = a.Hd.Pd; b.Yd;)(c = b.Me(c)), (b = b.Yd);
+      for (; f.Yd;)(a = f.Me(a)), (f = f.Yd);
       return b === f && c === a;
     };
     dc.prototype.clone = function () {
@@ -5447,9 +5657,17 @@ var CanvasKitInit = (() => {
     };
     pc.prototype.fromWireType = function (a) {
       function b() {
-        return this.Te
-          ? bc(this.Nd.De, { Td: this.$f, Pd: c, ce: this, Wd: a })
-          : bc(this.Nd.De, { Td: this, Pd: a });
+        return this.Te ?
+          bc(this.Nd.De, {
+            Td: this.$f,
+            Pd: c,
+            ce: this,
+            Wd: a
+          }) :
+          bc(this.Nd.De, {
+            Td: this,
+            Pd: a
+          });
       }
       var c = this.Qf(a);
       if (!c) return this.lf(a), null;
@@ -5466,11 +5684,19 @@ var CanvasKitInit = (() => {
       if (!f) return b.call(this);
       f = this.Se ? f.Gf : f.pointerType;
       var h = Pb(c, this.Nd, f.Nd);
-      return null === h
-        ? b.call(this)
-        : this.Te
-        ? bc(f.Nd.De, { Td: f, Pd: h, ce: this, Wd: a })
-        : bc(f.Nd.De, { Td: f, Pd: h });
+      return null === h ?
+        b.call(this) :
+        this.Te ?
+        bc(f.Nd.De, {
+          Td: f,
+          Pd: h,
+          ce: this,
+          Wd: a
+        }) :
+        bc(f.Nd.De, {
+          Td: f,
+          Pd: h
+        });
     };
     tc = w.UnboundTypeError = (function (a, b) {
       var c = fc(b, function (f) {
@@ -5484,9 +5710,9 @@ var CanvasKitInit = (() => {
       c.prototype = Object.create(a.prototype);
       c.prototype.constructor = c;
       c.prototype.toString = function () {
-        return void 0 === this.message
-          ? this.name
-          : `${this.name}: ${this.message}`;
+        return void 0 === this.message ?
+          this.name :
+          `${this.name}: ${this.message}`;
       };
       return c;
     })(Error, "UnboundTypeError");
@@ -5507,12 +5733,15 @@ var CanvasKitInit = (() => {
         this.qf.push(a);
       },
     });
-    Hc.he.push(
-      { value: void 0 },
-      { value: null },
-      { value: !0 },
-      { value: !1 }
-    );
+    Hc.he.push({
+      value: void 0
+    }, {
+      value: null
+    }, {
+      value: !0
+    }, {
+      value: !1
+    });
     Hc.Ee = Hc.he.length;
     w.count_emval_handles = function () {
       for (var a = 0, b = Hc.Ee; b < Hc.he.length; ++b)
@@ -5561,29 +5790,27 @@ var CanvasKitInit = (() => {
               },
             };
           });
-          return [
-            {
-              name: b.name,
-              fromWireType: function (q) {
-                var v = {},
-                  E;
-                for (E in n) v[E] = n[E].read(q);
-                f(q);
-                return v;
-              },
-              toWireType: function (q, v) {
-                for (var E in n)
-                  if (!(E in v)) throw new TypeError(`Missing field: "${E}"`);
-                var I = c();
-                for (E in n) n[E].write(I, v[E]);
-                null !== q && q.push(f, I);
-                return I;
-              },
-              argPackAdvance: 8,
-              readValueFromPointer: xb,
-              be: f,
+          return [{
+            name: b.name,
+            fromWireType: function (q) {
+              var v = {},
+                E;
+              for (E in n) v[E] = n[E].read(q);
+              f(q);
+              return v;
             },
-          ];
+            toWireType: function (q, v) {
+              for (var E in n)
+                if (!(E in v)) throw new TypeError(`Missing field: "${E}"`);
+              var I = c();
+              for (E in n) n[E].write(I, v[E]);
+              null !== q && q.push(f, I);
+              return I;
+            },
+            argPackAdvance: 8,
+            readValueFromPointer: xb,
+            be: f,
+          }, ];
         });
       },
       qb: function () {},
@@ -5641,14 +5868,21 @@ var CanvasKitInit = (() => {
               );
             return hb.apply(this, arguments);
           });
-          var pa = Object.create(S, { constructor: { value: N } });
+          var pa = Object.create(S, {
+            constructor: {
+              value: N
+            }
+          });
           N.prototype = pa;
           var la = new ic(E, N, pa, L, T, m, n, v);
           la.Yd && (void 0 === la.Yd.Ne && (la.Yd.Ne = []), la.Yd.Ne.push(la));
           T = new pc(E, la, !0, !1, !1);
           S = new pc(E + "*", la, !1, !1, !1);
           var gb = new pc(E + " const*", la, !1, !0, !1);
-          Qb[a] = { pointerType: S, Gf: gb };
+          Qb[a] = {
+            pointerType: S,
+            Gf: gb
+          };
           qc(y, N);
           return [T, S, gb];
         });
@@ -5665,15 +5899,15 @@ var CanvasKitInit = (() => {
           var E = `${q.name}.${b}`;
           b.startsWith("@@") && (b = Symbol[b.substring(2)]);
           var I = q.Nd.constructor;
-          void 0 === I[b]
-            ? ((v.Ae = c - 1), (I[b] = v))
-            : (gc(I, b, E), (I[b].Vd[c - 1] = v));
+          void 0 === I[b] ?
+            ((v.Ae = c - 1), (I[b] = v)) :
+            (gc(I, b, E), (I[b].Vd[c - 1] = v));
           Eb([], n, function (L) {
             L = [L[0], null].concat(L.slice(1));
             L = Ec(E, L, null, m, u);
-            void 0 === I[b].Vd
-              ? ((L.Ae = c - 1), (I[b] = L))
-              : (I[b].Vd[c - 1] = L);
+            void 0 === I[b].Vd ?
+              ((L.Ae = c - 1), (I[b] = L)) :
+              (I[b].Vd[c - 1] = L);
             if (q.Nd.Ne)
               for (const y of q.Nd.Ne)
                 y.constructor.hasOwnProperty(b) || (y.constructor[b] = L);
@@ -5723,14 +5957,14 @@ var CanvasKitInit = (() => {
           var L = v.Nd.De,
             y = L[b];
           void 0 === y ||
-          (void 0 === y.Vd && y.className !== v.name && y.Ae === c - 2)
-            ? ((E.Ae = c - 2), (E.className = v.name), (L[b] = E))
-            : (gc(L, b, I), (L[b].Vd[c - 2] = E));
+            (void 0 === y.Vd && y.className !== v.name && y.Ae === c - 2) ?
+            ((E.Ae = c - 2), (E.className = v.name), (L[b] = E)) :
+            (gc(L, b, I), (L[b].Vd[c - 2] = E));
           Eb([], q, function (N) {
             N = Ec(I, N, v, m, u);
-            void 0 === L[b].Vd
-              ? ((N.Ae = c - 2), (L[b] = N))
-              : (L[b].Vd[c - 2] = N);
+            void 0 === L[b].Vd ?
+              ((N.Ae = c - 2), (L[b] = N)) :
+              (L[b].Vd[c - 2] = N);
             return [];
           });
           return [];
@@ -5786,8 +6020,12 @@ var CanvasKitInit = (() => {
         b = Ib(b);
         a = f.constructor;
         f = Object.create(f.constructor.prototype, {
-          value: { value: c },
-          constructor: { value: fc(`${f.name}_${b}`, function () {}) },
+          value: {
+            value: c
+          },
+          constructor: {
+            value: fc(`${f.name}_${b}`, function () {})
+          },
         });
         a.values[c] = f;
         a[b] = f;
@@ -5826,21 +6064,21 @@ var CanvasKitInit = (() => {
         });
       },
       E: function (a, b, c, f, h) {
-        b = Ib(b);
-        -1 === h && (h = 4294967295);
+        b = Ib(b); -
+        1 === h && (h = 4294967295);
         h = Gb(c);
         var m = (n) => n;
         if (0 === f) {
           var u = 32 - 8 * c;
           m = (n) => (n << u) >>> u;
         }
-        c = b.includes("unsigned")
-          ? function (n, q) {
-              return q >>> 0;
-            }
-          : function (n, q) {
-              return q;
-            };
+        c = b.includes("unsigned") ?
+          function (n, q) {
+            return q >>> 0;
+          } :
+          function (n, q) {
+            return q;
+          };
         Fb(a, {
           name: b,
           fromWireType: m,
@@ -5868,14 +6106,14 @@ var CanvasKitInit = (() => {
         ][b];
         c = Ib(c);
         Fb(
-          a,
-          {
+          a, {
             name: c,
             fromWireType: f,
             argPackAdvance: 8,
             readValueFromPointer: f,
-          },
-          { Uf: !0 }
+          }, {
+            Uf: !0
+          }
         );
       },
       p: function (a, b, c, f, h, m, u, n, q, v, E, I) {
@@ -5903,7 +6141,7 @@ var CanvasKitInit = (() => {
                 if (n == h || 0 == K[q]) {
                   u = u ? ub(K, u, q - u) : "";
                   if (void 0 === v) var v = u;
-                  else (v += String.fromCharCode(0)), (v += u);
+                  else(v += String.fromCharCode(0)), (v += u);
                   u = q + 1;
                 }
               }
@@ -5933,10 +6171,11 @@ var CanvasKitInit = (() => {
                 var v = h.charCodeAt(m);
                 255 < v &&
                   (wc(q),
-                  X("String has UTF-16 code units that do not fit in 8 bits"));
+                    X("String has UTF-16 code units that do not fit in 8 bits"));
                 K[q + m] = v;
               }
-            else for (m = 0; m < u; ++m) K[q + m] = h[m];
+            else
+              for (m = 0; m < u; ++m) K[q + m] = h[m];
             null !== f && f.push(wc, n);
             return n;
           },
@@ -5961,17 +6200,16 @@ var CanvasKitInit = (() => {
           name: c,
           fromWireType: function (q) {
             for (
-              var v = Ua[q >> 2], E = u(), I, L = q + 4, y = 0;
-              y <= v;
+              var v = Ua[q >> 2], E = u(), I, L = q + 4, y = 0; y <= v;
               ++y
             ) {
               var N = q + 4 + y * b;
               if (y == v || 0 == E[N >> n])
                 (L = f(L, N - L)),
-                  void 0 === I
-                    ? (I = L)
-                    : ((I += String.fromCharCode(0)), (I += L)),
-                  (L = N + b);
+                void 0 === I ?
+                (I = L) :
+                ((I += String.fromCharCode(0)), (I += L)),
+                (L = N + b);
             }
             wc(q);
             return I;
@@ -5994,7 +6232,12 @@ var CanvasKitInit = (() => {
         });
       },
       D: function (a, b, c, f, h, m) {
-        vb[a] = { name: Ib(b), ff: sc(c, f), ie: sc(h, m), pf: [] };
+        vb[a] = {
+          name: Ib(b),
+          ff: sc(c, f),
+          ie: sc(h, m),
+          pf: []
+        };
       },
       e: function (a, b, c, f, h, m, u, n, q, v) {
         vb[a].pf.push({
@@ -6056,11 +6299,11 @@ var CanvasKitInit = (() => {
           f.name +
           "_$" +
           c
-            .slice(1)
-            .map(function (u) {
-              return u.name;
-            })
-            .join("_") +
+          .slice(1)
+          .map(function (u) {
+            return u.name;
+          })
+          .join("_") +
           "$";
         var h = ad[b];
         if (void 0 !== h) return h;
@@ -6068,7 +6311,7 @@ var CanvasKitInit = (() => {
         h = Zc((u, n, q, v) => {
           for (var E = 0, I = 0; I < a - 1; ++I)
             (m[I] = c[I + 1].readValueFromPointer(v + E)),
-              (E += c[I + 1].argPackAdvance);
+            (E += c[I + 1].argPackAdvance);
           u = u[n].apply(u, m);
           for (I = 0; I < a - 1; ++I) c[I + 1].Jf && c[I + 1].Jf(m[I]);
           if (!f.Wf) return f.toWireType(q, u);
@@ -6137,10 +6380,10 @@ var CanvasKitInit = (() => {
           f = Math.max(a, f);
           a: {
             h =
-              (h.min.call(h, 2147483648, f + ((65536 - (f % 65536)) % 65536)) -
-                Ma.buffer.byteLength +
-                65535) >>>
-              16;
+            (h.min.call(h, 2147483648, f + ((65536 - (f % 65536)) % 65536)) -
+              Ma.buffer.byteLength +
+              65535) >>>
+            16;
             try {
               Ma.grow(h);
               Wa();
@@ -6200,9 +6443,9 @@ var CanvasKitInit = (() => {
           for (var q = 0; q < n; q++) {
             var v = K[u + q],
               E = Cd[a];
-            0 === v || 10 === v
-              ? ((1 === a ? Ha : Ja)(ub(E, 0)), (E.length = 0))
-              : E.push(v);
+            0 === v || 10 === v ?
+              ((1 === a ? Ha : Ja)(ub(E, 0)), (E.length = 0)) :
+              E.push(v);
           }
           h += n;
         }
@@ -6249,16 +6492,16 @@ var CanvasKitInit = (() => {
         Z.blitFramebuffer(a, b, c, f, h, m, u, n, q, v);
       },
       ia: function (a, b, c, f) {
-        2 <= A.version
-          ? c && b
-            ? Z.bufferData(a, K, f, c, b)
-            : Z.bufferData(a, b, f)
-          : Z.bufferData(a, c ? K.subarray(c, c + b) : b, f);
+        2 <= A.version ?
+          c && b ?
+          Z.bufferData(a, K, f, c, b) :
+          Z.bufferData(a, b, f) :
+          Z.bufferData(a, c ? K.subarray(c, c + b) : b, f);
       },
       ja: function (a, b, c, f) {
-        2 <= A.version
-          ? c && Z.bufferSubData(a, b, K, f, c)
-          : Z.bufferSubData(a, b, K.subarray(f, f + c));
+        2 <= A.version ?
+          c && Z.bufferSubData(a, b, K, f, c) :
+          Z.bufferSubData(a, b, K.subarray(f, f + c));
       },
       ec: function (a) {
         return Z.checkFramebufferStatus(a);
@@ -6282,35 +6525,35 @@ var CanvasKitInit = (() => {
         Z.compileShader(md[a]);
       },
       ma: function (a, b, c, f, h, m, u, n) {
-        2 <= A.version
-          ? Z.Be || !u
-            ? Z.compressedTexImage2D(a, b, c, f, h, m, u, n)
-            : Z.compressedTexImage2D(a, b, c, f, h, m, K, n, u)
-          : Z.compressedTexImage2D(
-              a,
-              b,
-              c,
-              f,
-              h,
-              m,
-              n ? K.subarray(n, n + u) : null
-            );
+        2 <= A.version ?
+          Z.Be || !u ?
+          Z.compressedTexImage2D(a, b, c, f, h, m, u, n) :
+          Z.compressedTexImage2D(a, b, c, f, h, m, K, n, u) :
+          Z.compressedTexImage2D(
+            a,
+            b,
+            c,
+            f,
+            h,
+            m,
+            n ? K.subarray(n, n + u) : null
+          );
       },
       na: function (a, b, c, f, h, m, u, n, q) {
-        2 <= A.version
-          ? Z.Be || !n
-            ? Z.compressedTexSubImage2D(a, b, c, f, h, m, u, n, q)
-            : Z.compressedTexSubImage2D(a, b, c, f, h, m, u, K, q, n)
-          : Z.compressedTexSubImage2D(
-              a,
-              b,
-              c,
-              f,
-              h,
-              m,
-              u,
-              q ? K.subarray(q, q + n) : null
-            );
+        2 <= A.version ?
+          Z.Be || !n ?
+          Z.compressedTexSubImage2D(a, b, c, f, h, m, u, n, q) :
+          Z.compressedTexSubImage2D(a, b, c, f, h, m, u, K, q, n) :
+          Z.compressedTexSubImage2D(
+            a,
+            b,
+            c,
+            f,
+            h,
+            m,
+            u,
+            q ? K.subarray(q, q + n) : null
+          );
       },
       Xb: function (a, b, c, f, h) {
         Z.copyBufferSubData(a, b, c, f, h);
@@ -6341,10 +6584,10 @@ var CanvasKitInit = (() => {
             h = hd[f];
           h &&
             (Z.deleteBuffer(h),
-            (h.name = 0),
-            (hd[f] = null),
-            f == Z.cf && (Z.cf = 0),
-            f == Z.Be && (Z.Be = 0));
+              (h.name = 0),
+              (hd[f] = null),
+              f == Z.cf && (Z.cf = 0),
+              f == Z.Be && (Z.Be = 0));
         }
       },
       fc: function (a, b) {
@@ -6442,9 +6685,9 @@ var CanvasKitInit = (() => {
         Z.enableVertexAttribArray(a);
       },
       Vb: function (a, b) {
-        return (a = Z.fenceSync(a, b))
-          ? ((b = ha(pd)), (a.name = b), (pd[b] = a), b)
-          : 0;
+        return (a = Z.fenceSync(a, b)) ?
+          ((b = ha(pd)), (a.name = b), (pd[b] = a), b) :
+          0;
       },
       Da: function () {
         Z.finish();
@@ -6511,28 +6754,28 @@ var CanvasKitInit = (() => {
         if (c)
           if (a >= gd) td(1281);
           else if (((a = jd[a]), 35716 == b))
-            (a = Z.getProgramInfoLog(a)),
-              null === a && (a = "(unknown error)"),
-              (R[c >> 2] = a.length + 1);
-          else if (35719 == b) {
-            if (!a.We)
-              for (b = 0; b < Z.getProgramParameter(a, 35718); ++b)
-                a.We = Math.max(a.We, Z.getActiveUniform(a, b).name.length + 1);
-            R[c >> 2] = a.We;
-          } else if (35722 == b) {
-            if (!a.Ue)
-              for (b = 0; b < Z.getProgramParameter(a, 35721); ++b)
-                a.Ue = Math.max(a.Ue, Z.getActiveAttrib(a, b).name.length + 1);
-            R[c >> 2] = a.Ue;
-          } else if (35381 == b) {
-            if (!a.Ve)
-              for (b = 0; b < Z.getProgramParameter(a, 35382); ++b)
-                a.Ve = Math.max(
-                  a.Ve,
-                  Z.getActiveUniformBlockName(a, b).length + 1
-                );
-            R[c >> 2] = a.Ve;
-          } else R[c >> 2] = Z.getProgramParameter(a, b);
+          (a = Z.getProgramInfoLog(a)),
+          null === a && (a = "(unknown error)"),
+          (R[c >> 2] = a.length + 1);
+        else if (35719 == b) {
+          if (!a.We)
+            for (b = 0; b < Z.getProgramParameter(a, 35718); ++b)
+              a.We = Math.max(a.We, Z.getActiveUniform(a, b).name.length + 1);
+          R[c >> 2] = a.We;
+        } else if (35722 == b) {
+          if (!a.Ue)
+            for (b = 0; b < Z.getProgramParameter(a, 35721); ++b)
+              a.Ue = Math.max(a.Ue, Z.getActiveAttrib(a, b).name.length + 1);
+          R[c >> 2] = a.Ue;
+        } else if (35381 == b) {
+          if (!a.Ve)
+            for (b = 0; b < Z.getProgramParameter(a, 35382); ++b)
+              a.Ve = Math.max(
+                a.Ve,
+                Z.getActiveUniformBlockName(a, b).length + 1
+              );
+          R[c >> 2] = a.Ve;
+        } else R[c >> 2] = Z.getProgramParameter(a, b);
         else td(1281);
       },
       bc: function (a, b, c) {
@@ -6552,15 +6795,16 @@ var CanvasKitInit = (() => {
       },
       Oa: function (a, b, c) {
         c
-          ? 35716 == b
-            ? ((a = Z.getShaderInfoLog(md[a])),
-              null === a && (a = "(unknown error)"),
-              (R[c >> 2] = a ? a.length + 1 : 0))
-            : 35720 == b
-            ? ((a = Z.getShaderSource(md[a])),
-              (R[c >> 2] = a ? a.length + 1 : 0))
-            : (R[c >> 2] = Z.getShaderParameter(md[a], b))
-          : td(1281);
+          ?
+          35716 == b ?
+          ((a = Z.getShaderInfoLog(md[a])),
+            null === a && (a = "(unknown error)"),
+            (R[c >> 2] = a ? a.length + 1 : 0)) :
+          35720 == b ?
+          ((a = Z.getShaderSource(md[a])),
+            (R[c >> 2] = a ? a.length + 1 : 0)) :
+          (R[c >> 2] = Z.getShaderParameter(md[a], b)) :
+          td(1281);
       },
       O: function (a) {
         var b = qd[a];
@@ -6585,9 +6829,9 @@ var CanvasKitInit = (() => {
             case 7938:
               b = Z.getParameter(7938);
               b =
-                2 <= A.version
-                  ? "OpenGL ES 3.0 (" + b + ")"
-                  : "OpenGL ES 2.0 (" + b + ")";
+                2 <= A.version ?
+                "OpenGL ES 3.0 (" + b + ")" :
+                "OpenGL ES 2.0 (" + b + ")";
               b = Ld(b);
               break;
             case 35724:
@@ -6595,7 +6839,7 @@ var CanvasKitInit = (() => {
               var c = b.match(/^WebGL GLSL ES ([0-9]\.[0-9][0-9]?)(?:$| .*)/);
               null !== c &&
                 (3 == c[1].length && (c[1] += "0"),
-                (b = "OpenGL ES GLSL ES " + c[1] + " (" + b + ")"));
+                  (b = "OpenGL ES GLSL ES " + c[1] + " (" + b + ")"));
               b = Ld(b);
               break;
             default:
@@ -6637,8 +6881,7 @@ var CanvasKitInit = (() => {
             m;
           if (!f)
             for (
-              c.Le = f = {}, c.vf = {}, m = 0;
-              m < Z.getProgramParameter(c, 35718);
+              c.Le = f = {}, c.vf = {}, m = 0; m < Z.getProgramParameter(c, 35718);
               ++m
             ) {
               var u = Z.getActiveUniform(c, m);
@@ -6649,7 +6892,7 @@ var CanvasKitInit = (() => {
               var v = c.hf;
               c.hf += u;
               h[q] = [u, v];
-              for (n = 0; n < u; ++n) (f[v] = n), (c.vf[v++] = q);
+              for (n = 0; n < u; ++n)(f[v] = n), (c.vf[v++] = q);
             }
           c = a.Le;
           f = 0;
@@ -6743,9 +6986,9 @@ var CanvasKitInit = (() => {
             );
           }
         else
-          (u = Od(m, h, c, f, u))
-            ? Z.readPixels(a, b, c, f, h, m, u)
-            : td(1280);
+          (u = Od(m, h, c, f, u)) ?
+          Z.readPixels(a, b, c, f, h, m, u) :
+          td(1280);
       },
       cc: function (a, b, c, f) {
         Z.renderbufferStorage(a, b, c, f);
@@ -6796,20 +7039,20 @@ var CanvasKitInit = (() => {
         if (2 <= A.version)
           if (Z.Be) Z.texImage2D(a, b, c, f, h, m, u, n, q);
           else if (q) {
-            var v = Nd(n);
-            Z.texImage2D(
-              a,
-              b,
-              c,
-              f,
-              h,
-              m,
-              u,
-              n,
-              v,
-              q >> (31 - Math.clz32(v.BYTES_PER_ELEMENT))
-            );
-          } else Z.texImage2D(a, b, c, f, h, m, u, n, null);
+          var v = Nd(n);
+          Z.texImage2D(
+            a,
+            b,
+            c,
+            f,
+            h,
+            m,
+            u,
+            n,
+            v,
+            q >> (31 - Math.clz32(v.BYTES_PER_ELEMENT))
+          );
+        } else Z.texImage2D(a, b, c, f, h, m, u, n, null);
         else Z.texImage2D(a, b, c, f, h, m, u, n, q ? Od(n, u, f, h, q) : null);
       },
       cb: function (a, b, c) {
@@ -6831,24 +7074,24 @@ var CanvasKitInit = (() => {
         if (2 <= A.version)
           if (Z.Be) Z.texSubImage2D(a, b, c, f, h, m, u, n, q);
           else if (q) {
-            var v = Nd(n);
-            Z.texSubImage2D(
-              a,
-              b,
-              c,
-              f,
-              h,
-              m,
-              u,
-              n,
-              v,
-              q >> (31 - Math.clz32(v.BYTES_PER_ELEMENT))
-            );
-          } else Z.texSubImage2D(a, b, c, f, h, m, u, n, null);
+          var v = Nd(n);
+          Z.texSubImage2D(
+            a,
+            b,
+            c,
+            f,
+            h,
+            m,
+            u,
+            n,
+            v,
+            q >> (31 - Math.clz32(v.BYTES_PER_ELEMENT))
+          );
+        } else Z.texSubImage2D(a, b, c, f, h, m, u, n, null);
         else
           (v = null),
-            q && (v = Od(n, u, h, m, q)),
-            Z.texSubImage2D(a, b, c, f, h, m, u, n, v);
+          q && (v = Od(n, u, h, m, q)),
+          Z.texSubImage2D(a, b, c, f, h, m, u, n, v);
       },
       hb: function (a, b) {
         Z.uniform1f(Pd(a), b);
@@ -6885,7 +7128,7 @@ var CanvasKitInit = (() => {
           if (144 >= b)
             for (var f = Qd[2 * b - 1], h = 0; h < 2 * b; h += 2)
               (f[h] = V[(c + 4 * h) >> 2]),
-                (f[h + 1] = V[(c + (4 * h + 4)) >> 2]);
+              (f[h + 1] = V[(c + (4 * h + 4)) >> 2]);
           else f = V.subarray(c >> 2, (c + 8 * b) >> 2);
           Z.uniform2fv(Pd(a), f);
         }
@@ -6899,7 +7142,7 @@ var CanvasKitInit = (() => {
           if (144 >= b)
             for (var f = Rd[2 * b - 1], h = 0; h < 2 * b; h += 2)
               (f[h] = R[(c + 4 * h) >> 2]),
-                (f[h + 1] = R[(c + (4 * h + 4)) >> 2]);
+              (f[h + 1] = R[(c + (4 * h + 4)) >> 2]);
           else f = R.subarray(c >> 2, (c + 8 * b) >> 2);
           Z.uniform2iv(Pd(a), f);
         }
@@ -6913,8 +7156,8 @@ var CanvasKitInit = (() => {
           if (96 >= b)
             for (var f = Qd[3 * b - 1], h = 0; h < 3 * b; h += 3)
               (f[h] = V[(c + 4 * h) >> 2]),
-                (f[h + 1] = V[(c + (4 * h + 4)) >> 2]),
-                (f[h + 2] = V[(c + (4 * h + 8)) >> 2]);
+              (f[h + 1] = V[(c + (4 * h + 4)) >> 2]),
+              (f[h + 2] = V[(c + (4 * h + 8)) >> 2]);
           else f = V.subarray(c >> 2, (c + 12 * b) >> 2);
           Z.uniform3fv(Pd(a), f);
         }
@@ -6928,8 +7171,8 @@ var CanvasKitInit = (() => {
           if (96 >= b)
             for (var f = Rd[3 * b - 1], h = 0; h < 3 * b; h += 3)
               (f[h] = R[(c + 4 * h) >> 2]),
-                (f[h + 1] = R[(c + (4 * h + 4)) >> 2]),
-                (f[h + 2] = R[(c + (4 * h + 8)) >> 2]);
+              (f[h + 1] = R[(c + (4 * h + 4)) >> 2]),
+              (f[h + 2] = R[(c + (4 * h + 8)) >> 2]);
           else f = R.subarray(c >> 2, (c + 12 * b) >> 2);
           Z.uniform3iv(Pd(a), f);
         }
@@ -6964,9 +7207,9 @@ var CanvasKitInit = (() => {
           if (72 >= b)
             for (var f = Rd[4 * b - 1], h = 0; h < 4 * b; h += 4)
               (f[h] = R[(c + 4 * h) >> 2]),
-                (f[h + 1] = R[(c + (4 * h + 4)) >> 2]),
-                (f[h + 2] = R[(c + (4 * h + 8)) >> 2]),
-                (f[h + 3] = R[(c + (4 * h + 12)) >> 2]);
+              (f[h + 1] = R[(c + (4 * h + 4)) >> 2]),
+              (f[h + 2] = R[(c + (4 * h + 8)) >> 2]),
+              (f[h + 3] = R[(c + (4 * h + 12)) >> 2]);
           else f = R.subarray(c >> 2, (c + 16 * b) >> 2);
           Z.uniform4iv(Pd(a), f);
         }
@@ -6978,9 +7221,9 @@ var CanvasKitInit = (() => {
           if (72 >= b)
             for (var h = Qd[4 * b - 1], m = 0; m < 4 * b; m += 4)
               (h[m] = V[(f + 4 * m) >> 2]),
-                (h[m + 1] = V[(f + (4 * m + 4)) >> 2]),
-                (h[m + 2] = V[(f + (4 * m + 8)) >> 2]),
-                (h[m + 3] = V[(f + (4 * m + 12)) >> 2]);
+              (h[m + 1] = V[(f + (4 * m + 4)) >> 2]),
+              (h[m + 2] = V[(f + (4 * m + 8)) >> 2]),
+              (h[m + 3] = V[(f + (4 * m + 12)) >> 2]);
           else h = V.subarray(f >> 2, (f + 16 * b) >> 2);
           Z.uniformMatrix2fv(Pd(a), !!c, h);
         }
@@ -6992,14 +7235,14 @@ var CanvasKitInit = (() => {
           if (32 >= b)
             for (var h = Qd[9 * b - 1], m = 0; m < 9 * b; m += 9)
               (h[m] = V[(f + 4 * m) >> 2]),
-                (h[m + 1] = V[(f + (4 * m + 4)) >> 2]),
-                (h[m + 2] = V[(f + (4 * m + 8)) >> 2]),
-                (h[m + 3] = V[(f + (4 * m + 12)) >> 2]),
-                (h[m + 4] = V[(f + (4 * m + 16)) >> 2]),
-                (h[m + 5] = V[(f + (4 * m + 20)) >> 2]),
-                (h[m + 6] = V[(f + (4 * m + 24)) >> 2]),
-                (h[m + 7] = V[(f + (4 * m + 28)) >> 2]),
-                (h[m + 8] = V[(f + (4 * m + 32)) >> 2]);
+              (h[m + 1] = V[(f + (4 * m + 4)) >> 2]),
+              (h[m + 2] = V[(f + (4 * m + 8)) >> 2]),
+              (h[m + 3] = V[(f + (4 * m + 12)) >> 2]),
+              (h[m + 4] = V[(f + (4 * m + 16)) >> 2]),
+              (h[m + 5] = V[(f + (4 * m + 20)) >> 2]),
+              (h[m + 6] = V[(f + (4 * m + 24)) >> 2]),
+              (h[m + 7] = V[(f + (4 * m + 28)) >> 2]),
+              (h[m + 8] = V[(f + (4 * m + 32)) >> 2]);
           else h = V.subarray(f >> 2, (f + 36 * b) >> 2);
           Z.uniformMatrix3fv(Pd(a), !!c, h);
         }
@@ -7104,7 +7347,9 @@ var CanvasKitInit = (() => {
         }
         return c;
       }
-      var b = { a: oe };
+      var b = {
+        a: oe
+      };
       db++;
       w.monitorRunDependencies && w.monitorRunDependencies(db);
       if (w.instantiateWasm)
@@ -7165,6 +7410,7 @@ var CanvasKitInit = (() => {
       (w.dynCall_iiiiijj = Q.Fd)(a, b, c, f, h, m, u, n, q);
     w.dynCall_iiiiiijj = (a, b, c, f, h, m, u, n, q, v) =>
       (w.dynCall_iiiiiijj = Q.Gd)(a, b, c, f, h, m, u, n, q, v);
+
     function be(a, b) {
       var c = qe();
       try {
@@ -7175,6 +7421,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function ce(a, b, c) {
       var f = qe();
       try {
@@ -7185,6 +7432,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function de(a, b, c, f) {
       var h = qe();
       try {
@@ -7195,6 +7443,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function je(a, b) {
       var c = qe();
       try {
@@ -7205,6 +7454,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function le(a, b, c, f) {
       var h = qe();
       try {
@@ -7215,6 +7465,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function ke(a, b, c) {
       var f = qe();
       try {
@@ -7225,6 +7476,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function fe(a, b, c, f, h, m) {
       var u = qe();
       try {
@@ -7235,6 +7487,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function me(a, b, c, f, h) {
       var m = qe();
       try {
@@ -7245,6 +7498,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function ge(a, b, c, f, h, m, u) {
       var n = qe();
       try {
@@ -7255,6 +7509,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function ne(a, b, c, f, h, m) {
       var u = qe();
       try {
@@ -7265,6 +7520,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function ee(a, b, c, f, h) {
       var m = qe();
       try {
@@ -7275,6 +7531,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function he(a, b, c, f, h, m, u, n, q, v) {
       var E = qe();
       try {
@@ -7285,6 +7542,7 @@ var CanvasKitInit = (() => {
         pe(1, 0);
       }
     }
+
     function ie(a) {
       var b = qe();
       try {
@@ -7300,6 +7558,7 @@ var CanvasKitInit = (() => {
       se || ue();
       se || (fb = te);
     };
+
     function ue() {
       function a() {
         if (!se && ((se = !0), (w.calledRun = !0), !Pa)) {
@@ -7308,8 +7567,7 @@ var CanvasKitInit = (() => {
           if (w.onRuntimeInitialized) w.onRuntimeInitialized();
           if (w.postRun)
             for (
-              "function" == typeof w.postRun && (w.postRun = [w.postRun]);
-              w.postRun.length;
+              "function" == typeof w.postRun && (w.postRun = [w.postRun]); w.postRun.length;
 
             ) {
               var b = w.postRun.shift();
@@ -7321,28 +7579,26 @@ var CanvasKitInit = (() => {
       if (!(0 < db)) {
         if (w.preRun)
           for (
-            "function" == typeof w.preRun && (w.preRun = [w.preRun]);
-            w.preRun.length;
+            "function" == typeof w.preRun && (w.preRun = [w.preRun]); w.preRun.length;
 
           )
             cb();
         sb(Ya);
         0 < db ||
-          (w.setStatus
-            ? (w.setStatus("Running..."),
+          (w.setStatus ?
+            (w.setStatus("Running..."),
               setTimeout(function () {
                 setTimeout(function () {
                   w.setStatus("");
                 }, 1);
                 a();
-              }, 1))
-            : a());
+              }, 1)) :
+            a());
       }
     }
     if (w.preInit)
       for (
-        "function" == typeof w.preInit && (w.preInit = [w.preInit]);
-        0 < w.preInit.length;
+        "function" == typeof w.preInit && (w.preInit = [w.preInit]); 0 < w.preInit.length;
 
       )
         w.preInit.pop()();
@@ -7352,6 +7608,12 @@ var CanvasKitInit = (() => {
   };
 })();
 if (typeof exports === "object" && typeof module === "object")
-  module.exports = {CanvasKitInit, GLVersion};
+  module.exports = {
+    CanvasKitInit,
+    GLVersion
+  };
 else if (typeof define === "function" && define["amd"])
-  define([], () => {CanvasKitInit, GLVersion});
+  define([], () => {
+    CanvasKitInit,
+    GLVersion
+  });
