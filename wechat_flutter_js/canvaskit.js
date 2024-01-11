@@ -1643,7 +1643,6 @@ var CanvasKitInit = (() => {
         return eee;
       };
       a.MakeImageFromEncoded = function (e) {
-        console.log("MakeImageFromEncoded", e);
         e = new Uint8Array(e);
         var d = a._malloc(e.byteLength);
         a.HEAPU8.set(e, d);
