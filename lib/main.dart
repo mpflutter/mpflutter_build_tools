@@ -62,20 +62,27 @@ class WechatBuilder {
     final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
     (pkgConfigData["packages"] as List).forEach((it) {
       if (nonCompatiblesPackages[it['name']] != null) {
-        final disableLines = nonCompatiblesPackages[it['name']];
         final srcRoot =
             Directory.fromUri(Uri.parse(_fixRootUri(it['rootUri'])));
+        if (File(join(srcRoot.path, "pubspec.bak.yaml")).existsSync()) {
+          File(join(srcRoot.path, "pubspec.bak.yaml"))
+              .copySync(join(srcRoot.path, "pubspec.yaml"));
+        }
         final yamlFile = File(join(srcRoot.path, "pubspec.yaml"));
+        yamlFile.copySync(join(srcRoot.path, "pubspec.bak.yaml"));
         if (yamlFile.existsSync()) {
           String yamlContent = yamlFile.readAsStringSync();
           final originContent = yamlContent;
           final yamlEditor = YamlEditor(yamlContent);
-          yamlEditor.remove(['flutter', 'plugin', 'platforms', 'web']);
-          yamlFile.writeAsStringSync(yamlEditor.toString());
-          print("Flutter Package [${it['name']}] 被标记为[不兼容的包]，本次构建已被临时禁用。");
-          Timer(Duration(seconds: 2), () {
-            yamlFile.writeAsStringSync(originContent);
-          });
+          try {
+            yamlEditor.remove(['flutter', 'plugin', 'platforms', 'web']);
+            yamlFile.writeAsStringSync(yamlEditor.toString());
+            print("Flutter Package [${it['name']}] 被标记为[不兼容的包]，本次构建已被临时禁用。");
+            Timer(Duration(seconds: 2), () {
+              yamlFile.writeAsStringSync(originContent);
+              File(join(srcRoot.path, "pubspec.bak.yaml")).deleteSync();
+            });
+          } catch (e) {}
         }
       }
     });
