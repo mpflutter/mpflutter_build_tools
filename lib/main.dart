@@ -557,8 +557,8 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
             File(element.path + ".br").writeAsBytesSync(encoded);
             element.deleteSync();
           } catch (e) {
-            print(
-                "[INFO] 内置 brotli 压缩 ${element.path} 失败，回退至 native command 执行。");
+            // print(
+            //     "[INFO] 内置 brotli 压缩 ${element.path} 失败，回退至 native command 执行。");
             Process.runSync(
               'brotli',
               [element.path, '-o', element.path + ".br"],
