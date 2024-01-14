@@ -11,6 +11,7 @@ let resumeTimer = undefined;
 
 Page({
   data: {
+    windowHeight: wx.getSystemInfoSync().windowHeight,
     readyToDisplay: false,
     shouldCatchBack: false,
   },

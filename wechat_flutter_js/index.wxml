@@ -1,6 +1,6 @@
 <!--index.wxml-->
 <view style="height: 100%;display: flex;">
-  <canvas key="my_canvas" type="webgl2" id="my_canvas" style="width: 100vw; height: 100vh; background-color: white;" bindtouchstart="ontouchstart" bindtouchmove="ontouchmove" bindtouchend="ontouchend" bindtouchcancel="ontouchcancel" />
+  <canvas key="my_canvas" type="webgl2" id="my_canvas" style="width: 100vw; height: {{windowHeight}}px; background-color: white;" bindtouchstart="ontouchstart" bindtouchmove="ontouchmove" bindtouchend="ontouchend" bindtouchcancel="ontouchcancel" />
   <page-container show="{{shouldCatchBack}}" duration="0" overlay="false" overlay-style="width:100vw;height:100vh;background-color:transparent" custom-style="width:100vw;height:100vh;background-color:transparent" bind:afterleave="onPageContainerHide">
     <view style="width: 100vw; height: 100vh; background-color: transparent;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2" />
   </page-container>
