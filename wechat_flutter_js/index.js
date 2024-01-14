@@ -57,6 +57,10 @@ Page({
     wx.mpcb.onEnter(enterQuery);
   },
 
+  onSaveExitState() {
+    return wx.mpcb?.onSaveExitState();
+  },
+
   restoreCanvas() {
     wx.createSelectorQuery()
       .select("#my_canvas") // 在 WXML 中填入的 id
@@ -160,6 +164,7 @@ Page({
 
   onShow() {
     wx.mpcb?.onShow?.();
+    wx.mpcbExitState = this.exitState;
   },
 
   onHide() {
@@ -167,8 +172,23 @@ Page({
   },
 
   onShareAppMessage(detail) {
+    if (!wx.mpcb.onShareAppMessage) return undefined;
     return {
       ...wx.mpcb.onShareAppMessage(detail),
+    };
+  },
+
+  onShareTimeline(detail) {
+    if (!wx.mpcb.onShareTimeline) return undefined;
+    return {
+      ...wx.mpcb.onShareTimeline(detail),
+    };
+  },
+
+  onAddToFavorites(detail) {
+    if (!wx.mpcb.onAddToFavorites) return undefined;
+    return {
+      ...wx.mpcb.onAddToFavorites(detail),
     };
   },
 

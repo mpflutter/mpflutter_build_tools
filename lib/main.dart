@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:es_compression/brotli.dart';
+import 'package:mpflutter_build_tools/disable-features.dart';
 import 'package:mpflutter_build_tools/non-compatibles.dart';
 import 'package:path/path.dart';
 import 'package:yaml_edit/yaml_edit.dart';
@@ -15,6 +16,10 @@ late Directory mpflutterSrcRoot;
 
 void addNonCompatiblesPackage(String pkgName) {
   nonCompatiblesPackages[pkgName] = [];
+}
+
+void disableFeature(String featureName) {
+  disableFeatures[featureName] = true;
 }
 
 void main(List<String> arguments) async {
@@ -168,6 +173,7 @@ class WechatBuilder {
     await _openDevMode(arguments);
     _addLogStack(arguments);
     _fixEnterkeyhint();
+    _disableFeatures();
     wechatOut.deleteSync();
     wechatTmp.renameSync(wechatOut.path);
   }
@@ -600,6 +606,31 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
       content =
           content.replaceAll("if(s){s=this.gjH()", "if(true){s=this.gjH()");
       mainDartJSFile.writeAsStringSync(content);
+    }
+  }
+
+  void _disableFeatures() {
+    final indexJSFile =
+        File(join("build", 'wechat_tmp', 'pages', 'index', 'index.js'));
+    var changed = false;
+    var content = indexJSFile.readAsStringSync();
+    if (disableFeatures["wechat_share_app_message"] == true) {
+      changed = true;
+      content = content.replaceAll(
+          "onShareAppMessage(detail)", "_onShareAppMessage(detail)");
+    }
+    if (disableFeatures["wechat_share_timeline"] == true) {
+      changed = true;
+      content = content.replaceAll(
+          "onShareTimeline(detail)", "_onShareTimeline(detail)");
+    }
+    if (disableFeatures["wechat_add_to_favorites"] == true) {
+      changed = true;
+      content = content.replaceAll(
+          "onAddToFavorites(detail)", "_onAddToFavorites(detail)");
+    }
+    if (changed) {
+      indexJSFile.writeAsStringSync(content);
     }
   }
 
