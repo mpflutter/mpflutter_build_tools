@@ -96,9 +96,7 @@ export class XMLHttpRequest {
   $$trigger(event) {
     const cb = this.eventCallbacks[event];
     if (cb) {
-      cb({
-        $$clazz$$: "Event",
-      });
+      cb({});
     }
   }
   $_callReadyStateChange(readyState) {

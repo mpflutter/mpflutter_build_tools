@@ -1,5 +1,10 @@
 # ChangeLog
 
+## 2.1.1
+
+fix:
+- 修正一个因 XMLHttpRequest 导致的 js.context 失效问题
+
 ## 2.1.0
 
 fix:
