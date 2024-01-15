@@ -460,14 +460,13 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
     final indexWxmlFile =
         File(join("build", 'wechat_tmp', 'pages', 'index', 'index.wxml'));
     var indexWxmlContent = indexWxmlFile.readAsStringSync();
-    indexWxmlContent += maybeWeChatPkgs
-        .map((key, value) => MapEntry(key,
-            File(join(value.path, 'wechat', 'main.wxml')).readAsStringSync()))
-        .values
-        .join("\n");
     indexWxmlContent = indexWxmlContent.replaceAll(
-      'style="{{item.wrapper}}"',
-      'style="{{item.wrapper}};z-index:9999;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2"',
+      "<!--PlatformViewBlocks-->",
+      maybeWeChatPkgs
+          .map((key, value) => MapEntry(key,
+              File(join(value.path, 'wechat', 'main.wxml')).readAsStringSync()))
+          .values
+          .join("\n"),
     );
     indexWxmlFile.writeAsStringSync(indexWxmlContent);
   }

@@ -14,6 +14,7 @@ Page({
     windowHeight: wx.getSystemInfoSync().windowHeight,
     readyToDisplay: false,
     shouldCatchBack: false,
+    PVWrapper: { removed: true, style: "" },
   },
 
   onUnload() {

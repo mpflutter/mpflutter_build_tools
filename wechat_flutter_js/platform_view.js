@@ -100,22 +100,6 @@ export class FlutterPlatformViewManager {
         `height:${viewOption.frame.height}px;` +
         `opacity: ${viewOption.opacity};` +
         `z-index: 9999;`;
-      const windowHeight = wx.getSystemInfoSync().windowHeight;
-      let wrapperTop = viewOption.wrapper.top / windowHeight;
-      let wrapperBottom = viewOption.wrapper.bottom / windowHeight;
-      targetElement.wrapper = `position: absolute;top:0px;left:0px;width:100%;height:100%;mask-image: linear-gradient(to bottom, transparent, transparent ${(
-        wrapperTop * 100
-      ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(
-        0
-      )}%);-webkit-mask-image: linear-gradient(to bottom, transparent, transparent ${(
-        wrapperTop * 100
-      ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(0)}%);`;
-      if (viewOption.ignorePlatformTouch === true) {
-        targetElement.wrapper += `pointer-events:none;`;
-      }
-      if (viewOption.opacity <= 0.01) {
-        targetElement.wrapper += "visibility:hidden;pointer-events:none;";
-      }
       targetElement.props = { ...viewOption.props };
       const keyPath = blockName + `.[${targetIndex}]`;
       self.setData({ [keyPath]: targetElement });
@@ -134,28 +118,11 @@ export class FlutterPlatformViewManager {
           [styleKeyPath]: style,
         });
       }
-      // wrapper
-      const wrapperKeyPath = blockName + `.[${targetIndex}].wrapper`;
-      const windowHeight = wx.getSystemInfoSync().windowHeight;
-      let wrapperTop = viewOption.wrapper.top / windowHeight;
-      let wrapperBottom = viewOption.wrapper.bottom / windowHeight;
-      let wrapper = `position: absolute;top:0px;left:0px;width:100%;height:100%;mask-image: linear-gradient(to bottom, transparent, transparent ${(
-        wrapperTop * 100
-      ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(
-        0
-      )}%);-webkit-mask-image: linear-gradient(to bottom, transparent, transparent ${(
-        wrapperTop * 100
-      ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(0)}%);`;
       if (viewOption.ignorePlatformTouch === true) {
-        wrapper += `pointer-events:none;`;
+        style += `pointer-events:none;`;
       }
       if (viewOption.opacity <= 0.01) {
-        wrapper += "visibility:hidden;pointer-events:none;";
-      }
-      if (targetElement.wrapper !== wrapper) {
-        self.setData({
-          [wrapperKeyPath]: wrapper,
-        });
+        style += "visibility:hidden;pointer-events:none;";
       }
       // props
       if (targetElement.props) {
@@ -176,6 +143,8 @@ export class FlutterPlatformViewManager {
           }
         }
       }
+      // wrapper
+      this.updateWrapper(viewOption);
     }
   }
 
@@ -196,5 +165,38 @@ export class FlutterPlatformViewManager {
       self.setData({ [keyPath]: true });
     }
     delete this[viewOption.pvid + "_pvcb"];
+    this.updateWrapper();
+  }
+
+  updateWrapper(viewOption) {
+    const self = this.FlutterHostView.shared.self;
+    const hasPV =
+      Object.keys(this).filter((it) => it.endsWith("_pvcb")).length > 0;
+    if (hasPV) {
+      if (viewOption.wrapper) {
+        const windowHeight = wx.getSystemInfoSync().windowHeight;
+        let wrapperTop = viewOption.wrapper.top / windowHeight;
+        let wrapperBottom = viewOption.wrapper.bottom / windowHeight;
+        let wrapper = `position: absolute;top:0px;left:0px;width:100%;height:100%;mask-image: linear-gradient(to bottom, transparent, transparent ${(
+          wrapperTop * 100
+        ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(
+          0
+        )}%);-webkit-mask-image: linear-gradient(to bottom, transparent, transparent ${(
+          wrapperTop * 100
+        ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(0)}%);`;
+        if (
+          self.data.PVWrapper.removed === false &&
+          self.data.PVWrapper.style === wrapper
+        )
+          return;
+        self.setData({
+          "PVWrapper.removed": false,
+          "PVWrapper.style": wrapper,
+        });
+      }
+    } else {
+      if (self.data.PVWrapper.removed === true) return;
+      self.setData({ "PVWrapper.removed": true });
+    }
   }
 }
