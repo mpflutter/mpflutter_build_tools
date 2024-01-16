@@ -12,6 +12,7 @@ import 'package:path/path.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 import './sourcemap.server.dart';
 
+bool licenseGrant = false;
 late Directory mpflutterSrcRoot;
 
 void addNonCompatiblesPackage(String pkgName) {
@@ -22,7 +23,7 @@ void disableFeature(String featureName) {
   disableFeatures[featureName] = true;
 }
 
-void main(List<String> arguments) async {
+Future main(List<String> arguments) async {
   init();
 
   print("====== 欢迎使用 MPFlutter Build Tools ======");
@@ -32,6 +33,10 @@ void main(List<String> arguments) async {
   print("3. 禁止在未获取授权的情况下，移除 UNLICENSED 标识");
   print("4. MPFlutter Build Tools 会上传埋点信息，用于营销分析，如果你不同意该行为，应停止使用。");
   print("===========================================");
+
+  if (licenseGrant) {
+    print("提示：你已声明获得 MPFlutter 2.0 授权，角标将被移除。");
+  }
 
   if (arguments.contains("--wechat")) {
     print("[INFO] 正在构建 wechat 小程序");
@@ -174,6 +179,7 @@ class WechatBuilder {
     _addLogStack(arguments);
     _fixEnterkeyhint();
     _disableFeatures();
+    _removeLicenseTipsFlag();
     wechatOut.deleteSync();
     wechatTmp.renameSync(wechatOut.path);
   }
@@ -631,6 +637,16 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
     if (changed) {
       indexJSFile.writeAsStringSync(content);
     }
+  }
+
+  void _removeLicenseTipsFlag() {
+    final file =
+        File(join("build", "wechat_tmp", 'pages', 'index', 'index.js'));
+    var content = file.readAsStringSync();
+    content = content.replaceAll(
+        '<image style="position: absolute;right:0;top:0;width:66px;height:66px;z-index: 10000" src="{{licenseUrl}}" />',
+        '');
+    file.writeAsStringSync(content);
   }
 
   void _copyDirectory(Directory source, Directory destination) {
