@@ -640,6 +640,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
   }
 
   void _removeLicenseTipsFlag() {
+    if (!licenseGrant) return;
     final file =
         File(join("build", "wechat_tmp", 'pages', 'index', 'index.wxml'));
     var content = file.readAsStringSync();
