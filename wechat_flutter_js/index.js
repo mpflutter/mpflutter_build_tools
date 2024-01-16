@@ -5,9 +5,6 @@
 // index.ts
 // 获取应用实例
 const { FlutterHostView } = require("./flutter");
-const { FlutterMiniProgramMockInputElement } = require("./flutter_bom/input");
-
-let resumeTimer = undefined;
 
 Page({
   data: {
@@ -39,7 +36,9 @@ Page({
     await loadPlugins();
 
     setupFlutterHostView(this);
+    setupAppLifeCycleListener();
 
+    wx.mpcbExitState = this.exitState;
     wx.createSelectorQuery()
       .select("#my_canvas") // 在 WXML 中填入的 id
       .fields({ node: true, size: true })
@@ -164,15 +163,6 @@ Page({
     }
   },
 
-  onShow() {
-    wx.mpcb?.onShow?.();
-    wx.mpcbExitState = this.exitState;
-  },
-
-  onHide() {
-    wx.mpcb?.onHide?.();
-  },
-
   onShareAppMessage(detail) {
     if (!wx.mpcb.onShareAppMessage) return undefined;
     return {
@@ -222,6 +212,15 @@ function loadCanvasKitPages() {
 
 async function loadPlugins() {
   // loadPlugins
+}
+
+function setupAppLifeCycleListener() {
+  wx.onAppShow(() => {
+    wx.mpcb?.onShow?.();
+  });
+  wx.onAppHide(() => {
+    wx.mpcb?.onHide?.();
+  });
 }
 
 function setupFlutterHostView(self) {
