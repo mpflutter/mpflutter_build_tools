@@ -5,10 +5,11 @@
 // index.ts
 // 获取应用实例
 const { FlutterHostView } = require("./flutter");
+const { wxSystemInfo } = require("./system_info");
 
 Page({
   data: {
-    windowHeight: wx.getSystemInfoSync().windowHeight,
+    windowHeight: 0,
     readyToDisplay: false,
     shouldCatchBack: false,
     PVWrapper: { removed: true, style: "" },
@@ -20,6 +21,15 @@ Page({
   },
 
   async onLoad() {
+    await new Promise((resolve) => {
+      wx.getSystemInfoAsync({
+        success: (res) => {
+          Object.assign(wxSystemInfo, res);
+          resolve();
+        },
+      });
+    });
+    this.setData({ windowHeight: wxSystemInfo.windowHeight });
     if (FlutterHostView.shared.onwebglcontextrestored) {
       this.restoreCanvas();
       setupFlutterHostView(this);
@@ -250,8 +260,8 @@ function setupFlutterHostView(self) {
 }
 
 function resizeCanvas(canvas) {
-  canvas.width = canvas.width * wx.getSystemInfoSync().pixelRatio;
-  canvas.height = canvas.height * wx.getSystemInfoSync().pixelRatio;
+  canvas.width = canvas.width * wxSystemInfo.pixelRatio;
+  canvas.height = canvas.height * wxSystemInfo.pixelRatio;
   getApp()._flutter.window.requestAnimationFrame = canvas.requestAnimationFrame;
 }
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a Apache License Version 2.0 that can be
 // found in the LICENSE file.
 
+const { wxSystemInfo } = require("./system_info");
+
 function deepCompare(value1, value2) {
   if (typeof value1 !== typeof value2) {
     return false;
@@ -54,7 +56,7 @@ function deepCompare(value1, value2) {
 export class FlutterPlatformViewManager {
   constructor(FlutterHostView) {
     this.FlutterHostView = FlutterHostView;
-    this.devtools = wx.getSystemInfoSync().platform === "devtools";
+    this.devtools = wxSystemInfo.platform === "devtools";
   }
 
   onPVCB(option) {
@@ -174,7 +176,7 @@ export class FlutterPlatformViewManager {
       Object.keys(this).filter((it) => it.endsWith("_pvcb")).length > 0;
     if (hasPV) {
       if (viewOption.wrapper) {
-        const windowHeight = wx.getSystemInfoSync().windowHeight;
+        const windowHeight = wxSystemInfo.windowHeight;
         let wrapperTop = viewOption.wrapper.top / windowHeight;
         let wrapperBottom = viewOption.wrapper.bottom / windowHeight;
         let wrapper = `position: absolute;top:0px;left:0px;width:100%;height:100%;mask-image: linear-gradient(to bottom, transparent, transparent ${(

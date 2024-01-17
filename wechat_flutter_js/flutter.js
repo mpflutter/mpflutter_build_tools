@@ -5,6 +5,8 @@
 // Copyright 2023 MPFlutter Author. All rights reserved.
 // For MiniProgram polyfill code is governed by a Apache-2.0 license.
 
+const { wxSystemInfo } = require("./system_info");
+
 var _flutter = getApp()._flutter;
 
 if (!_flutter) {
@@ -179,6 +181,9 @@ globalThis.FlutterHostView = FlutterHostView;
      *                     supplies an `onEntrypointLoaded` Function as an option.
      */
     async loadEntrypoint(options) {
+      _flutter.self.safeAreaInsetTop = wxSystemInfo.safeArea.top;
+      _flutter.self.safeAreaInsetBottom =
+        wxSystemInfo.windowHeight - wxSystemInfo.safeArea.bottom;
       const { ...entrypoint } = options || {};
       // The FlutterEntrypointLoader instance could be injected as a dependency
       // (and dynamically imported from a module if not present).
@@ -266,10 +271,6 @@ globalThis.FlutterHostView = FlutterHostView;
     },
     XMLHttpRequest: require("./flutter_bom/xml-http-request").XMLHttpRequest,
   };
-  _flutter.self.safeAreaInsetTop = wx.getSystemInfoSync().safeArea.top;
-  _flutter.self.safeAreaInsetBottom =
-    wx.getSystemInfoSync().windowHeight -
-    wx.getSystemInfoSync().safeArea.bottom;
   FlutterHostView.shared.onkeyboardheightchange = (e) => {
     _flutter.self.keyboardHeightChanged(e.detail.height);
   };

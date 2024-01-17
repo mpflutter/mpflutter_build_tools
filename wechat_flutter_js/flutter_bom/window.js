@@ -2,6 +2,8 @@
 // Use of this source code is governed by a Apache-2.0 license that can be
 // found in the LICENSE file.
 
+const { wxSystemInfo } = require("../system_info");
+
 export class FlutterMiniProgramMockWindow {
   // globals
   parseFloat = parseFloat;
@@ -14,9 +16,17 @@ export class FlutterMiniProgramMockWindow {
   };
 
   // screens
-  devicePixelRatio = wx.getSystemInfoSync().pixelRatio;
-  innerWidth = wx.getSystemInfoSync().windowWidth;
-  innerHeight = wx.getSystemInfoSync().windowHeight;
+  get devicePixelRatio() {
+    return wxSystemInfo.pixelRatio;
+  }
+
+  get innerWidth() {
+    return wxSystemInfo.windowWidth;
+  }
+
+  get innerHeight() {
+    return wxSystemInfo.windowHeight;
+  }
 
   // webs
   navigator = {
