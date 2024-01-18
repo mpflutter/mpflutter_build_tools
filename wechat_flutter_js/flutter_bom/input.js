@@ -44,6 +44,8 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     );
   }
 
+  disabled = false;
+
   _value = "";
 
   get value() {
