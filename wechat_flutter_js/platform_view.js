@@ -57,6 +57,9 @@ export class FlutterPlatformViewManager {
   constructor(FlutterHostView) {
     this.FlutterHostView = FlutterHostView;
     this.devtools = wxSystemInfo.platform === "devtools";
+    setTimeout(() => {
+      this.devtools = wxSystemInfo.platform === "devtools";
+    }, 300);
   }
 
   onPVCB(option) {
