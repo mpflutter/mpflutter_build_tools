@@ -2,6 +2,8 @@
 // Use of this source code is governed by a Apache-2.0 license that can be
 // found in the LICENSE file.
 
+const { Event } = require("./event");
+
 export class FlutterMiniProgramMockElement {
   constructor() {
     this.$$clazz$$ = "Element";
@@ -56,22 +58,14 @@ export class FlutterMiniProgramMockElement {
     } else if (this.tagName === "canvas") {
       if (event === "webglcontextlost") {
         FlutterHostView.shared.onwebglcontextlost = () => {
-          const event = {
-            $$clazz$$: "Event",
-            target: this,
-            preventDefault: function () {},
-            stopPropagation: function () {},
-          };
+          const event = new Event();
+          event.target = this;
           callback(event);
         };
       } else if (event === "webglcontextrestored") {
         FlutterHostView.shared.onwebglcontextrestored = () => {
-          const event = {
-            $$clazz$$: "Event",
-            target: this,
-            preventDefault: function () {},
-            stopPropagation: function () {},
-          };
+          const event = new Event();
+          event.target = this;
           callback(event);
         };
       }

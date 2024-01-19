@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 const { Blob } = require("./blob");
+const { Event } = require("./event");
 const SUPPORT_METHOD = [
   "OPTIONS",
   "GET",
@@ -96,7 +97,7 @@ export class XMLHttpRequest {
   $$trigger(event) {
     const cb = this.eventCallbacks[event];
     if (cb) {
-      cb({});
+      cb(new Event());
     }
   }
   $_callReadyStateChange(readyState) {

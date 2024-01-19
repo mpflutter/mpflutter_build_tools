@@ -2,6 +2,8 @@
 // Use of this source code is governed by a Apache License Version 2.0 that can be
 // found in the LICENSE file.
 
+const { Event } = require("./event");
+
 export class FileReader {
   constructor() {
     this.$$clazz$$ = "FileReader";
@@ -12,12 +14,11 @@ export class FileReader {
     this.result = ab;
     setTimeout(() => {
       if (this.onload) {
-        this.onload({
-          $$clazz$$: "Event",
-          target: {
-            result: ab,
-          },
-        });
+        const event = new Event();
+        event.target = {
+          result: ab,
+        };
+        this.onload(event);
       }
     }, 10);
   }
@@ -27,12 +28,11 @@ export class FileReader {
     this.result = text;
     setTimeout(() => {
       if (this.onload) {
-        this.onload({
-          $$clazz$$: "Event",
-          target: {
-            result: text,
-          },
-        });
+        const event = new Event();
+        event.target = {
+          result: text,
+        };
+        this.onload(event);
       }
     }, 10);
   }
