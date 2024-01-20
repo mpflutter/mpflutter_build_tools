@@ -170,7 +170,7 @@ export class FlutterPlatformViewManager {
       self.setData({ [keyPath]: true });
     }
     delete this[viewOption.pvid + "_pvcb"];
-    this.updateWrapper();
+    this.updateWrapper({});
   }
 
   updateWrapper(viewOption) {
