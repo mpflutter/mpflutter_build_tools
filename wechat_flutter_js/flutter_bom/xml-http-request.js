@@ -147,7 +147,7 @@ export class XMLHttpRequest {
       this.$_callReadyStateChange(XMLHttpRequest.LOADING);
       this.$$trigger("loadstart");
       if (this.$_responseType === "blob") {
-        this.$_response = new Blob([new ArrayBuffer(0)]);
+        this.$_response = new Blob([data]);
       } else {
         this.$_response = data;
       }
@@ -201,6 +201,9 @@ export class XMLHttpRequest {
       return this.$_response;
     }
     return null;
+  }
+  get responseURL() {
+    return this.$_url;
   }
   get response() {
     return this.$_response;

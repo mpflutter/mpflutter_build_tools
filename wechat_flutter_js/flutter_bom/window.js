@@ -35,6 +35,7 @@ export class FlutterMiniProgramMockWindow {
     userAgent: "",
     vendor: "",
     language: "zh",
+    geolocation: {},
   };
   location = {
     href: "",
