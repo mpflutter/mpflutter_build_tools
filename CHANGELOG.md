@@ -1,5 +1,11 @@
 # ChangeLog
 
+## 2.1.3
+
+fix:
+- 修正 PlatformView 无法显示的问题
+- 修正 GetX 网络请求无法进行的问题
+
 ## 2.1.2
 
 fix:
