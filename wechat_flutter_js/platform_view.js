@@ -108,6 +108,8 @@ export class FlutterPlatformViewManager {
       targetElement.props = { ...viewOption.props };
       const keyPath = blockName + `.[${targetIndex}]`;
       self.setData({ [keyPath]: targetElement });
+      // wrapper
+      this.updateWrapper(viewOption);
     } else {
       // style
       const styleKeyPath = blockName + `.[${targetIndex}].style`;
