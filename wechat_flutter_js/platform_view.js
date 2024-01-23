@@ -97,7 +97,7 @@ export class FlutterPlatformViewManager {
       targetElement = { pvid: viewOption.pvid };
       targetIndex = nextIndex;
       targetElement.removed = false;
-      targetElement.style =
+      let style =
         `position: absolute;` +
         `left:${viewOption.frame.x}px;` +
         `top:${viewOption.frame.y}px;` +
@@ -105,6 +105,13 @@ export class FlutterPlatformViewManager {
         `height:${viewOption.frame.height}px;` +
         `opacity: ${viewOption.opacity};` +
         `z-index: 9999;`;
+      if (viewOption.ignorePlatformTouch === true) {
+        style += `pointer-events:none;`;
+      }
+      if (viewOption.opacity <= 0.01) {
+        style += "top: -1000px;pointer-events:none;";
+      }
+      targetElement.style = style;
       targetElement.props = { ...viewOption.props };
       const keyPath = blockName + `.[${targetIndex}]`;
       self.setData({ [keyPath]: targetElement });
@@ -120,16 +127,16 @@ export class FlutterPlatformViewManager {
         `width:${viewOption.frame.width}px;` +
         `height:${viewOption.frame.height}px;` +
         `opacity: ${viewOption.opacity};`;
-      if (targetElement.style !== style) {
-        self.setData({
-          [styleKeyPath]: style,
-        });
-      }
       if (viewOption.ignorePlatformTouch === true) {
         style += `pointer-events:none;`;
       }
       if (viewOption.opacity <= 0.01) {
-        style += "visibility:hidden;pointer-events:none;";
+        style += "top: -1000px;pointer-events:none;";
+      }
+      if (targetElement.style !== style) {
+        self.setData({
+          [styleKeyPath]: style,
+        });
       }
       // props
       if (targetElement.props) {
