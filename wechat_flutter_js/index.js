@@ -7,7 +7,7 @@
 const { FlutterHostView } = require("./flutter");
 const { wxSystemInfo } = require("./system_info");
 
-Page({
+export const main = {
   data: {
     windowHeight: 0,
     readyToDisplay: false,
@@ -206,7 +206,9 @@ Page({
       });
     }
   },
-});
+};
+
+Page(main);
 
 function loadAssetPages() {
   return new Promise((resolve) => {

@@ -6,21 +6,32 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:es_compression/brotli.dart';
-import 'package:mpflutter_build_tools/disable-features.dart';
-import 'package:mpflutter_build_tools/non-compatibles.dart';
 import 'package:path/path.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 import './sourcemap.server.dart';
 
 bool licenseGrant = false;
-late Directory mpflutterSrcRoot;
+
+late Directory _mpflutterSrcRoot;
+Map<String, bool> _disableFeatures = {};
+Map<String, List<String>> _nonCompatiblesPackages = {
+  "fluwx": [],
+  "file_picker": [],
+  "image_picker_for_web": [],
+  "flutter_inappwebview_web": [],
+};
+List<String> _shadowPages = [];
 
 void addNonCompatiblesPackage(String pkgName) {
-  nonCompatiblesPackages[pkgName] = [];
+  _nonCompatiblesPackages[pkgName] = [];
 }
 
 void disableFeature(String featureName) {
-  disableFeatures[featureName] = true;
+  _disableFeatures[featureName] = true;
+}
+
+void addShadowPage(String pageName) {
+  _shadowPages.add(pageName);
 }
 
 Future main(List<String> arguments) async {
@@ -60,7 +71,7 @@ void init() {
   final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
   (pkgConfigData["packages"] as List).forEach((it) {
     if (it['name'] == "mpflutter_build_tools") {
-      mpflutterSrcRoot =
+      _mpflutterSrcRoot =
           Directory.fromUri(Uri.parse(_fixRootUri(it['rootUri'])));
     }
   });
@@ -71,7 +82,7 @@ class WechatBuilder {
     final pkgConfig = File(join('.dart_tool', 'package_config.json'));
     final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
     (pkgConfigData["packages"] as List).forEach((it) {
-      if (nonCompatiblesPackages[it['name']] != null) {
+      if (_nonCompatiblesPackages[it['name']] != null) {
         final srcRoot =
             Directory.fromUri(Uri.parse(_fixRootUri(it['rootUri'])));
         if (File(join(srcRoot.path, "pubspec.bak.yaml")).existsSync()) {
@@ -178,14 +189,15 @@ class WechatBuilder {
     await _openDevMode(arguments);
     _addLogStack(arguments);
     _fixEnterkeyhint();
-    _disableFeatures();
+    _makeDisableFeatures();
+    _makeShadowPages();
     _removeLicenseTipsFlag();
     wechatOut.deleteSync();
     wechatTmp.renameSync(wechatOut.path);
   }
 
   void _copyCanvaskitWasm(List<String> arguments) {
-    final canvaskitSrc = Directory(join(mpflutterSrcRoot.path, 'canvaskit'));
+    final canvaskitSrc = Directory(join(_mpflutterSrcRoot.path, 'canvaskit'));
     final canvaskitOut =
         Directory(join('build', 'wechat_tmp', 'canvaskit', 'pages'));
     canvaskitOut.createSync(recursive: true);
@@ -194,7 +206,7 @@ class WechatBuilder {
 
   void _copyFlutterSkeleton(List<String> arguments) {
     final wechatFlutterJSSrc =
-        Directory(join(mpflutterSrcRoot.path, 'wechat_flutter_js'));
+        Directory(join(_mpflutterSrcRoot.path, 'wechat_flutter_js'));
     final wechatFlutterJSOut =
         Directory(join('build', 'wechat_tmp', 'pages', 'index'));
     _copyDirectory(wechatFlutterJSSrc, wechatFlutterJSOut);
@@ -614,28 +626,57 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
     }
   }
 
-  void _disableFeatures() {
+  void _makeDisableFeatures() {
     final indexJSFile =
         File(join("build", 'wechat_tmp', 'pages', 'index', 'index.js'));
     var changed = false;
     var content = indexJSFile.readAsStringSync();
-    if (disableFeatures["wechat_share_app_message"] == true) {
+    if (_disableFeatures["wechat_share_app_message"] == true) {
       changed = true;
       content = content.replaceAll(
           "onShareAppMessage(detail)", "_onShareAppMessage(detail)");
     }
-    if (disableFeatures["wechat_share_timeline"] == true) {
+    if (_disableFeatures["wechat_share_timeline"] == true) {
       changed = true;
       content = content.replaceAll(
           "onShareTimeline(detail)", "_onShareTimeline(detail)");
     }
-    if (disableFeatures["wechat_add_to_favorites"] == true) {
+    if (_disableFeatures["wechat_add_to_favorites"] == true) {
       changed = true;
       content = content.replaceAll(
           "onAddToFavorites(detail)", "_onAddToFavorites(detail)");
     }
     if (changed) {
       indexJSFile.writeAsStringSync(content);
+    }
+  }
+
+  void _makeShadowPages() {
+    _shadowPages.forEach((shadowPage) {
+      File(
+        join("build", 'wechat_tmp', 'pages', 'index', 'index.json'),
+      ).copySync(
+        join("build", 'wechat_tmp', 'pages', 'index', '$shadowPage.json'),
+      );
+      File(join("build", 'wechat_tmp', 'pages', 'index', '$shadowPage.wxml'))
+          .writeAsStringSync(
+        '<include src="index.wxml"/>',
+      );
+      File(join("build", 'wechat_tmp', 'pages', 'index', '$shadowPage.js'))
+          .writeAsStringSync(
+        "Page(require('./index').main)",
+      );
+    });
+    if (_shadowPages.length > 0) {
+      final appJSONData = json.decode(
+          File(join('build', 'wechat_tmp', 'app.json')).readAsStringSync());
+      final appJSONPages = appJSONData['pages'] as List<dynamic>;
+      _shadowPages.forEach((element) {
+        appJSONPages.add('pages/index/$element');
+      });
+      appJSONData["pages"] = appJSONPages;
+      File(join('build', 'wechat_tmp', 'app.json'))
+          .writeAsStringSync(json.encode(appJSONData));
     }
   }
 
