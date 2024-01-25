@@ -181,9 +181,15 @@ globalThis.FlutterHostView = FlutterHostView;
      *                     supplies an `onEntrypointLoaded` Function as an option.
      */
     async loadEntrypoint(options) {
-      _flutter.self.safeAreaInsetTop = wxSystemInfo.safeArea.top;
-      _flutter.self.safeAreaInsetBottom =
-        wxSystemInfo.windowHeight - wxSystemInfo.safeArea.bottom;
+      if (wxSystemInfo.safeArea) {
+        _flutter.self.safeAreaInsetTop = Math.max(wxSystemInfo.safeArea.top, wxSystemInfo.statusBarHeight);
+        _flutter.self.safeAreaInsetBottom =
+          wxSystemInfo.windowHeight - wxSystemInfo.safeArea.bottom;
+      }
+      else {
+        _flutter.self.safeAreaInsetTop = 0;
+        _flutter.self.safeAreaInsetBottom = 0;
+      }
       const { ...entrypoint } = options || {};
       // The FlutterEntrypointLoader instance could be injected as a dependency
       // (and dynamically imported from a module if not present).
