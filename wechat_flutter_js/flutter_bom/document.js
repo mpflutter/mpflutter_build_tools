@@ -2,9 +2,7 @@
 // Use of this source code is governed by a Apache-2.0 license that can be
 // found in the LICENSE file.
 
-const {
-  GLVersion
-} = require("../canvaskit");
+const GLVersion = 2;
 
 export class FlutterMiniProgramMockDocument {
   addEventListener(event, callback) {}
