@@ -174,24 +174,51 @@ export const main = {
   },
 
   onShareAppMessage(detail) {
-    if (!wx.mpcb.onShareAppMessage) return undefined;
-    return {
-      ...wx.mpcb.onShareAppMessage(detail),
-    };
+    if (wx.mpcb.onShareAppMessage) {
+      return {
+        ...wx.mpcb.onShareAppMessage(detail),
+      };
+    } else if (wx.mpcb.onShareAppMessageAsync) {
+      return {
+        promise: new Promise((resolve) => {
+          wx.mpcb.onShareAppMessageAsync(detail, (result) => {
+            resolve(result);
+          });
+        }),
+      };
+    }
   },
 
   onShareTimeline(detail) {
-    if (!wx.mpcb.onShareTimeline) return undefined;
-    return {
-      ...wx.mpcb.onShareTimeline(detail),
-    };
+    if (wx.mpcb.onShareTimeline) {
+      return {
+        ...wx.mpcb.onShareTimeline(detail),
+      };
+    } else if (wx.mpcb.onShareTimelineAsync) {
+      return {
+        promise: new Promise((resolve) => {
+          wx.mpcb.onShareTimelineAsync(detail, (result) => {
+            resolve(result);
+          });
+        }),
+      };
+    }
   },
 
   onAddToFavorites(detail) {
-    if (!wx.mpcb.onAddToFavorites) return undefined;
-    return {
-      ...wx.mpcb.onAddToFavorites(detail),
-    };
+    if (wx.mpcb.onAddToFavorites) {
+      return {
+        ...wx.mpcb.onAddToFavorites(detail),
+      };
+    } else if (wx.mpcb.onAddToFavoritesAsync) {
+      return {
+        promise: new Promise((resolve) => {
+          wx.mpcb.onAddToFavoritesAsync(detail, (result) => {
+            resolve(result);
+          });
+        }),
+      };
+    }
   },
 
   onPVCB(e) {
