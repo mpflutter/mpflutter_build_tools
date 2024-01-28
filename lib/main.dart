@@ -64,6 +64,21 @@ Future main(List<String> arguments) async {
       print("[ERROR] 构建失败，失败信息： $e");
     }
   }
+  if (arguments.contains("--douyin")) {
+    print("[INFO] 正在构建 douyin 小程序");
+    final builder = DouyinBuilder();
+    try {
+      builder.disableNonCompatiblesPackages(arguments);
+      await builder.buildFlutterWeb(arguments);
+      await builder.buildFlutterDouyin(arguments);
+      print("[INFO] 构建成功，产物在 build/douyin 目录，使用抖音开发者工具导入预览、上传、发布。");
+      if (arguments.contains('--debug')) {
+        runSourceMapServer();
+      }
+    } catch (e) {
+      print("[ERROR] 构建失败，失败信息： $e");
+    }
+  }
 }
 
 void init() {
@@ -77,7 +92,7 @@ void init() {
   });
 }
 
-class WechatBuilder {
+class Builder {
   void disableNonCompatiblesPackages(List<String> arguments) {
     final pkgConfig = File(join('.dart_tool', 'package_config.json'));
     final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
@@ -127,6 +142,7 @@ class WechatBuilder {
           ...([...arguments]..removeWhere((element) =>
               element == "--devmode" ||
               element == "--wechat" ||
+              element == "--douyin" ||
               element == "--debug" ||
               element == '--printstack')),
           ...[
@@ -161,6 +177,25 @@ class WechatBuilder {
     return completer.future;
   }
 
+  void _copyDirectory(Directory source, Directory destination) {
+    // 获取源文件夹中的所有内容
+    source.listSync().forEach((entity) {
+      if (entity is File) {
+        // 如果是文件，则复制到目标文件夹中
+        final newPath = join(destination.path, basename(entity.path));
+        entity.copySync(newPath);
+      } else if (entity is Directory) {
+        // 如果是文件夹，则递归复制子文件夹
+        final newDirectory =
+            Directory(join(destination.path, basename(entity.path)));
+        newDirectory.createSync();
+        _copyDirectory(entity, newDirectory);
+      }
+    });
+  }
+}
+
+class WechatBuilder extends Builder {
   Future buildFlutterWechat(List<String> arguments) async {
     print("[INFO] 正在构建 wechat 产物");
     // create wechat dir
@@ -320,7 +355,7 @@ $subPkgAsset
         .listSync()
         .where((element) => element.path.endsWith('.part.js'))
         .forEach((element) {
-      if (currentPkgSize + element.statSync().size > 2 * 1000 * 1000) {
+      if (currentPkgSize + element.statSync().size > 1.9 * 1000 * 1000) {
         subPkgs.add(currentPkgFiles);
         currentPkgFiles = [];
         currentPkgSize = 0;
@@ -690,22 +725,538 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
         '');
     file.writeAsStringSync(content);
   }
+}
 
-  void _copyDirectory(Directory source, Directory destination) {
-    // 获取源文件夹中的所有内容
-    source.listSync().forEach((entity) {
-      if (entity is File) {
-        // 如果是文件，则复制到目标文件夹中
-        final newPath = join(destination.path, basename(entity.path));
-        entity.copySync(newPath);
-      } else if (entity is Directory) {
-        // 如果是文件夹，则递归复制子文件夹
-        final newDirectory =
-            Directory(join(destination.path, basename(entity.path)));
-        newDirectory.createSync();
-        _copyDirectory(entity, newDirectory);
+class DouyinBuilder extends Builder {
+  Future buildFlutterDouyin(List<String> arguments) async {
+    print("[INFO] 正在构建 douyin 产物");
+    // create douyin dir
+    final douyinOut = Directory(join('build', 'douyin'));
+    if (douyinOut.existsSync()) {
+      douyinOut.deleteSync(recursive: true);
+    }
+    final douyinTmp = Directory(join('build', 'douyin_tmp'));
+    if (douyinTmp.existsSync()) {
+      douyinTmp.deleteSync(recursive: true);
+    }
+    // copy src dir to build
+    final douyinSrc = Directory('douyin');
+    if (!douyinSrc.existsSync()) {
+      throw '工程目录下不存在 douyin 文件夹，请先按照教程初始化 douyin 工程。';
+    }
+    douyinTmp.createSync();
+    douyinOut.createSync();
+    _copyDirectory(douyinSrc, douyinTmp);
+    _copyCanvaskitWasm(arguments);
+    _copyFlutterSkeleton(arguments);
+    _copyAssets(arguments);
+    _compressAssets(arguments);
+    _copyDartJS(arguments);
+    _copyPubPackagesToDouyin(arguments);
+    await _openDevMode(arguments);
+    _addLogStack(arguments);
+    _fixEnterkeyhint();
+    _makeDisableFeatures();
+    _makeShadowPages();
+    _removeLicenseTipsFlag();
+    douyinOut.deleteSync();
+    douyinTmp.renameSync(douyinOut.path);
+  }
+
+  void _copyCanvaskitWasm(List<String> arguments) {
+    final canvaskitSrc = Directory(join(_mpflutterSrcRoot.path, 'canvaskit'));
+    final canvaskitOut =
+        Directory(join('build', 'douyin_tmp', 'canvaskit', 'pages'));
+    canvaskitOut.createSync(recursive: true);
+    _copyDirectory(canvaskitSrc, canvaskitOut);
+  }
+
+  void _copyFlutterSkeleton(List<String> arguments) {
+    final douyinFlutterJSSrc =
+        Directory(join(_mpflutterSrcRoot.path, 'douyin_flutter_js'));
+    final douyinFlutterJSOut =
+        Directory(join('build', 'douyin_tmp', 'pages', 'index'));
+    _copyDirectory(douyinFlutterJSSrc, douyinFlutterJSOut);
+  }
+
+  void _copyAssets(List<String> arguments) {
+    final assetsSrc = Directory(join('build', 'web', 'assets'));
+    File(join(assetsSrc.path, 'NOTICES')).deleteSync();
+
+    List<List<String>> subPkgs = [];
+    List<String> currentPkgFiles = [];
+    var currentPkgSize = 0;
+    final firstly = ["Manifest", "fonts"];
+    final files =
+        Directory(join('build', 'web', 'assets')).listSync(recursive: true);
+    files.sort((a, b) {
+      for (var i = 0; i < firstly.length; i++) {
+        if (a.path.contains(firstly[i]) && !b.path.contains(firstly[i])) {
+          return -1;
+        } else if (b.path.contains(firstly[i]) &&
+            !a.path.contains(firstly[i])) {
+          return 1;
+        } else if (b.path.contains(firstly[i]) && a.path.contains(firstly[i])) {
+          return -1;
+        }
+      }
+      return 1;
+    });
+    files.forEach((element) {
+      if (element.statSync().type == FileSystemEntityType.directory) return;
+      if (element.path.endsWith(".DS_Store")) return;
+      if (element.path.contains('/packages/window_manager/')) return;
+      if (currentPkgSize + element.statSync().size > 2.0 * 1000 * 1000) {
+        subPkgs.add(currentPkgFiles);
+        currentPkgFiles = [];
+        currentPkgSize = 0;
+      }
+      currentPkgFiles.add(element.path);
+      currentPkgSize += element.statSync().size;
+    });
+    if (currentPkgFiles.isNotEmpty) {
+      subPkgs.add(currentPkgFiles);
+    }
+
+    subPkgs.asMap().forEach((key, value) {
+      final keyId = key == 0 ? "" : key.toString();
+      final pkgDirRoot = join('build', 'douyin_tmp', 'assets' + keyId);
+      Directory(pkgDirRoot).createSync();
+      Directory(join(pkgDirRoot, 'pages')).createSync();
+      File(join(pkgDirRoot, 'pages', 'index.js')).writeAsStringSync('Page({})');
+      File(join(pkgDirRoot, 'pages', 'index.json')).writeAsStringSync('{}');
+      File(join(pkgDirRoot, 'pages', 'index.ttml'))
+          .writeAsStringSync('<view></view>');
+      value.forEach((element) {
+        final srcOut = element.replaceFirst(join("build", "web", "assets"),
+            join("build", "douyin_tmp", "assets${keyId}"));
+        Directory(srcOut).parent.createSync(recursive: true);
+        File(element).copySync(srcOut);
+      });
+    });
+
+    var subPkgAsset = '';
+    subPkgs.asMap().forEach((key, value) {
+      final keyId = key == 0 ? "" : key.toString();
+      value.forEach((element) {
+        if (element.contains("\\")) {
+          subPkgAsset +=
+              '"${element.replaceAll("\\", "/").replaceFirst("build/web/", "/")}": "${element.replaceAll("\\", "/").replaceFirst("build/web/assets/", "/assets${keyId}/")}",\n';
+        } else {
+          subPkgAsset +=
+              '"${element.replaceFirst("build/web/", "/")}": "${element.replaceFirst("build/web/assets/", "/assets${keyId}/")}",\n';
+        }
+      });
+    });
+    File(join('build', 'douyin_tmp', 'pages', 'index', 'assets.js'))
+        .writeAsStringSync('''
+export default {
+$subPkgAsset
+}
+''');
+
+    final appJSONData = json.decode(
+        File(join('build', 'douyin_tmp', 'app.json')).readAsStringSync());
+    final appJSONSubpackages = appJSONData["subpackages"] ??
+        [
+          {
+            "name": "canvaskit",
+            "root": "canvaskit",
+            "pages": ["pages/index"]
+          },
+        ];
+    subPkgs.asMap().forEach((key, value) {
+      final keyId = key == 0 ? "" : key.toString();
+      appJSONSubpackages.add({
+        "name": "assets" + keyId.toString(),
+        "root": "assets" + keyId.toString(),
+        "pages": ["pages/index"]
+      });
+    });
+    appJSONData["subpackages"] = appJSONSubpackages;
+    File(join('build', 'douyin_tmp', 'app.json'))
+        .writeAsStringSync(json.encode(appJSONData));
+  }
+
+  void _copyDartJS(List<String> arguments) {
+    List<List<String>> subPkgs = [];
+    List<String> currentPkgFiles = [];
+    var currentPkgSize = 0;
+    Directory(join('build', 'web'))
+        .listSync()
+        .where((element) => element.path.endsWith('.part.js'))
+        .forEach((element) {
+      if (currentPkgSize + element.statSync().size > 2 * 1000 * 1000) {
+        subPkgs.add(currentPkgFiles);
+        currentPkgFiles = [];
+        currentPkgSize = 0;
+      }
+      currentPkgFiles.add(element.path.split(separator).last);
+      currentPkgSize += element.statSync().size;
+    });
+    if (currentPkgFiles.isNotEmpty) {
+      subPkgs.add(currentPkgFiles);
+    }
+    File(join('build', 'web', 'main.dart.js')).copySync(
+        join('build', 'douyin_tmp', 'pages', 'index', 'main.dart.js'));
+    if (File(join('build', 'web', 'main.dart.js.map')).existsSync()) {
+      File(join('build', 'web', 'main.dart.js.map')).copySync(
+          join('build', 'douyin_tmp', 'pages', 'index', 'main.dart.js.map'));
+      String fileContent = File(
+              join('build', 'douyin_tmp', 'pages', 'index', 'main.dart.js.map'))
+          .readAsStringSync();
+      fileContent = _fixSourceMap(fileContent);
+      File(join('build', 'douyin_tmp', 'pages', 'index', 'main.dart.js.map'))
+          .writeAsStringSync(fileContent);
+    }
+    subPkgs.asMap().forEach((key, value) {
+      final pkgDirRoot = join('build', 'douyin_tmp', 'pkg' + key.toString());
+      Directory(pkgDirRoot).createSync();
+      Directory(join(pkgDirRoot, 'pages')).createSync();
+      File(join(pkgDirRoot, 'pages', 'index.js')).writeAsStringSync('Page({})');
+      File(join(pkgDirRoot, 'pages', 'index.json')).writeAsStringSync('{}');
+      File(join(pkgDirRoot, 'pages', 'index.ttml'))
+          .writeAsStringSync('<view></view>');
+      value.forEach((element) {
+        File(join('build', 'web', element))
+            .copySync(join(pkgDirRoot, 'pages', element));
+        if (File(join('build', 'web', element + ".map")).existsSync()) {
+          File(join('build', 'web', element + ".map"))
+              .copySync(join(pkgDirRoot, 'pages', element + ".map"));
+          String fileContent = File(join(pkgDirRoot, 'pages', element + ".map"))
+              .readAsStringSync();
+          fileContent = fileContent.replaceAll(
+              '"sourceRoot": ""', '"sourceRoot": "http://localhost:10706/"');
+          File(join(pkgDirRoot, 'pages', element + ".map"))
+              .writeAsStringSync(fileContent);
+        }
+      });
+    });
+    var subPkgJS = '';
+    subPkgs.asMap().forEach((key, value) {
+      value.forEach((element) {
+        subPkgJS += '"/$element": "pkg$key",\n';
+      });
+    });
+    File(join('build', 'douyin_tmp', 'pages', 'index', 'pkgs.js'))
+        .writeAsStringSync('''
+export default {
+$subPkgJS
+}
+''');
+    final appJSONData = json.decode(
+        File(join('build', 'douyin_tmp', 'app.json')).readAsStringSync());
+    final appJSONSubpackages = appJSONData["subpackages"] ??
+        [
+          {
+            "name": "canvaskit",
+            "root": "canvaskit",
+            "pages": ["pages/index"]
+          },
+          {
+            "name": "assets",
+            "root": "assets",
+            "pages": ["pages/index"]
+          }
+        ];
+    subPkgs.asMap().forEach((key, value) {
+      appJSONSubpackages.add({
+        "name": "pkg" + key.toString(),
+        "root": "pkg" + key.toString(),
+        "pages": ["pages/index"]
+      });
+    });
+    appJSONData["subpackages"] = appJSONSubpackages;
+    File(join('build', 'douyin_tmp', 'app.json'))
+        .writeAsStringSync(json.encode(appJSONData));
+    // 添加环境变量到 js 头部
+    _insertJSVars(
+        join('build', 'douyin_tmp', 'pages', 'index', 'main.dart.js'));
+    subPkgs.asMap().forEach((key, value) {
+      value.forEach((element) {
+        _insertJSVars(join(
+            'build', 'douyin_tmp', 'pkg' + key.toString(), 'pages', element));
+      });
+    });
+    // Ignore ES6 -> ES5
+    final ignoreList = ["pages/index/main.dart.js"];
+    subPkgs.asMap().forEach((key, value) {
+      value.forEach((element) {
+        ignoreList.add("pkg" + key.toString() + "/pages/" + element);
+      });
+    });
+    final projectConfigJSONData = json.decode(
+        File(join('build', 'douyin_tmp', 'project.config.json'))
+            .readAsStringSync());
+    final originIgnoreList =
+        projectConfigJSONData["setting"]["babelSetting"]["ignore"] as List;
+    originIgnoreList.addAll(ignoreList);
+    File(join('build', 'douyin_tmp', 'project.config.json')).writeAsStringSync(
+      JsonEncoder.withIndent("  ").convert(projectConfigJSONData),
+    );
+  }
+
+  void _copyPubPackagesToDouyin(List<String> arguments) {
+    Map<String, Directory> maybeDouyinPkgs = {};
+    final pkgConfig = File(join('.dart_tool', 'package_config.json'));
+    final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
+    (pkgConfigData["packages"] as List).forEach((it) {
+      final name = it['name'];
+      if (name is String && name.startsWith('mpflutter_')) {
+        final rootUri = _fixRootUri(it['rootUri']);
+        if (rootUri.isEmpty) return;
+        if (File(
+          join(Directory.fromUri(Uri.parse(rootUri)).path, 'douyin', 'main.js'),
+        ).existsSync()) {
+          maybeDouyinPkgs[name] = Directory.fromUri(Uri.parse(rootUri));
+        }
       }
     });
+    if (maybeDouyinPkgs.length > 0) {
+      print("发现 ${maybeDouyinPkgs.length} 个 MPFlutter 抖音插件，它们将被添加到产物中。");
+    }
+    maybeDouyinPkgs.forEach((name, dir) {
+      _copyPubPackageToDouyin(name, dir);
+    });
+    // rewrite the app.json of subPackages
+    final appJSONData = json.decode(
+        File(join('build', 'douyin_tmp', 'app.json')).readAsStringSync());
+    final appJSONSubpackages = appJSONData['subpackages'] as List<dynamic>;
+    maybeDouyinPkgs.forEach((name, dir) {
+      appJSONSubpackages.add({
+        "name": name,
+        "root": name,
+        "pages": ["pages/index"]
+      });
+    });
+    appJSONData["subpackages"] = appJSONSubpackages;
+    File(join('build', 'douyin_tmp', 'app.json'))
+        .writeAsStringSync(json.encode(appJSONData));
+    // load main.js in index.js
+    final indexJSFile =
+        File(join("build", 'douyin_tmp', 'pages', 'index', 'index.js'));
+    var indexJS = indexJSFile.readAsStringSync();
+    indexJS = indexJS.replaceAll("// loadPlugins", """
+${maybeDouyinPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve) => {require("../../$key/pages/main", resolve);});')).values.join("\n")}
+""");
+    indexJSFile.writeAsStringSync(indexJS);
+    // add main.wxml to index.wxml
+    final indexWxmlFile =
+        File(join("build", 'douyin_tmp', 'pages', 'index', 'index.ttml'));
+    var indexWxmlContent = indexWxmlFile.readAsStringSync();
+    indexWxmlContent = indexWxmlContent.replaceAll(
+      "<!--PlatformViewBlocks-->",
+      maybeDouyinPkgs
+          .map((key, value) => MapEntry(key,
+              File(join(value.path, 'douyin', 'main.ttml')).readAsStringSync()))
+          .values
+          .join("\n"),
+    );
+    indexWxmlFile.writeAsStringSync(indexWxmlContent);
+  }
+
+  void _copyPubPackageToDouyin(String pkgName, Directory pkgSrc) {
+    final pkgOut = Directory(join('build', 'douyin_tmp', pkgName, 'pages'));
+    pkgOut.createSync(recursive: true);
+    File(join(pkgOut.path, 'index.js')).writeAsStringSync('Page({})');
+    File(join(pkgOut.path, 'index.json')).writeAsStringSync('{}');
+    File(join(pkgOut.path, 'index.ttml')).writeAsStringSync('<view></view>');
+    _copyDirectory(
+      Directory(join(pkgSrc.path, 'douyin')),
+      Directory(pkgOut.path),
+    );
+  }
+
+  Future<void> _openDevMode(List<String> arguments) async {
+    if (arguments.contains('--devmode')) {
+      // add ip to mpjs
+      final myIP = await _getIP();
+      if (myIP == null) {
+        print(
+          "[WARN] 无法获取本地局域网 IP 地址，请自行在 build/douyin/pages/index/mpjs.js 中修改 127.0.0.1 为你的 IP。",
+        );
+        return;
+      }
+      print(
+        "[INFO] 已获取到你的局域网 IP：$myIP",
+      );
+      print(
+        "[INFO] 已替换 build/douyin/pages/index/mpjs.js 文件中的 IP 地址",
+      );
+      var content =
+          File(join('build', 'douyin_tmp', 'pages', 'index', 'mpjs.js'))
+              .readAsStringSync();
+      content = content.replaceAll("127.0.0.1", myIP);
+      File(join('build', 'douyin_tmp', 'pages', 'index', 'mpjs.js'))
+          .writeAsStringSync(content);
+      if (File(join('macos', 'Runner', 'DebugProfile.entitlements'))
+          .existsSync()) {
+        File(join('macos', 'Runner', 'DebugProfile.entitlements'))
+            .writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+	<key>com.apple.security.files.downloads.read-write</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<key>com.apple.security.network.server</key>
+	<true/>
+</dict>
+</plist>
+''');
+      }
+      return;
+    }
+    File(join('build', 'douyin_tmp', 'pages', 'index', 'mpjs.js'))
+        .writeAsStringSync("");
+  }
+
+  void _insertJSVars(String filePath) {
+    String content = File(filePath).readAsStringSync();
+    content = content.replaceAll('return !!J.getInterceptor\$(object)[tag];',
+        'if (object.\$\$clazz\$\$) {return true;}return !!J.getInterceptor\$(object)[tag];');
+    content = content.replaceAll(
+        'new self.MutationObserver', 'new globalThis.MutationObserver');
+    File(filePath).writeAsStringSync(
+        '''var globalThis = global;var self = getApp()._flutter.self;var XMLHttpRequest = self.XMLHttpRequest;var \$__dart_deferred_initializers__ = self.\$__dart_deferred_initializers__;var document = self.document;var window = self.window;''' +
+            content);
+  }
+
+  void _compressAssets(List<String> arguments) {
+    for (var i = 0; i < 100; i++) {
+      final keyId = i == 0 ? "" : i.toString();
+      final dir = Directory(join('build', 'douyin_tmp', 'assets${keyId}'));
+      if (dir.existsSync()) {
+        dir.listSync(recursive: true).forEach((element) {
+          if (element.statSync().type == FileSystemEntityType.directory) return;
+          if (element.path.endsWith('index.js') ||
+              element.path.endsWith('index.json') ||
+              element.path.endsWith('index.ttml')) return;
+          File(element.path)
+              .renameSync(element.path + ".ab.png"); // use .ab.png
+          // try {
+          //   final codec = BrotliCodec(level: BrotliOption.maxLevel);
+          //   final encoded = codec.encode(
+          //     File(element.path).readAsBytesSync().toList(),
+          //   );
+          //   File(element.path + ".br").writeAsBytesSync(encoded);
+          //   element.deleteSync();
+          // } catch (e) {
+          //   // print(
+          //   //     "[INFO] 内置 brotli 压缩 ${element.path} 失败，回退至 native command 执行。");
+          //   Process.runSync(
+          //     'brotli',
+          //     [element.path, '-o', element.path + ".br"],
+          //     runInShell: true,
+          //   );
+          //   if (!File(element.path + ".br").existsSync()) {
+          //     throw 'brotli 执行失败，请检查 brotli 是否正确安装。\n参考文档：https://mpflutter.feishu.cn/wiki/HsMzwcGKNioPlAkh9pPc8NfznIf';
+          //   }
+          //   element.deleteSync();
+          // }
+        });
+      }
+    }
+  }
+
+  void _addLogStack(List<String> arguments) {
+    if (!arguments.contains('--debug')) {
+      return;
+    }
+    if (!arguments.contains('--printstack')) {
+      return;
+    }
+    final mainDartJSFile =
+        File(join("build", 'douyin_tmp', 'pages', 'index', 'main.dart.js'));
+    var content = mainDartJSFile.readAsStringSync();
+    content = content.replaceAll("console.log(string);",
+        'const error = new Error();console.log(string);console.info("=== 这是本次 Log 堆栈信息（不是错误） ===", error);');
+    content = content.replaceAll(
+        "return A.initializeExceptionWrapper(new Error(), ex);",
+        "console.error(ex, new Error()); return ex;");
+    mainDartJSFile.writeAsStringSync(content);
+  }
+
+  void _fixEnterkeyhint() {
+    final mainDartJSFile =
+        File(join("build", 'douyin_tmp', 'pages', 'index', 'main.dart.js'));
+    var content = mainDartJSFile.readAsStringSync();
+    if (content.contains("if(s){s=this.gjH()")) {
+      content =
+          content.replaceAll("if(s){s=this.gjH()", "if(true){s=this.gjH()");
+      mainDartJSFile.writeAsStringSync(content);
+    }
+  }
+
+  void _makeDisableFeatures() {
+    final indexJSFile =
+        File(join("build", 'douyin_tmp', 'pages', 'index', 'index.js'));
+    var changed = false;
+    var content = indexJSFile.readAsStringSync();
+    if (_disableFeatures["douyin_share_app_message"] == true) {
+      changed = true;
+      content = content.replaceAll(
+          "onShareAppMessage(detail)", "_onShareAppMessage(detail)");
+    }
+    if (_disableFeatures["douyin_share_timeline"] == true) {
+      changed = true;
+      content = content.replaceAll(
+          "onShareTimeline(detail)", "_onShareTimeline(detail)");
+    }
+    if (_disableFeatures["douyin_add_to_favorites"] == true) {
+      changed = true;
+      content = content.replaceAll(
+          "onAddToFavorites(detail)", "_onAddToFavorites(detail)");
+    }
+    if (changed) {
+      indexJSFile.writeAsStringSync(content);
+    }
+  }
+
+  void _makeShadowPages() {
+    _shadowPages.forEach((shadowPage) {
+      File(
+        join("build", 'douyin_tmp', 'pages', 'index', 'index.json'),
+      ).copySync(
+        join("build", 'douyin_tmp', 'pages', 'index', '$shadowPage.json'),
+      );
+      File(join("build", 'douyin_tmp', 'pages', 'index', '$shadowPage.ttml'))
+          .writeAsStringSync(
+        '<include src="index.ttml"/>',
+      );
+      File(join("build", 'douyin_tmp', 'pages', 'index', '$shadowPage.js'))
+          .writeAsStringSync(
+        "Page(require('./index').main)",
+      );
+    });
+    if (_shadowPages.length > 0) {
+      final appJSONData = json.decode(
+          File(join('build', 'douyin_tmp', 'app.json')).readAsStringSync());
+      final appJSONPages = appJSONData['pages'] as List<dynamic>;
+      _shadowPages.forEach((element) {
+        appJSONPages.add('pages/index/$element');
+      });
+      appJSONData["pages"] = appJSONPages;
+      File(join('build', 'douyin_tmp', 'app.json'))
+          .writeAsStringSync(json.encode(appJSONData));
+    }
+  }
+
+  void _removeLicenseTipsFlag() {
+    if (!licenseGrant) return;
+    final file =
+        File(join("build", "douyin_tmp", 'pages', 'index', 'index.ttml'));
+    var content = file.readAsStringSync();
+    content = content.replaceAll(
+        '<image style="position: absolute;right:0;top:0;width:66px;height:66px;z-index: 10000" src="{{licenseUrl}}" />',
+        '');
+    file.writeAsStringSync(content);
   }
 }
 

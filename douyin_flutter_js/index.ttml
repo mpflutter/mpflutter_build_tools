@@ -1,0 +1,18 @@
+<!--index.wxml-->
+<view style="height: 100%;display: flex;overflow: hidden;">
+  <canvas canvas-id="my_canvas" key="my_canvas" type="webgl" id="my_canvas" style="width: 100vw; height: {{windowHeight}}px; background-color: white;" catchtouchstart="ontouchstart" catchtouchmove="ontouchmove" catchtouchend="ontouchend" catchtouchcancel="ontouchcancel" />
+
+  <block wx:for="{{MPFlutter_Wechat_Input_Block}}" wx:key="pvid">
+    <input wx:if="{{!item.removed}}" key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" value="{{item.props.value}}" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="false" confirm-hold="false" hold-keyboard="true" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange"></input>
+  </block>
+  <block wx:for="{{MPFlutter_Wechat_TextArea_Block}}" wx:key="pvid">
+    <textarea wx:if="{{!item.removed}}" key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" value="{{item.props.value}}" show-confirm-bar="false" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="false" confirm-hold="false" hold-keyboard="true" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange" />
+  </block>
+
+  <view wx:if="{{!PVWrapper.removed}}" style="{{PVWrapper.style}}z-index:9999;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2">
+    <!--PlatformViewBlocks-->
+  </view>
+
+  <image style="position: absolute;right:0;top:0;width:66px;height:66px;z-index: 10000" src="{{licenseUrl}}" />
+  <include src="splash.ttml"/>
+</view>
