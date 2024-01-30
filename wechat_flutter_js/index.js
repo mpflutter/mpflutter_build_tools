@@ -101,6 +101,9 @@ export const main = {
   ontouchend() {
     if (this.data.shouldCatchBack) return;
     FlutterHostView.shared.touching = false;
+    let moveEvent = {...arguments[0]};
+    moveEvent.type = "touchmove"
+    callFlutterTouchEvent("ontouchmove", [moveEvent]);
     callFlutterTouchEvent("ontouchend", arguments);
   },
 
@@ -126,6 +129,9 @@ export const main = {
     if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = false;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
+    let moveEvent = {...arguments[0]};
+    moveEvent.type = "touchmove"
+    callFlutterTouchEvent("ontouchmove", [moveEvent]);
     callFlutterTouchEvent("ontouchend", arguments);
   },
 
