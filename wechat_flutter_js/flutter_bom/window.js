@@ -276,8 +276,10 @@ export class FlutterMiniProgramMockWindow {
           node: true,
           size: true,
         })
-        .exec((res) => {
-          const { CanvasKitInit, GLVersion } = require("../../../canvaskit/pages/canvaskit");
+        .exec(async (res) => {
+          const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
+            require("../../../canvaskit/pages/canvaskit", resolve);
+          });
           const _flutter = getApp()._flutter;
           // Canvas 对象
           let canvas = res[0].node;
