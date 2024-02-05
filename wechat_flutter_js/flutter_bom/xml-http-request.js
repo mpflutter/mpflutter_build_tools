@@ -298,6 +298,35 @@ export class XMLHttpRequest {
       img.src = this.$_url;
       return;
     }
+    if (
+      this.$_url.indexOf("wxfile://") === 0 ||
+      this.$_url.indexOf("http://tmp/") === 0
+    ) {
+      // weixin local file
+      const fs = wx.getFileSystemManager();
+      this.$$trigger("loadstart");
+      fs.readFile({
+        filePath: this.$_url,
+        success: (res) => {
+          this.$_status = 200;
+          this.$_resHeader = {};
+          this.$_callReadyStateChange(XMLHttpRequest.HEADERS_RECEIVED);
+          this.$_callReadyStateChange(XMLHttpRequest.LOADING);
+          this.$_response = res.data;
+          this.$$trigger("loadend");
+          setTimeout(() => {
+            this.$_callReadyStateChange(XMLHttpRequest.DONE);
+            this.$$trigger("load");
+          }, 50);
+        },
+        fail: (err) => {
+          this.$_status = 0;
+          this.$_statusText = "local file load failed";
+          this.$$trigger("error");
+        },
+      });
+      return;
+    }
     if (this.$_readyState !== XMLHttpRequest.OPENED) return;
     if (data instanceof Uint8Array) {
       data = data.buffer;
