@@ -280,6 +280,9 @@ export class FlutterMiniProgramMockWindow {
           const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
             require("../../../canvaskit/pages/canvaskit", resolve);
           });
+          const { MiniTex } = await new Promise((resolve) => {
+            require("../../../canvaskit/pages/minitex/index", resolve);
+          });
           const _flutter = getApp()._flutter;
           // Canvas 对象
           let canvas = res[0].node;
@@ -311,6 +314,7 @@ export class FlutterMiniProgramMockWindow {
           // 渲染上下文
           const ckLoaded = CanvasKitInit(canvas);
           ckLoaded.then((CanvasKit) => {
+            MiniTex.install(CanvasKit);
             const surface = CanvasKit.MakeCanvasSurface(canvas);
             _flutter.window.flutterCanvasKit = CanvasKit;
             if (!globalThis.window) {
