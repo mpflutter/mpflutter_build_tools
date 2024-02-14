@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 const { wxSystemInfo } = require("../system_info");
+const { useMiniTex } = require("../minitex");
 
 export class FlutterMiniProgramMockWindow {
   // globals
@@ -280,9 +281,6 @@ export class FlutterMiniProgramMockWindow {
           const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
             require("../../../canvaskit/pages/canvaskit", resolve);
           });
-          const { MiniTex } = await new Promise((resolve) => {
-            require("../../../canvaskit/pages/minitex/index", resolve);
-          });
           const _flutter = getApp()._flutter;
           // Canvas 对象
           let canvas = res[0].node;
@@ -313,8 +311,13 @@ export class FlutterMiniProgramMockWindow {
           _flutter.activeCanvas = canvas;
           // 渲染上下文
           const ckLoaded = CanvasKitInit(canvas);
-          ckLoaded.then((CanvasKit) => {
-            MiniTex.install(CanvasKit);
+          ckLoaded.then(async (CanvasKit) => {
+            if (useMiniTex) {
+              const { MiniTex } = await new Promise((resolve) => {
+                require("../../../canvaskit/pages/minitex/index", resolve);
+              });
+              MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio);
+            }
             const surface = CanvasKit.MakeCanvasSurface(canvas);
             _flutter.window.flutterCanvasKit = CanvasKit;
             if (!globalThis.window) {

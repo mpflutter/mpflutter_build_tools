@@ -191,6 +191,7 @@ class WechatBuilder {
     _fixEnterkeyhint();
     _makeDisableFeatures();
     _makeShadowPages();
+    _enableMiniTex();
     _removeLicenseTipsFlag();
     wechatOut.deleteSync();
     wechatTmp.renameSync(wechatOut.path);
@@ -677,6 +678,22 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
       appJSONData["pages"] = appJSONPages;
       File(join('build', 'wechat_tmp', 'app.json'))
           .writeAsStringSync(json.encode(appJSONData));
+    }
+  }
+
+  void _enableMiniTex() {
+    final mainDartJSFile = File(
+      join("build", 'wechat_tmp', 'pages', 'index', 'main.dart.js'),
+    );
+    final requireMiniTex =
+        mainDartJSFile.readAsStringSync().contains("\"MiniTex\"");
+    if (requireMiniTex) {
+      File(
+        join("build", 'wechat_tmp', 'pages', 'index', 'minitex.js'),
+      ).writeAsStringSync("""export const useMiniTex = true;""");
+    } else {
+      Directory(join('build', 'wechat_tmp', "canvaskit", "pages", "minitex"))
+          .deleteSync(recursive: true);
     }
   }
 

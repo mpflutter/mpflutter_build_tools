@@ -6,6 +6,7 @@
 // 获取应用实例
 const { FlutterHostView } = require("./flutter");
 const { wxSystemInfo } = require("./system_info");
+const { useMiniTex } = require("./minitex");
 
 export const main = {
   data: {
@@ -44,6 +45,9 @@ export const main = {
     await loadAssetPages();
     await loadCanvasKitPages();
     await loadPlugins();
+    if (useMiniTex && wxSystemInfo.platform === "android") {
+      await loadRobotoFont();
+    }
 
     setupFlutterHostView(this);
     setupAppLifeCycleListener();
@@ -101,8 +105,8 @@ export const main = {
   ontouchend() {
     if (this.data.shouldCatchBack) return;
     FlutterHostView.shared.touching = false;
-    let moveEvent = {...arguments[0]};
-    moveEvent.type = "touchmove"
+    let moveEvent = { ...arguments[0] };
+    moveEvent.type = "touchmove";
     callFlutterTouchEvent("ontouchmove", [moveEvent]);
     callFlutterTouchEvent("ontouchend", arguments);
   },
@@ -129,8 +133,8 @@ export const main = {
     if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = false;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
-    let moveEvent = {...arguments[0]};
-    moveEvent.type = "touchmove"
+    let moveEvent = { ...arguments[0] };
+    moveEvent.type = "touchmove";
     callFlutterTouchEvent("ontouchmove", [moveEvent]);
     callFlutterTouchEvent("ontouchend", arguments);
   },
@@ -257,6 +261,25 @@ function loadCanvasKitPages() {
 
 async function loadPlugins() {
   // loadPlugins
+}
+
+function loadRobotoFont() {
+  return new Promise((resolve) => {
+    wx.loadFontFace({
+      global: true,
+      family: "Roboto",
+      source:
+        "https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf",
+      scopes: ["native"],
+      success: function () {
+        resolve();
+      },
+      fail: function (err) {
+        console.log("fail to load roboto", err);
+        resolve();
+      },
+    });
+  });
 }
 
 function setupAppLifeCycleListener() {

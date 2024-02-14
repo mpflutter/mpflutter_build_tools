@@ -4,8 +4,24 @@ exports.ParagraphBuilder = void 0;
 const paragraph_1 = require("./paragraph");
 const skia_1 = require("./skia");
 class ParagraphBuilder extends skia_1.EmbindObject {
-    static MakeFromFontCollection() {
-        return new ParagraphBuilder();
+    static MakeFromFontCollection(originMakeFromFontCollectionMethod, style, fontCollection) {
+        var _a;
+        const fontFamilies = (_a = style.textStyle) === null || _a === void 0 ? void 0 : _a.fontFamilies;
+        if (fontFamilies && fontFamilies[0] === "MiniTex") {
+            // console.log("use minitex");
+            return new ParagraphBuilder(style);
+        }
+        else {
+            // console.log("use old", fontFamilies);
+            return originMakeFromFontCollectionMethod(style, fontCollection);
+        }
+    }
+    constructor(style) {
+        super();
+        this.style = style;
+        this.isMiniTex = true;
+        this.spans = [];
+        this.styles = [];
     }
     /**
      * Pushes the information required to leave an open space.
@@ -16,7 +32,7 @@ class ParagraphBuilder extends skia_1.EmbindObject {
      * @param offset
      */
     addPlaceholder(width, height, alignment, baseline, offset) {
-        console.log("addPlaceholder", width, height, alignment, baseline, offset);
+        // console.log("addPlaceholder", width, height, alignment, baseline, offset);
     }
     /**
      * Adds text to the builder. Forms the proper runs to use the upper-most style
@@ -24,14 +40,20 @@ class ParagraphBuilder extends skia_1.EmbindObject {
      * @param str
      */
     addText(str) {
-        console.log("addtext", str);
+        // console.log("addText", str);
+        let mergedStyle = {};
+        this.styles.forEach((it) => {
+            Object.assign(mergedStyle, it);
+        });
+        const span = new paragraph_1.TextSpan(str, mergedStyle);
+        this.spans.push(span);
     }
     /**
      * Returns a Paragraph object that can be used to be layout and paint the text to an
      * Canvas.
      */
     build() {
-        return new paragraph_1.Paragraph();
+        return new paragraph_1.Paragraph(this.spans, this.style);
     }
     /**
      * @param words is an array of word edges (starting or ending). You can
@@ -98,22 +120,30 @@ class ParagraphBuilder extends skia_1.EmbindObject {
      * was produced as a set of addText calls).
      */
     getText() {
-        throw "todo";
+        let text = "";
+        this.spans.forEach((it) => {
+            if (it instanceof paragraph_1.TextSpan) {
+                text += it.text;
+            }
+        });
+        return text;
     }
     /**
      * Remove a style from the stack. Useful to apply different styles to chunks
      * of text such as bolding.
      */
     pop() {
-        console.log("pop");
+        // console.log("pop");
+        this.styles.pop();
     }
     /**
      * Push a style to the stack. The corresponding text added with addText will
      * use the top-most style.
-     * @param text
+     * @param textStyle
      */
-    pushStyle(text) {
-        console.log("push style", text);
+    pushStyle(textStyle) {
+        // console.log("pushStyle", textStyle);
+        this.styles.push(textStyle);
     }
     /**
      * Pushes a TextStyle using paints instead of colors for foreground and background.
@@ -122,14 +152,16 @@ class ParagraphBuilder extends skia_1.EmbindObject {
      * @param bg
      */
     pushPaintStyle(textStyle, fg, bg) {
-        console.log("pushPaintStyle", textStyle, fg, bg);
+        // console.log("pushPaintStyle", textStyle, fg, bg);
+        this.styles.push(textStyle);
     }
     /**
      * Resets this builder to its initial state, discarding any text, styles, placeholders that have
      * been added, but keeping the initial ParagraphStyle.
      */
     reset() {
-        console.log("reset");
+        this.spans = [];
+        this.styles = [];
     }
 }
 exports.ParagraphBuilder = ParagraphBuilder;
