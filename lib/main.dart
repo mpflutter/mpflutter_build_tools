@@ -558,6 +558,8 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve)
         'if (object.\$\$clazz\$\$) {return true;}return !!J.getInterceptor\$(object)[tag];');
     content = content.replaceAll(
         'new self.MutationObserver', 'new globalThis.MutationObserver');
+    content = content.replaceAll(
+        '(self.MutationObserver,', '(globalThis.MutationObserver,');
     File(filePath).writeAsStringSync(
         '''var self = getApp()._flutter.self;var XMLHttpRequest = self.XMLHttpRequest;var \$__dart_deferred_initializers__ = self.\$__dart_deferred_initializers__;var document = self.document;var window = self.window;''' +
             content);

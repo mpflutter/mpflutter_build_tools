@@ -4,8 +4,16 @@
 
 const { wxSystemInfo } = require("../system_info");
 const { useMiniTex } = require("../minitex");
+const { Event } = require("./event");
+
+class PointerEvent extends Event {
+
+}
 
 export class FlutterMiniProgramMockWindow {
+
+  PointerEvent = PointerEvent;
+
   // globals
   parseFloat = parseFloat;
   parseInt = parseInt;

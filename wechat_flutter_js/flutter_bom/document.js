@@ -10,12 +10,18 @@ export class FlutterMiniProgramMockDocument {
 
   documentElement = {};
 
-  body = new(require("./element").FlutterMiniProgramMockElement)();
+  body = new (require("./element").FlutterMiniProgramMockElement)();
 
   currentScript = {
     src: "/",
     getAttribute: function () {},
   };
+
+  createTextNode() {
+    const el = new (require("./element").FlutterMiniProgramMockElement)();
+    el.tagName = "text";
+    return el;
+  }
 
   createElement(tag) {
     if (tag === "script") {
@@ -36,16 +42,18 @@ export class FlutterMiniProgramMockDocument {
     } else if (tag === "canvas") {
       const _flutter = getApp()._flutter;
       const isOffScreen = _flutter.activeCanvasBinded === true;
-      let canvas = !isOffScreen ? _flutter.activeCanvas : wx.createOffscreenCanvas({
-        type: GLVersion >= 2 ? "webgl2" : "webgl",
-        width: 1,
-        height: 1
-      });
+      let canvas = !isOffScreen
+        ? _flutter.activeCanvas
+        : wx.createOffscreenCanvas({
+            type: GLVersion >= 2 ? "webgl2" : "webgl",
+            width: 1,
+            height: 1,
+          });
       setTimeout(() => {
         _flutter.activeCanvasBinded = true;
       }, 1000);
       let mockElement =
-        new(require("./element").FlutterMiniProgramMockElement)();
+        new (require("./element").FlutterMiniProgramMockElement)();
       mockElement.tagName = "canvas";
       for (const key in mockElement) {
         canvas[key] = mockElement[key];
@@ -54,6 +62,16 @@ export class FlutterMiniProgramMockDocument {
       if (!isOffScreen) {
         let oriGetContext = canvas.getContext.bind(canvas);
         canvas.getContext = function (type) {
+          if (type === "2d") {
+            const canvas2d = wx.createOffscreenCanvas({
+              type: "2d",
+              width: 375,
+              height: 1024,
+            });
+            const ctx = canvas2d.getContext("2d");
+            ctx.drawImage = function () {};
+            return ctx;
+          }
           if (GLVersion > 1) {
             if (type !== "webgl2") return null;
             return oriGetContext("webgl2");
@@ -63,11 +81,11 @@ export class FlutterMiniProgramMockDocument {
           }
         };
       } else {
-        recreateOffScrrenCanvas = function() {
+        recreateOffScrrenCanvas = function () {
           let newCanvas = wx.createOffscreenCanvas({
             type: GLVersion >= 2 ? "webgl2" : "webgl",
             width: canvas._width,
-            height: canvas._height
+            height: canvas._height,
           });
           let oriGetContext = newCanvas.getContext.bind(newCanvas);
           canvas.getContext = function (type) {
@@ -79,7 +97,7 @@ export class FlutterMiniProgramMockDocument {
               return oriGetContext("webgl");
             }
           };
-        }
+        };
       }
       Object.defineProperty(canvas, "width", {
         get: function () {
@@ -113,24 +131,24 @@ export class FlutterMiniProgramMockDocument {
       });
       return canvas;
     } else if (tag === "flutter-view") {
-      const el = new(require("./element").FlutterMiniProgramMockElement)();
+      const el = new (require("./element").FlutterMiniProgramMockElement)();
       el.tagName = "flutter-view";
       return el;
     } else if (tag === "input") {
-      const el = new(require("./input").FlutterMiniProgramMockInputElement)();
+      const el = new (require("./input").FlutterMiniProgramMockInputElement)();
       el.tagName = "input";
       return el;
     } else if (tag === "textarea") {
       const el =
-        new(require("./input").FlutterMiniProgramMockTextAreaElement)();
+        new (require("./input").FlutterMiniProgramMockTextAreaElement)();
       el.tagName = "textarea";
       return el;
     } else if (tag === "form") {
-      const el = new(require("./input").FlutterMiniProgramMockFormElement)();
+      const el = new (require("./input").FlutterMiniProgramMockFormElement)();
       el.tagName = "form";
       return el;
     } else {
-      const el = new(require("./element").FlutterMiniProgramMockElement)();
+      const el = new (require("./element").FlutterMiniProgramMockElement)();
       el.tagName = tag;
       return el;
     }
@@ -146,7 +164,7 @@ export class FlutterMiniProgramMockDocument {
     };
   }
 
-  head = new(require("./element").FlutterMiniProgramMockElement)();
+  head = new (require("./element").FlutterMiniProgramMockElement)();
 
   querySelector() {}
 
