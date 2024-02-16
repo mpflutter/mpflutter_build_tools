@@ -11,6 +11,7 @@ import 'package:yaml_edit/yaml_edit.dart';
 import './sourcemap.server.dart';
 
 bool licenseGrant = false;
+final compactVersion = '3.16.7';
 
 late Directory _mpflutterSrcRoot;
 Map<String, bool> _disableFeatures = {};
@@ -35,6 +36,7 @@ void addShadowPage(String pageName) {
 }
 
 Future main(List<String> arguments) async {
+  checkFlutterVersion();
   init();
 
   print("====== 欢迎使用 MPFlutter Build Tools ======");
@@ -62,6 +64,22 @@ Future main(List<String> arguments) async {
       }
     } catch (e) {
       print("[ERROR] 构建失败，失败信息： $e");
+    }
+  }
+}
+
+void checkFlutterVersion() async {
+  final process = await Process.start('flutter', ['--version']);
+  final output = await process.stdout.transform(utf8.decoder).join();
+  final versionPattern = RegExp(r'Flutter\s+(\d+\.\d+\.\d+)');
+  final match = versionPattern.firstMatch(output);
+
+  if (match != null) {
+    final flutterVersion = match.group(1);
+
+    if (flutterVersion != null &&
+        compareVersions(flutterVersion, compactVersion) > 0) {
+      throw "你当前的 Flutter SDK 版本是 $flutterVersion，请勿使用高于 $compactVersion 版本的 Flutter SDK，MPFlutter 尚未兼容你当前的版本。";
     }
   }
 }
@@ -765,4 +783,22 @@ Future<String?> _getIP() async {
   } catch (e) {
     return null;
   }
+}
+
+int compareVersions(String version1, String version2) {
+  final parts1 = version1.split('.');
+  final parts2 = version2.split('.');
+
+  for (var i = 0; i < 3; i++) {
+    final part1 = int.parse(parts1[i]);
+    final part2 = int.parse(parts2[i]);
+
+    if (part1 < part2) {
+      return -1;
+    } else if (part1 > part2) {
+      return 1;
+    }
+  }
+
+  return 0;
 }
