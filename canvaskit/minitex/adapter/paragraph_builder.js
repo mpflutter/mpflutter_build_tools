@@ -1,18 +1,23 @@
 "use strict";
+// Copyright 2023 The MPFlutter Authors. All rights reserved.
+// Use of this source code is governed by a Apache License Version 2.0 that can be
+// found in the LICENSE file.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ParagraphBuilder = void 0;
+const span_1 = require("../impl/span");
+const logger_1 = require("../logger");
 const paragraph_1 = require("./paragraph");
 const skia_1 = require("./skia");
-class ParagraphBuilder extends skia_1.EmbindObject {
+class ParagraphBuilder extends skia_1.SkEmbindObject {
     static MakeFromFontCollection(originMakeFromFontCollectionMethod, style, fontCollection) {
         var _a;
         const fontFamilies = (_a = style.textStyle) === null || _a === void 0 ? void 0 : _a.fontFamilies;
         if (fontFamilies && fontFamilies[0] === "MiniTex") {
-            // console.log("use minitex");
+            logger_1.logger.info("use minitex paragraph builder.", fontFamilies);
             return new ParagraphBuilder(style);
         }
         else {
-            // console.log("use old", fontFamilies);
+            logger_1.logger.info("use skia paragraph builder.", fontFamilies);
             return originMakeFromFontCollectionMethod(style, fontCollection);
         }
     }
@@ -31,21 +36,19 @@ class ParagraphBuilder extends skia_1.EmbindObject {
      * @param baseline
      * @param offset
      */
-    addPlaceholder(width, height, alignment, baseline, offset) {
-        // console.log("addPlaceholder", width, height, alignment, baseline, offset);
-    }
+    addPlaceholder(width, height, alignment, baseline, offset) { }
     /**
      * Adds text to the builder. Forms the proper runs to use the upper-most style
      * on the style_stack.
      * @param str
      */
     addText(str) {
-        // console.log("addText", str);
+        logger_1.logger.debug("ParagraphBuilder.addText", str);
         let mergedStyle = {};
         this.styles.forEach((it) => {
             Object.assign(mergedStyle, it);
         });
-        const span = new paragraph_1.TextSpan(str, mergedStyle);
+        const span = new span_1.TextSpan(str, mergedStyle);
         this.spans.push(span);
     }
     /**
@@ -122,7 +125,7 @@ class ParagraphBuilder extends skia_1.EmbindObject {
     getText() {
         let text = "";
         this.spans.forEach((it) => {
-            if (it instanceof paragraph_1.TextSpan) {
+            if (it instanceof span_1.TextSpan) {
                 text += it.text;
             }
         });
@@ -133,7 +136,7 @@ class ParagraphBuilder extends skia_1.EmbindObject {
      * of text such as bolding.
      */
     pop() {
-        // console.log("pop");
+        logger_1.logger.debug("ParagraphBuilder.pop");
         this.styles.pop();
     }
     /**
@@ -142,7 +145,7 @@ class ParagraphBuilder extends skia_1.EmbindObject {
      * @param textStyle
      */
     pushStyle(textStyle) {
-        // console.log("pushStyle", textStyle);
+        logger_1.logger.debug("ParagraphBuilder.pushStyle", textStyle);
         this.styles.push(textStyle);
     }
     /**
@@ -152,7 +155,7 @@ class ParagraphBuilder extends skia_1.EmbindObject {
      * @param bg
      */
     pushPaintStyle(textStyle, fg, bg) {
-        // console.log("pushPaintStyle", textStyle, fg, bg);
+        logger_1.logger.debug("ParagraphBuilder.pushPaintStyle", textStyle, fg, bg);
         this.styles.push(textStyle);
     }
     /**
@@ -160,6 +163,7 @@ class ParagraphBuilder extends skia_1.EmbindObject {
      * been added, but keeping the initial ParagraphStyle.
      */
     reset() {
+        logger_1.logger.debug("ParagraphBuilder.reset");
         this.spans = [];
         this.styles = [];
     }

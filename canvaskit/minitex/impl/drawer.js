@@ -1,15 +1,14 @@
 "use strict";
+// Copyright 2023 The MPFlutter Authors. All rights reserved.
+// Use of this source code is governed by a Apache License Version 2.0 that can be
+// found in the LICENSE file.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Drawer = void 0;
-const layout_1 = require("./layout");
-const paragraph_1 = require("./paragraph");
-const skia_1 = require("./skia");
-const text_style_1 = require("./text_style");
-function convertToUpwardToPixelRatio(number, pixelRatio) {
-    const upwardInt = Math.ceil(number);
-    const remainder = upwardInt % pixelRatio;
-    return remainder === 0 ? upwardInt : upwardInt + (pixelRatio - remainder);
-}
+const skia_1 = require("../adapter/skia");
+const skia_2 = require("../adapter/skia");
+const span_1 = require("./span");
+const util_1 = require("../util");
+const logger_1 = require("../logger");
 class Drawer {
     constructor(paragraph) {
         this.paragraph = paragraph;
@@ -18,19 +17,20 @@ class Drawer {
         if (!Drawer.sharedRenderCanvas) {
             Drawer.sharedRenderCanvas = wx.createOffscreenCanvas({
                 type: "2d",
-                width: 1000 * Drawer.pixelRatio,
-                height: 1000 * Drawer.pixelRatio,
+                width: Math.min(4000, 1000 * Drawer.pixelRatio),
+                height: Math.min(4000, 1000 * Drawer.pixelRatio),
             });
             Drawer.sharedRenderContext = Drawer.sharedRenderCanvas.getContext("2d");
         }
     }
     draw() {
-        // console.log("paragraph", this.paragraph);
         this.initCanvas();
-        const width = convertToUpwardToPixelRatio(this.paragraph.getMaxWidth() * Drawer.pixelRatio, Drawer.pixelRatio);
-        const height = convertToUpwardToPixelRatio(this.paragraph.getHeight() * Drawer.pixelRatio, Drawer.pixelRatio);
+        const width = (0, util_1.convertToUpwardToPixelRatio)(this.paragraph.getMaxWidth() * Drawer.pixelRatio, Drawer.pixelRatio);
+        const height = (0, util_1.convertToUpwardToPixelRatio)(this.paragraph.getHeight() * Drawer.pixelRatio, Drawer.pixelRatio);
         if (width <= 0 || height <= 0) {
-            throw "invalid text draw.";
+            const context = Drawer.sharedRenderContext;
+            context.clearRect(0, 0, 1, 1);
+            return context.getImageData(0, 0, 1, 1);
         }
         const context = Drawer.sharedRenderContext;
         context.clearRect(0, 0, width, height);
@@ -39,21 +39,24 @@ class Drawer {
         let didExceedMaxLines = false;
         let spanLetterStartIndex = 0;
         let linesDrawingRightBounds = {};
-        const spans = this.paragraph.spansWithNewline();
+        const spans = (0, span_1.spanWithNewline)(this.paragraph.spans);
         let linesUndrawed = {};
-        this.paragraph._lineMetrics.forEach((it) => {
+        this.paragraph.getLineMetrics().forEach((it) => {
             linesUndrawed[it.lineNumber] = it.endIndex - it.startIndex;
         });
         spans.forEach((span) => {
             var _a, _b, _c, _d, _e, _f;
             if (didExceedMaxLines)
                 return;
-            if (span instanceof paragraph_1.TextSpan) {
+            if (span instanceof span_1.TextSpan) {
+                if (span instanceof span_1.NewlineSpan) {
+                    spanLetterStartIndex++;
+                    return;
+                }
                 let spanUndrawLength = span.text.length;
                 let spanLetterEndIndex = spanLetterStartIndex + span.text.length;
                 const lineMetrics = this.paragraph.getLineMetricsOfRange(spanLetterStartIndex, spanLetterEndIndex);
                 context.font = span.toCanvasFont();
-                // console.log("font", span.toCanvasFont())
                 while (spanUndrawLength > 0) {
                     let currentDrawText = "";
                     let currentDrawLine;
@@ -74,7 +77,7 @@ class Drawer {
                         this.paragraph.paragraphStyle.maxLines ===
                             currentDrawLine.lineNumber + 1 &&
                         linesUndrawed[currentDrawLine.lineNumber] <= 0) {
-                        const trimLength = (0, layout_1.isSquareCharacter)(currentDrawText[currentDrawText.length - 1])
+                        const trimLength = (0, util_1.isSquareCharacter)(currentDrawText[currentDrawText.length - 1])
                             ? 1
                             : 3;
                         currentDrawText =
@@ -104,7 +107,13 @@ class Drawer {
                         }
                         return linesDrawingRightBounds[currentDrawLine.lineNumber];
                     })();
-                    const drawingRight = drawingLeft + context.measureText(currentDrawText).width;
+                    const drawingRight = drawingLeft +
+                        (() => {
+                            if (currentDrawText === "\n") {
+                                return 0;
+                            }
+                            return context.measureText(currentDrawText).width;
+                        })();
                     linesDrawingRightBounds[currentDrawLine.lineNumber] = drawingRight;
                     const textTop = currentDrawLine.baseline * currentDrawLine.heightMultiplier -
                         span.letterBaseline;
@@ -120,9 +129,8 @@ class Drawer {
                     });
                     context.save();
                     if (span.style.shadows && span.style.shadows.length > 0) {
-                        console.log("span.style.shadows[0]", span.style.shadows[0]);
                         context.shadowColor = span.style.shadows[0].color
-                            ? span.colorToHex(span.style.shadows[0].color)
+                            ? (0, util_1.colorToHex)(span.style.shadows[0].color)
                             : "transparent";
                         context.shadowOffsetX = (_c = (_b = span.style.shadows[0].offset) === null || _b === void 0 ? void 0 : _b[0]) !== null && _c !== void 0 ? _c : 0;
                         context.shadowOffsetY = (_e = (_d = span.style.shadows[0].offset) === null || _d === void 0 ? void 0 : _d[1]) !== null && _e !== void 0 ? _e : 0;
@@ -131,12 +139,7 @@ class Drawer {
                     context.fillStyle = span.toTextFillStyle();
                     context.fillText(currentDrawText, drawingLeft, textBaseline + currentDrawLine.yOffset);
                     context.restore();
-                    // console.log(
-                    //   "fillText",
-                    //   currentDrawText,
-                    //   drawingLeft,
-                    //   textBaseline + currentDrawLine.yOffset
-                    // );
+                    logger_1.logger.debug("Drawer.draw.fillText", currentDrawText, drawingLeft, textBaseline + currentDrawLine.yOffset);
                     this.drawDecoration(span, context, {
                         currentDrawLine,
                         drawingLeft,
@@ -173,42 +176,42 @@ class Drawer {
                     Math.max(1, ((_b = span.style.fontSize) !== null && _b !== void 0 ? _b : 12) / 14);
             const decorationStyle = (_c = span.style.decorationStyle) === null || _c === void 0 ? void 0 : _c.value;
             switch (decorationStyle) {
-                case text_style_1.DecorationStyle.Dashed:
+                case skia_2.DecorationStyle.Dashed:
                     context.lineCap = "butt";
                     context.setLineDash([4, 2]);
                     break;
-                case text_style_1.DecorationStyle.Dotted:
+                case skia_2.DecorationStyle.Dotted:
                     context.lineCap = "butt";
                     context.setLineDash([2, 2]);
                     break;
             }
-            if (span.style.decoration & text_style_1.UnderlineDecoration) {
+            if (span.style.decoration & skia_2.UnderlineDecoration) {
                 context.beginPath();
                 context.moveTo(drawingLeft, currentDrawLine.yOffset + textBaseline + 1);
                 context.lineTo(drawingRight, currentDrawLine.yOffset + textBaseline + 1);
                 context.stroke();
-                if (decorationStyle === text_style_1.DecorationStyle.Double) {
+                if (decorationStyle === skia_2.DecorationStyle.Double) {
                     context.beginPath();
                     context.moveTo(drawingLeft, currentDrawLine.yOffset + textBaseline + 3);
                     context.lineTo(drawingRight, currentDrawLine.yOffset + textBaseline + 3);
                     context.stroke();
                 }
             }
-            if (span.style.decoration & text_style_1.LineThroughDecoration) {
+            if (span.style.decoration & skia_2.LineThroughDecoration) {
                 context.beginPath();
                 context.moveTo(drawingLeft, currentDrawLine.yOffset + textTop + textHeight / 2.0);
                 context.lineTo(drawingRight, currentDrawLine.yOffset + textTop + textHeight / 2.0);
-                if (decorationStyle === text_style_1.DecorationStyle.Double) {
+                if (decorationStyle === skia_2.DecorationStyle.Double) {
                     context.moveTo(drawingLeft, currentDrawLine.yOffset + textTop + textHeight / 2.0 + 2);
                     context.lineTo(drawingRight, currentDrawLine.yOffset + textTop + textHeight / 2.0 + 2);
                 }
                 context.stroke();
             }
-            if (span.style.decoration & text_style_1.OverlineDecoration) {
+            if (span.style.decoration & skia_2.OverlineDecoration) {
                 context.beginPath();
                 context.moveTo(drawingLeft, currentDrawLine.yOffset + textTop);
                 context.lineTo(drawingRight, currentDrawLine.yOffset + textTop);
-                if (decorationStyle === text_style_1.DecorationStyle.Double) {
+                if (decorationStyle === skia_2.DecorationStyle.Double) {
                     context.moveTo(drawingLeft, currentDrawLine.yOffset + textTop + 2);
                     context.lineTo(drawingRight, currentDrawLine.yOffset + textTop + 2);
                 }

@@ -1,11 +1,16 @@
 "use strict";
+// Copyright 2023 The MPFlutter Authors. All rights reserved.
+// Use of this source code is governed by a Apache License Version 2.0 that can be
+// found in the LICENSE file.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Paint = void 0;
+const util_1 = require("../util");
 const skia_1 = require("./skia");
-class Paint extends skia_1.EmbindObject {
+class Paint extends skia_1.SkEmbindObject {
     constructor() {
         super(...arguments);
-        this._color = Float32Array.from([0, 0, 0, 255]);
+        this._type = "SkPaint";
+        this._color = (0, util_1.valueOfRGBAInt)(0, 0, 0, 255);
         this._strokeCap = skia_1.StrokeCap.Butt;
         this._strokeJoin = skia_1.StrokeJoin.Bevel;
         this._strokeMiter = 0;
@@ -105,7 +110,7 @@ class Paint extends skia_1.EmbindObject {
      * @param colorSpace - defaults to sRGB
      */
     setColorComponents(r, g, b, a) {
-        this.setColor(Float32Array.from([r, g, b, a]));
+        this.setColor((0, util_1.valueOfRGBAInt)(r, g, b, a));
     }
     /**
      * Sets the current color filter, replacing the existing one if there was one.
