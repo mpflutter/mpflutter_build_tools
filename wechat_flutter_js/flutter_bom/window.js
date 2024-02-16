@@ -107,6 +107,24 @@ export class FlutterMiniProgramMockWindow {
           url = mUrl;
         }
       }
+      if (useMiniTex && url.startsWith("https://fonts.gstatic.com/s/")) {
+        const responseData = {
+          ok: true,
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          arrayBuffer: async function () {
+            return new ArrayBuffer(0);
+          },
+          text: async function () {
+            return "";
+          },
+        };
+        setTimeout(() => {
+          resolve(responseData);
+        }, 32);
+        return;
+      }
       if (url.startsWith("/")) {
         let subPackageUrl = require("../assets").default[url] ?? url;
         await new Promise((resolve) => {
