@@ -1,5 +1,11 @@
 # ChangeLog
 
+## 2.3.1
+
+fix:
+- Windows 构建异常
+- 修改 Flutter Web Plugin 非兼容的处理方法，避免因不兼容插件导致的白屏出现。
+
 ## 2.3.0
 
 fix:
