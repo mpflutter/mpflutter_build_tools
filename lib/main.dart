@@ -69,7 +69,7 @@ Future main(List<String> arguments) async {
 }
 
 void checkFlutterVersion() async {
-  final process = await Process.start('flutter', ['--version']);
+  final process = await Process.start('flutter', ['--version'], runInShell: true);
   final output = await process.stdout.transform(utf8.decoder).join();
   final versionPattern = RegExp(r'Flutter\s+(\d+\.\d+\.\d+)');
   final match = versionPattern.firstMatch(output);
