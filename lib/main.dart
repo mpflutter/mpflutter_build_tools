@@ -55,7 +55,6 @@ Future main(List<String> arguments) async {
     print("[INFO] 正在构建 wechat 小程序");
     final builder = WechatBuilder();
     try {
-      builder.disableNonCompatiblesPackages(arguments);
       await builder.buildFlutterWeb(arguments);
       await builder.buildFlutterWechat(arguments);
       print("[INFO] 构建成功，产物在 build/wechat 目录，使用微信开发者工具导入预览、上传、发布。");
@@ -69,7 +68,8 @@ Future main(List<String> arguments) async {
 }
 
 void checkFlutterVersion() async {
-  final process = await Process.start('flutter', ['--version'], runInShell: true);
+  final process =
+      await Process.start('flutter', ['--version'], runInShell: true);
   final output = await process.stdout.transform(utf8.decoder).join();
   final versionPattern = RegExp(r'Flutter\s+(\d+\.\d+\.\d+)');
   final match = versionPattern.firstMatch(output);
@@ -96,7 +96,8 @@ void init() {
 }
 
 class WechatBuilder {
-  void disableNonCompatiblesPackages(List<String> arguments) {
+  List<String> findNonCompatiblesPackagesNames() {
+    final List<String> result = [];
     final pkgConfig = File(join('.dart_tool', 'package_config.json'));
     final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
     (pkgConfigData["packages"] as List).forEach((it) {
@@ -111,72 +112,101 @@ class WechatBuilder {
         yamlFile.copySync(join(srcRoot.path, "pubspec.bak.yaml"));
         if (yamlFile.existsSync()) {
           String yamlContent = yamlFile.readAsStringSync();
-          final originContent = yamlContent;
           final yamlEditor = YamlEditor(yamlContent);
           try {
-            yamlEditor.remove(['flutter', 'plugin', 'platforms', 'web']);
-            yamlFile.writeAsStringSync(yamlEditor.toString());
-            print("Flutter Package [${it['name']}] 被标记为[不兼容的包]，本次构建已被临时禁用。");
-            Timer(Duration(seconds: 2), () {
-              yamlFile.writeAsStringSync(originContent);
-              File(join(srcRoot.path, "pubspec.bak.yaml")).deleteSync();
-            });
+            String webClass = yamlEditor.parseAt(
+                ['flutter', 'plugin', 'platforms', 'web', 'pluginClass']).value;
+            result.add(webClass);
           } catch (e) {}
         }
       }
     });
+    return result;
   }
 
   Future buildFlutterWeb(List<String> arguments) async {
     print("[INFO] 正在构建 flutter for web 产物");
+
+    // remove flutter build dir
+    final flutterBuildDir = Directory(join('.dart_tool', 'flutter_build'));
+    if (flutterBuildDir.existsSync()) {
+      flutterBuildDir.deleteSync(recursive: true);
+    }
+
     // create wechat dir
     final webOut = Directory(join('build', 'web'));
     if (webOut.existsSync()) {
       webOut.deleteSync(recursive: true);
     }
 
-    final completer = Completer();
-    // 转发请求至Flutter命令
-    final flutterProcess = await Process.start(
-        'flutter',
-        [
-          'build',
-          'web',
-          ...([...arguments]..removeWhere((element) =>
-              element == "--devmode" ||
-              element == "--wechat" ||
-              element == "--debug" ||
-              element == '--printstack')),
-          ...[
-            '--web-renderer',
-            'canvaskit',
-            '--dart-define=mpflutter.library.core=true'
+    final buildWeb = () async {
+      final completer = Completer();
+      // 转发请求至Flutter命令
+      final flutterProcess = await Process.start(
+          'flutter',
+          [
+            'build',
+            'web',
+            ...([...arguments]..removeWhere((element) =>
+                element == "--devmode" ||
+                element == "--wechat" ||
+                element == "--debug" ||
+                element == '--printstack')),
+            ...[
+              '--web-renderer',
+              'canvaskit',
+              '--dart-define=mpflutter.library.core=true'
+            ],
+            ...arguments.contains('--debug')
+                ? ['--source-maps', '--dart2js-optimization', 'O1']
+                : [],
           ],
-          ...arguments.contains('--debug')
-              ? ['--source-maps', '--dart2js-optimization', 'O1']
-              : [],
-        ],
-        runInShell: true);
+          runInShell: true);
 
-    // 获取Flutter命令的输出
-    flutterProcess.stdout.transform(utf8.decoder).listen((data) {
-      print(data);
-    });
+      // 获取Flutter命令的输出
+      flutterProcess.stdout.transform(utf8.decoder).listen((data) {
+        print(data);
+      });
 
-    // 获取Flutter命令的错误输出
-    flutterProcess.stderr.transform(utf8.decoder).listen((data) {
-      print(data);
-    });
+      // 获取Flutter命令的错误输出
+      flutterProcess.stderr.transform(utf8.decoder).listen((data) {
+        print(data);
+      });
 
-    // 等待Flutter命令完成
-    flutterProcess.exitCode.then((exitCode) {
-      if (exitCode != 0) {
-        completer.completeError("exit code = " + exitCode.toString());
+      // 等待Flutter命令完成
+      flutterProcess.exitCode.then((exitCode) {
+        if (exitCode != 0) {
+          completer.completeError("exit code = " + exitCode.toString());
+        } else {
+          completer.complete(exitCode);
+        }
+      });
+
+      return completer.future;
+    };
+
+    await buildWeb();
+
+    final nonCompatiblesPackagesNames = findNonCompatiblesPackagesNames();
+    final firstBuild = flutterBuildDir.listSync().first;
+    final webPluginRegistrant =
+        File(join(firstBuild.path, 'web_plugin_registrant.dart'));
+    var newWebPluginRegistrantContent = "";
+    webPluginRegistrant.readAsLinesSync().forEach((line) {
+      for (var element in nonCompatiblesPackagesNames) {
+        if (line.contains(element)) {
+          return;
+        }
+      }
+      if (line.contains('.registerWith(registrar)')) {
+        newWebPluginRegistrantContent +=
+            '''try {${line}} catch (e) { print("${line} 插件注册失败，可能是该插件未适配 MPFlutter 导致。"); }\n''';
       } else {
-        completer.complete(exitCode);
+        newWebPluginRegistrantContent += line + "\n";
       }
     });
-    return completer.future;
+    webPluginRegistrant.writeAsStringSync(newWebPluginRegistrantContent);
+    await buildWeb();
   }
 
   Future buildFlutterWechat(List<String> arguments) async {
