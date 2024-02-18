@@ -129,9 +129,9 @@ class WechatBuilder {
 
     // remove flutter build dir
     final flutterBuildDir = Directory(join('.dart_tool', 'flutter_build'));
-    if (flutterBuildDir.existsSync()) {
-      flutterBuildDir.deleteSync(recursive: true);
-    }
+    List<String> currentBuilds = flutterBuildDir.existsSync()
+        ? flutterBuildDir.listSync().map((e) => e.path).toList()
+        : <String>[];
 
     // create wechat dir
     final webOut = Directory(join('build', 'web'));
@@ -187,10 +187,22 @@ class WechatBuilder {
 
     await buildWeb();
 
-    final nonCompatiblesPackagesNames = findNonCompatiblesPackagesNames();
-    final firstBuild = flutterBuildDir.listSync().first;
+    final newBuilds = flutterBuildDir.listSync().map((e) => e.path).toList();
+    final targetBuild = newBuilds
+        .where((element) => !currentBuilds.contains(element))
+        .firstOrNull;
+    if (targetBuild == null) {
+      return;
+    }
+
     final webPluginRegistrant =
-        File(join(firstBuild.path, 'web_plugin_registrant.dart'));
+        File(join(targetBuild, 'web_plugin_registrant.dart'));
+    final content = webPluginRegistrant.readAsStringSync();
+    if (content.contains("// MPFlutter Generated") ||
+        !content.contains("registerWith(registrar)")) {
+      return;
+    }
+    final nonCompatiblesPackagesNames = findNonCompatiblesPackagesNames();
     var newWebPluginRegistrantContent = "";
     webPluginRegistrant.readAsLinesSync().forEach((line) {
       for (var element in nonCompatiblesPackagesNames) {
@@ -205,7 +217,8 @@ class WechatBuilder {
         newWebPluginRegistrantContent += line + "\n";
       }
     });
-    webPluginRegistrant.writeAsStringSync(newWebPluginRegistrantContent);
+    webPluginRegistrant.writeAsStringSync(
+        "// MPFlutter Generated\n" + newWebPluginRegistrantContent);
     await buildWeb();
   }
 
