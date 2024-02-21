@@ -32,9 +32,9 @@ export class FlutterMiniProgramMockWindow {
   // webs
   navigator = {
     appVersion: "",
-    platform: "",
+    platform: "iPhone",
     userAgent: "",
-    vendor: "",
+    vendor: "Apple Computer, Inc.",
     language: "zh",
     geolocation: {},
   };

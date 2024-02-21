@@ -26,7 +26,6 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
       props: {},
     };
     this.platformViewManager = getApp()._flutter.self.platformViewManager;
-    this.platformViewManager.updateView(this.viewOption);
     this.platformViewManager.addCBListenner(
       this.viewOption.pvid,
       (event, detail) => {
@@ -64,7 +63,7 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
 
   set inputmode(v) {
     let newValue = v;
-    if (newValue === "numeric") {
+    if (newValue === "numberic") {
       newValue = "number";
     } else if (newValue === "decimal") {
       newValue = "digit";
@@ -72,7 +71,6 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
       newValue = "text";
     }
     this.viewOption.props.type = newValue;
-    this.platformViewManager.updateView(this.viewOption);
   }
 
   set type(v) {
@@ -81,7 +79,6 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     } else {
       this.viewOption.props.password = false;
     }
-    this.platformViewManager.updateView(this.viewOption);
   }
 
   get enterkeyhint() {
@@ -90,7 +87,6 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
 
   set enterkeyhint(v) {
     this.viewOption.props.confirmType = v;
-    this.platformViewManager.updateView(this.viewOption);
   }
 
   selectionStart = 0;
@@ -137,7 +133,10 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
         callback.apply(callback, [detail]);
       };
     } else if (event === "blur") {
-      this.onBlur = callback;
+      this.onBlur = () => {
+        if (this.preventDispose) return;
+        callback();
+      };
     } else if (event === "keydown") {
       this.onKeydown = callback;
     }

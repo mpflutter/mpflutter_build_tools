@@ -73,6 +73,7 @@ export class FlutterPlatformViewManager {
   }
 
   updateView(viewOption) {
+    if (viewOption && this[viewOption.pvid + "_deleted"]) return;
     const self = this.FlutterHostView.shared.self;
     const blockName = viewOption.viewClazz + "_Block";
     const viewInstances = self.data[blockName] ?? [];
@@ -178,6 +179,7 @@ export class FlutterPlatformViewManager {
       const keyPath = blockName + `.[${targetIndex}].removed`;
       self.setData({ [keyPath]: true });
     }
+    this[viewOption.pvid + "_deleted"] = true;
     delete this[viewOption.pvid + "_pvcb"];
     this.updateWrapper({});
   }
