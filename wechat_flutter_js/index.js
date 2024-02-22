@@ -23,12 +23,11 @@ export const main = {
 
   async onLoad() {
     await new Promise((resolve) => {
-      wx.getSystemInfoAsync({
-        success: (res) => {
-          Object.assign(wxSystemInfo, res);
-          resolve();
-        },
-      });
+      // 微信小程序 getSystemInfoAsync 接口在 PC 上是存在 BUG 的
+      // https://developers.weixin.qq.com/community/develop/doc/000e46e65dc4e0be8a305ecb161c00?highLine=getsysteminfoasync%2520fail
+      const res = wx.getSystemInfoSync()
+      Object.assign(wxSystemInfo, res);
+      resolve();
     });
     this.setData({ windowHeight: wxSystemInfo.windowHeight });
     if (FlutterHostView.shared.onwebglcontextrestored) {
