@@ -135,7 +135,7 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     } else if (event === "blur") {
       this.onBlur = () => {
         if (this.preventDispose) return;
-        callback();
+        callback.apply(callback, [{}]);
       };
     } else if (event === "keydown") {
       this.onKeydown = callback;
