@@ -41,9 +41,11 @@ export const main = {
       return;
     }
     require("./mpjs");
-    await loadAssetPages();
-    await loadCanvasKitPages();
-    await loadPlugins();
+    await Promise.all([
+      loadAssetPages(),
+      loadCanvasKitPages(),
+      loadPlugins(),
+    ]);
     if (useMiniTex && wxSystemInfo.platform === "android") {
       await loadRobotoFont();
     }

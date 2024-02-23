@@ -533,7 +533,9 @@ $subPkgJS
         File(join("build", 'wechat_tmp', 'pages', 'index', 'index.js'));
     var indexJS = indexJSFile.readAsStringSync();
     indexJS = indexJS.replaceAll("// loadPlugins", """
-${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'await new Promise((resolve) => {require("../../$key/pages/main", resolve);});')).values.join("\n")}
+await Promise.all([
+${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {require("../../$key/pages/main", resolve);}),')).values.join("\n")}
+])
 """);
     indexJSFile.writeAsStringSync(indexJS);
     // add main.wxml to index.wxml

@@ -262,14 +262,14 @@ globalThis.FlutterHostView = FlutterHostView;
             pkgs[uri] +
             "/pages" +
             uri.replace(".part.js", ".part"), function () {
-            console.log(uri, "done");
+            // console.log(uri, "done");
             res();
           }, function (err) {
             console.error(err);
           });
         } else {
           require("./" + uri, function () {
-            console.log(uri, "done");
+            // console.log(uri, "done");
             res();
           });
         }
