@@ -64,6 +64,19 @@ Future main(List<String> arguments) async {
     } catch (e) {
       print("[ERROR] 构建失败，失败信息： $e");
     }
+  } else if (arguments.contains("--wegame")) {
+    print("[INFO] 正在构建 wegame 小程序");
+    final builder = WechatBuilder();
+    try {
+      await builder.buildFlutterWeb(arguments);
+      await builder.buildFlutterWegame(arguments);
+      print("[INFO] 构建成功，产物在 build/wegame 目录，使用微信开发者工具导入预览、上传、发布。");
+      if (arguments.contains('--debug')) {
+        runSourceMapServer();
+      }
+    } catch (e) {
+      print("[ERROR] 构建失败，失败信息： $e");
+    }
   }
 }
 
@@ -150,6 +163,7 @@ class WechatBuilder {
             ...([...arguments]..removeWhere((element) =>
                 element == "--devmode" ||
                 element == "--wechat" ||
+                element == "--wegame" ||
                 element == "--debug" ||
                 element == '--printstack')),
             ...[
@@ -258,6 +272,42 @@ class WechatBuilder {
     wechatTmp.renameSync(wechatOut.path);
   }
 
+  Future buildFlutterWegame(List<String> arguments) async {
+    print("[INFO] 正在构建 wegame 产物");
+    // create wechat dir
+    final wechatOut = Directory(join('build', 'wegame'));
+    if (wechatOut.existsSync()) {
+      wechatOut.deleteSync(recursive: true);
+    }
+    final wechatTmp = Directory(join('build', 'wechat_tmp'));
+    if (wechatTmp.existsSync()) {
+      wechatTmp.deleteSync(recursive: true);
+    }
+    // copy src dir to build
+    final wechatSrc = Directory('wegame');
+    if (!wechatSrc.existsSync()) {
+      throw '工程目录下不存在 wegame 文件夹，请先按照教程初始化 wegame 工程。';
+    }
+    wechatTmp.createSync();
+    wechatOut.createSync();
+    _copyDirectory(wechatSrc, wechatTmp);
+    _copyCanvaskitWasm(arguments);
+    _copyFlutterSkeleton(arguments, true);
+    _copyAssets(arguments);
+    _compressAssets(arguments);
+    _copyDartJS(arguments);
+    _copyPubPackagesToWechat(arguments);
+    await _openDevMode(arguments);
+    _addLogStack(arguments);
+    _fixEnterkeyhint();
+    _makeDisableFeatures();
+    _makeShadowPages();
+    _enableMiniTex();
+    _removeLicenseTipsFlag();
+    wechatOut.deleteSync();
+    wechatTmp.renameSync(wechatOut.path);
+  }
+
   void _copyCanvaskitWasm(List<String> arguments) {
     final canvaskitSrc = Directory(join(_mpflutterSrcRoot.path, 'canvaskit'));
     final canvaskitOut =
@@ -266,9 +316,9 @@ class WechatBuilder {
     _copyDirectory(canvaskitSrc, canvaskitOut);
   }
 
-  void _copyFlutterSkeleton(List<String> arguments) {
-    final wechatFlutterJSSrc =
-        Directory(join(_mpflutterSrcRoot.path, 'wechat_flutter_js'));
+  void _copyFlutterSkeleton(List<String> arguments, [bool isGame = false]) {
+    final wechatFlutterJSSrc = Directory(join(_mpflutterSrcRoot.path,
+        isGame ? 'wegame_flutter_js' : 'wechat_flutter_js'));
     final wechatFlutterJSOut =
         Directory(join('build', 'wechat_tmp', 'pages', 'index'));
     _copyDirectory(wechatFlutterJSSrc, wechatFlutterJSOut);
