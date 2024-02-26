@@ -292,8 +292,10 @@ export class FlutterMiniProgramMockWindow {
   CanvasKitInit() {
     return new Promise(async (resolve) => {
       const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
+        console.log("load canvaskit");
         require("../../../canvaskit/pages/canvaskit", resolve);
       });
+      console.log("done canvaskit", CanvasKitInit);
       const _flutter = getApp()._flutter;
       // Canvas 对象
       let canvas = _flutter.activeCanvas;

@@ -148,7 +148,7 @@ globalThis.FlutterHostView = FlutterHostView;
      */
     _loadEntrypoint(entrypointUrl, onEntrypointLoaded) {
       const useCallback = typeof onEntrypointLoaded === "function";
-      
+
       if (!this._scriptLoaded) {
         this._scriptLoaded = true;
         if (useCallback) {
@@ -182,11 +182,13 @@ globalThis.FlutterHostView = FlutterHostView;
      */
     async loadEntrypoint(options) {
       if (wxSystemInfo.safeArea) {
-        _flutter.self.safeAreaInsetTop = Math.max(wxSystemInfo.safeArea.top, wxSystemInfo.statusBarHeight);
+        _flutter.self.safeAreaInsetTop = Math.max(
+          wxSystemInfo.safeArea.top,
+          wxSystemInfo.statusBarHeight
+        );
         _flutter.self.safeAreaInsetBottom =
           wxSystemInfo.windowHeight - wxSystemInfo.safeArea.bottom;
-      }
-      else {
+      } else {
         _flutter.self.safeAreaInsetTop = 0;
         _flutter.self.safeAreaInsetBottom = 0;
       }

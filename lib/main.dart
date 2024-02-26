@@ -291,9 +291,9 @@ class WechatBuilder {
     wechatTmp.createSync();
     wechatOut.createSync();
     _copyDirectory(wechatSrc, wechatTmp);
-    _copyCanvaskitWasm(arguments);
+    _copyCanvaskitWasm(arguments, true);
     _copyFlutterSkeleton(arguments, true);
-    _copyAssets(arguments);
+    _copyAssets(arguments, true);
     _compressAssets(arguments);
     _copyDartJS(arguments);
     _copyPubPackagesToWechat(arguments);
@@ -308,11 +308,15 @@ class WechatBuilder {
     wechatTmp.renameSync(wechatOut.path);
   }
 
-  void _copyCanvaskitWasm(List<String> arguments) {
+  void _copyCanvaskitWasm(List<String> arguments, [bool isGame = false]) {
     final canvaskitSrc = Directory(join(_mpflutterSrcRoot.path, 'canvaskit'));
     final canvaskitOut =
         Directory(join('build', 'wechat_tmp', 'canvaskit', 'pages'));
     canvaskitOut.createSync(recursive: true);
+    if (isGame) {
+      File(join('build', 'wechat_tmp', 'canvaskit', 'game.js'))
+          .writeAsStringSync("");
+    }
     _copyDirectory(canvaskitSrc, canvaskitOut);
   }
 
@@ -324,7 +328,7 @@ class WechatBuilder {
     _copyDirectory(wechatFlutterJSSrc, wechatFlutterJSOut);
   }
 
-  void _copyAssets(List<String> arguments) {
+  void _copyAssets(List<String> arguments, [bool isGame = false]) {
     final assetsSrc = Directory(join('build', 'web', 'assets'));
     File(join(assetsSrc.path, 'NOTICES')).deleteSync();
 
@@ -369,6 +373,7 @@ class WechatBuilder {
       final pkgDirRoot = join('build', 'wechat_tmp', 'assets' + keyId);
       Directory(pkgDirRoot).createSync();
       Directory(join(pkgDirRoot, 'pages')).createSync();
+      File(join(pkgDirRoot, 'game.js')).writeAsStringSync('');
       File(join(pkgDirRoot, 'pages', 'index.js')).writeAsStringSync('Page({})');
       File(join(pkgDirRoot, 'pages', 'index.json')).writeAsStringSync('{}');
       File(join(pkgDirRoot, 'pages', 'index.wxml'))
@@ -402,12 +407,13 @@ $subPkgAsset
 ''');
 
     final appJSONData = json.decode(
-        File(join('build', 'wechat_tmp', 'app.json')).readAsStringSync());
+        File(join('build', 'wechat_tmp', isGame ? 'game.json' : 'app.json'))
+            .readAsStringSync());
     final appJSONSubpackages = appJSONData["subpackages"] ??
         [
           {
             "name": "canvaskit",
-            "root": "canvaskit",
+            "root": "canvaskit" + (isGame ? "/" : ""),
             "pages": ["pages/index"]
           },
         ];
@@ -415,12 +421,12 @@ $subPkgAsset
       final keyId = key == 0 ? "" : key.toString();
       appJSONSubpackages.add({
         "name": "assets" + keyId.toString(),
-        "root": "assets" + keyId.toString(),
+        "root": "assets" + keyId.toString() + (isGame ? "/" : ""),
         "pages": ["pages/index"]
       });
     });
     appJSONData["subpackages"] = appJSONSubpackages;
-    File(join('build', 'wechat_tmp', 'app.json'))
+    File(join('build', 'wechat_tmp', isGame ? 'game.json' : 'app.json'))
         .writeAsStringSync(json.encode(appJSONData));
   }
 
@@ -684,6 +690,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
         dir.listSync(recursive: true).forEach((element) {
           if (element.statSync().type == FileSystemEntityType.directory) return;
           if (element.path.endsWith('index.js') ||
+              element.path.endsWith('game.js') ||
               element.path.endsWith('index.json') ||
               element.path.endsWith('index.wxml')) return;
           try {
