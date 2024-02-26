@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 const { wxSystemInfo } = require("../system_info");
-const { useMiniTex } = require("../minitex");
+const { useMiniTex, embeddingFonts } = require("../minitex");
 
 export class FlutterMiniProgramMockWindow {
   // globals
@@ -334,7 +334,7 @@ export class FlutterMiniProgramMockWindow {
               const { MiniTex } = await new Promise((resolve) => {
                 require("../../../canvaskit/pages/minitex/index", resolve);
               });
-              MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio);
+              MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio, embeddingFonts);
             }
             const surface = CanvasKit.MakeCanvasSurface(canvas);
             _flutter.window.flutterCanvasKit = CanvasKit;

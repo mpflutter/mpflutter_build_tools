@@ -751,9 +751,17 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     final requireMiniTex =
         mainDartJSFile.readAsStringSync().contains("\"MiniTex\"");
     if (requireMiniTex) {
+      final fontManifestFile = File(
+        join("build", 'web', 'assets', 'FontManifest.json'),
+      );
+      final fontManifestData =
+          json.decode(fontManifestFile.readAsStringSync()) as List;
+      final embeddingFonts =
+          fontManifestData.map((it) => '"' + it['family'] + '"');
       File(
         join("build", 'wechat_tmp', 'pages', 'index', 'minitex.js'),
-      ).writeAsStringSync("""export const useMiniTex = true;""");
+      ).writeAsStringSync(
+          """export const useMiniTex = true;\nexport const embeddingFonts = [${embeddingFonts.join(",")}]""");
     } else {
       Directory(join('build', 'wechat_tmp', "canvaskit", "pages", "minitex"))
           .deleteSync(recursive: true);
