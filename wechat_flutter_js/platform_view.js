@@ -115,7 +115,7 @@ export class FlutterPlatformViewManager {
       targetElement.style = style;
       targetElement.props = { ...viewOption.props };
       const keyPath = blockName + `.[${targetIndex}]`;
-      self.setData({ [keyPath]: targetElement });
+      this.setData({ [keyPath]: targetElement });
       // wrapper
       this.updateWrapper(viewOption);
     } else {
@@ -135,7 +135,7 @@ export class FlutterPlatformViewManager {
         style += "top: -1000px;pointer-events:none;";
       }
       if (targetElement.style !== style) {
-        self.setData({
+        this.setData({
           [styleKeyPath]: style,
         });
       }
@@ -152,7 +152,7 @@ export class FlutterPlatformViewManager {
             )
           ) {
             const keyPath = blockName + `.[${targetIndex}].props.${targetKey}`;
-            self.setData({
+            this.setData({
               [keyPath]: viewOption.props[targetKey],
             });
           }
@@ -177,7 +177,7 @@ export class FlutterPlatformViewManager {
     }
     if (targetIndex !== undefined) {
       const keyPath = blockName + `.[${targetIndex}].removed`;
-      self.setData({ [keyPath]: true });
+      this.setData({ [keyPath]: true });
     }
     this[viewOption.pvid + "_deleted"] = true;
     delete this[viewOption.pvid + "_pvcb"];
@@ -205,14 +205,37 @@ export class FlutterPlatformViewManager {
           self.data.PVWrapper.style === wrapper
         )
           return;
-        self.setData({
+          this.setData({
           "PVWrapper.removed": false,
           "PVWrapper.style": wrapper,
         });
       }
     } else {
       if (self.data.PVWrapper.removed === true) return;
-      self.setData({ "PVWrapper.removed": true });
+      this.setData({ "PVWrapper.removed": true });
+    }
+  }
+
+  batchSetDataBegin() {
+    this.batching = true;
+    this.batchData = {};
+  }
+
+  batchSetDataCommit() {
+    if (Object.keys(this.batchData).length > 0) {
+      const self = this.FlutterHostView.shared.self;
+      self.setData(this.batchData);
+    }
+    this.batching = false;
+    this.batchData = {};
+  }
+
+  setData(data) {
+    if (this.batching === true) {
+      Object.assign(this.batchData, data);
+    } else {
+      const self = this.FlutterHostView.shared.self;
+      self.setData(data);
     }
   }
 }
