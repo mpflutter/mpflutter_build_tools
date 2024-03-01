@@ -106,6 +106,7 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     }, 64);
   }
   focus = () => {
+    FlutterMiniProgramMockInputElement.activeInput = this.viewOption.pvid;
     this.viewOption.props.focus = true;
     this.platformViewManager.updateView(this.viewOption);
   };
@@ -135,7 +136,10 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     } else if (event === "blur") {
       this.onBlur = () => {
         if (this.preventDispose) return;
-        callback.apply(callback, [{}]);
+        if (FlutterMiniProgramMockInputElement.activeInput !== this.viewOption.pvid) return;
+        setTimeout(() => {
+          callback.apply(callback, [{}]);
+        }, 100);
       };
     } else if (event === "keydown") {
       this.onKeydown = callback;
