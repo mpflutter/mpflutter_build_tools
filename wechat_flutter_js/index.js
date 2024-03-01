@@ -266,17 +266,27 @@ async function loadPlugins() {
 
 function loadRobotoFont() {
   return new Promise((resolve) => {
+    let resolved = false;
+    setTimeout(() => {
+      if (resolved) return;
+      resolved = true;
+      resolve();
+    }, 2000);
     wx.loadFontFace({
       global: true,
       family: "Roboto",
       source:
-        "https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf",
+        'url("https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf")',
       scopes: ["native"],
       success: function () {
+        if (resolved) return;
+        resolved = true;
         resolve();
       },
       fail: function (err) {
+        if (resolved) return;
         console.log("fail to load roboto", err);
+        resolved = true;
         resolve();
       },
     });
