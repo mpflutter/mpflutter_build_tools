@@ -237,7 +237,7 @@ export const main = {
       const event = e.type;
       const pvid = e.target.id;
       const detail = e.detail;
-      getApp()._flutter.self.platformViewManager.onPVCB({
+      return getApp()._flutter.self.platformViewManager.onPVCB({
         pvid,
         event,
         detail,

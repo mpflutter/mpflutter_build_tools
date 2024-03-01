@@ -64,7 +64,7 @@ export class FlutterPlatformViewManager {
 
   onPVCB(option) {
     if (this[option.pvid + "_pvcb"]) {
-      this[option.pvid + "_pvcb"](option.event, option.detail ?? {});
+      return this[option.pvid + "_pvcb"](option.event, option.detail ?? {});
     }
   }
 
