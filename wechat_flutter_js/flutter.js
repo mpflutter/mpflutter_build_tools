@@ -250,6 +250,7 @@ globalThis.FlutterHostView = FlutterHostView;
     HTMLTextAreaElement: require("./flutter_bom/input")
       .FlutterMiniProgramMockInputElement,
     encodeImage: require("./flutter_bom/image_encoder").encodeImage,
+    encodeImageToFilePath: require("./flutter_bom/image_encoder").encodeImageToFilePath,
     $__dart_deferred_initializers__: [],
     dartDeferredLibraryLoader: function (uri, res, rej) {
       const pkgs = require("./pkgs").default;
