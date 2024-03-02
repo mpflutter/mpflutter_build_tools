@@ -300,6 +300,7 @@ globalThis.FlutterHostView = FlutterHostView;
   globalThis.localStorage = _flutter.self.localStorage;
   globalThis.Blob = _flutter.self.Blob;
   globalThis.FileReader = _flutter.self.FileReader;
+  globalThis.performance = _flutter.self.window.performance;
 
   let originObjectStringFunction = Object.prototype.toString;
   Object.prototype.toString = function () {
