@@ -5,12 +5,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart' as dio;
 import 'package:es_compression/brotli.dart';
 import 'package:path/path.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 import './sourcemap.server.dart';
 
 bool licenseGrant = false;
+bool useMiniTex = false;
 final compactVersion = '3.16.7';
 
 late Directory _mpflutterSrcRoot;
@@ -244,6 +246,7 @@ class WechatBuilder {
     _copyCanvaskitWasm(arguments);
     _copyFlutterSkeleton(arguments);
     _copyAssets(arguments);
+    await _generateMiniTexIconFonts();
     _compressAssets(arguments);
     _copyDartJS(arguments);
     _copyPubPackagesToWechat(arguments);
@@ -749,7 +752,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
       join("build", 'wechat_tmp', 'pages', 'index', 'main.dart.js'),
     );
     final requireMiniTex =
-        mainDartJSFile.readAsStringSync().contains("\"MiniTex\"");
+        useMiniTex || mainDartJSFile.readAsStringSync().contains("\"MiniTex\"");
     if (requireMiniTex) {
       final fontManifestFile = File(
         join("build", 'web', 'assets', 'FontManifest.json'),
@@ -765,6 +768,38 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     } else {
       Directory(join('build', 'wechat_tmp', "canvaskit", "pages", "minitex"))
           .deleteSync(recursive: true);
+    }
+  }
+
+  Future _generateMiniTexIconFonts() async {
+    final mainDartJSFile = File(
+      join("build", 'wechat_tmp', 'pages', 'index', 'main.dart.js'),
+    );
+    final requireMiniTex =
+        useMiniTex || mainDartJSFile.readAsStringSync().contains("\"MiniTex\"");
+    if (requireMiniTex) {
+      final files =
+          Directory(join('build', 'wechat_tmp')).listSync(recursive: true);
+      for (var file in files) {
+        if (file.path.endsWith("MaterialIcons-Regular.otf")) {
+          final materialIcons = File(file.path);
+          if (materialIcons.existsSync()) {
+            final fontPathRes = (await dio.Dio().post<String>(
+              "https://1253771526-dsp9b2x9az-gz.scf.tencentcs.com/fontpath?name=materialicons-regular",
+              data: Stream.fromIterable(
+                  materialIcons.readAsBytesSync().map((e) => [e])),
+              options: dio.Options(
+                responseType: dio.ResponseType.plain,
+                headers: {
+                  "Content-Type": "application/stream",
+                },
+              ),
+            ));
+            File(join(file.path + ".json"))
+                .writeAsStringSync(fontPathRes.data!);
+          }
+        }
+      }
     }
   }
 

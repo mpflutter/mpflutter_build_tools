@@ -2,8 +2,24 @@
 // Use of this source code is governed by a Apache-2.0 license that can be
 // found in the LICENSE file.
 
-const { wxSystemInfo } = require("../system_info");
-const { useMiniTex, embeddingFonts } = require("../minitex");
+const {
+  wxSystemInfo
+} = require("../system_info");
+const {
+  useMiniTex,
+  embeddingFonts
+} = require("../minitex");
+
+function arrayBufferToUtf8String(arrayBuffer) {
+  const uint8Array = new Uint8Array(arrayBuffer);
+  let utf8String = '';
+
+  for (let i = 0; i < uint8Array.length; i++) {
+    utf8String += String.fromCharCode(uint8Array[i]);
+  }
+
+  return decodeURIComponent(escape(utf8String));
+}
 
 export class FlutterMiniProgramMockWindow {
   // globals
@@ -44,7 +60,7 @@ export class FlutterMiniProgramMockWindow {
     search: "",
     pathname: "",
   };
-  localStorage = new (require("./storage").LocalStorage)();
+  localStorage = new(require("./storage").LocalStorage)();
   performance = {
     now: () => {
       return new Date().getTime();
@@ -163,12 +179,12 @@ export class FlutterMiniProgramMockWindow {
                 const result = {
                   done: false,
                   value: new Uint8Array(
-                    br
-                      ? fs.readCompressedFileSync({
-                          filePath: subPackageUrl,
-                          compressionAlgorithm: "br",
-                        })
-                      : fs.readFileSync(subPackageUrl)
+                    br ?
+                    fs.readCompressedFileSync({
+                      filePath: subPackageUrl,
+                      compressionAlgorithm: "br",
+                    }) :
+                    fs.readFileSync(subPackageUrl)
                   ),
                 };
                 bodyReadDone = true;
@@ -178,12 +194,12 @@ export class FlutterMiniProgramMockWindow {
           },
         };
         const arrayBuffer = async () => {
-          const originBuffer = br
-            ? fs.readCompressedFileSync({
-                filePath: subPackageUrl,
-                compressionAlgorithm: "br",
-              })
-            : fs.readFileSync(subPackageUrl);
+          const originBuffer = br ?
+            fs.readCompressedFileSync({
+              filePath: subPackageUrl,
+              compressionAlgorithm: "br",
+            }) :
+            fs.readFileSync(subPackageUrl);
           const newBuffer = new ArrayBuffer(originBuffer.byteLength);
           const sourceArray = new Uint8Array(originBuffer);
           const targetArray = new Uint8Array(newBuffer);
@@ -296,7 +312,10 @@ export class FlutterMiniProgramMockWindow {
           size: true,
         })
         .exec(async (res) => {
-          const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
+          const {
+            CanvasKitInit,
+            GLVersion
+          } = await new Promise((resolve) => {
             require("../../../canvaskit/pages/canvaskit", resolve);
           });
           const _flutter = getApp()._flutter;
@@ -331,10 +350,18 @@ export class FlutterMiniProgramMockWindow {
           const ckLoaded = CanvasKitInit(canvas);
           ckLoaded.then(async (CanvasKit) => {
             if (useMiniTex) {
-              const { MiniTex } = await new Promise((resolve) => {
+              const {
+                MiniTex
+              } = await new Promise((resolve) => {
                 require("../../../canvaskit/pages/minitex/index", resolve);
               });
-              MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio, embeddingFonts);
+              const materialIconsData = wx.getFileSystemManager().readCompressedFileSync({
+                filePath: "assets/fonts/MaterialIcons-Regular.otf.json.br",
+                compressionAlgorithm: "br",
+              })
+              MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio, embeddingFonts, {
+                "MaterialIcons": arrayBufferToUtf8String(materialIconsData)
+              });
             }
             const surface = CanvasKit.MakeCanvasSurface(canvas);
             _flutter.window.flutterCanvasKit = CanvasKit;
