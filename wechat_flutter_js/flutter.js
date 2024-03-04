@@ -279,7 +279,9 @@ globalThis.FlutterHostView = FlutterHostView;
     XMLHttpRequest: require("./flutter_bom/xml-http-request").XMLHttpRequest,
   };
   FlutterHostView.shared.onkeyboardheightchange = (e) => {
-    _flutter.self.keyboardHeightChanged(e.detail.height);
+    if (e.detail.height != null && e.detail.height != undefined) {
+      _flutter.self.keyboardHeightChanged(e.detail.height);
+    }
   };
   FlutterHostView.shared.onAndroidBackPressed = () => {
     _flutter.self.androidBackPressed();
