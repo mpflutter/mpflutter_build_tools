@@ -18,14 +18,14 @@ export const main = {
 
   onUnload() {
     FlutterHostView.shared.onwebglcontextlost?.();
-    wx.offKeyboardHeightChange(this.onkeyboardheightchange.bind(this));
+    wx.offKeyboardHeightChange(this.onWXKeyboardheightchange.bind(this));
   },
 
   async onLoad() {
     await new Promise((resolve) => {
       // 微信小程序 getSystemInfoAsync 接口在 PC 上是存在 BUG 的
       // https://developers.weixin.qq.com/community/develop/doc/000e46e65dc4e0be8a305ecb161c00?highLine=getsysteminfoasync%2520fail
-      const res = wx.getSystemInfoSync()
+      const res = wx.getSystemInfoSync();
       Object.assign(wxSystemInfo, res);
       resolve();
     });
@@ -41,11 +41,7 @@ export const main = {
       return;
     }
     require("./mpjs");
-    await Promise.all([
-      loadAssetPages(),
-      loadCanvasKitPages(),
-      loadPlugins(),
-    ]);
+    await Promise.all([loadAssetPages(), loadCanvasKitPages(), loadPlugins()]);
     if (useMiniTex && wxSystemInfo.platform === "android") {
       await loadRobotoFont();
     }
@@ -65,7 +61,7 @@ export const main = {
         await setupFlutterApp(canvas);
       });
 
-    wx.onKeyboardHeightChange(this.onkeyboardheightchange.bind(this));
+    wx.onKeyboardHeightChange(this.onWXKeyboardheightchange.bind(this));
   },
 
   onEnter() {
@@ -147,17 +143,14 @@ export const main = {
     callFlutterTouchEvent("ontouchcancel", arguments);
   },
 
-  onkeyboardheightchange(detail) {
-    let a = { detail: detail };
-    if (shouldDelayKeyboardHeightChange()) {
-      setTimeout(() => {
-        if (!FlutterHostView.shared.inputHasFocus) {
-          FlutterHostView.shared.onkeyboardheightchange.apply(null, [a]);
-        }
-      }, 100);
-      return;
+  onkeyboardheightchange(e) {
+    FlutterHostView.shared.onkeyboardheightchange(e);
+  },
+
+  onWXKeyboardheightchange(detail) {
+    if (detail.height <= 0) {
+      this.onkeyboardheightchange({ detail: detail });
     }
-    FlutterHostView.shared.onkeyboardheightchange.apply(null, [a]);
   },
 
   onPageContainerHide() {

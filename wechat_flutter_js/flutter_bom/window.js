@@ -4,6 +4,7 @@
 
 const { wxSystemInfo } = require("../system_info");
 const { useMiniTex, embeddingFonts } = require("../minitex");
+const { Event } = require("./event");
 
 export class FlutterMiniProgramMockWindow {
   // globals
@@ -26,7 +27,18 @@ export class FlutterMiniProgramMockWindow {
   }
 
   get innerHeight() {
-    return wxSystemInfo.windowHeight;
+    return wxSystemInfo.windowHeight - this._keyboardHeight;
+  }
+
+  // keyboard
+
+  _keyboardHeight = 0;
+
+  keyboardHeightChanged(height) {
+    this._keyboardHeight = height;
+    if (this.onResize) {
+      this.onResize(new Event());
+    }
   }
 
   // webs
@@ -60,8 +72,16 @@ export class FlutterMiniProgramMockWindow {
   dispatchEvent() {
     return true;
   }
-  addEventListener(event, callback) {}
-  removeEventListener() {}
+  addEventListener(event, callback) {
+    if (event === "resize") {
+      this.onResize = callback;
+    }
+  }
+  removeEventListener(event) {
+    if (event === "resize") {
+      this.onResize = undefined;
+    }
+  }
   getComputedStyle() {
     return {
       getPropertyValue: () => {
@@ -334,7 +354,11 @@ export class FlutterMiniProgramMockWindow {
               const { MiniTex } = await new Promise((resolve) => {
                 require("../../../canvaskit/pages/minitex/index", resolve);
               });
-              MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio, embeddingFonts);
+              MiniTex.install(
+                CanvasKit,
+                wxSystemInfo.devicePixelRatio,
+                embeddingFonts
+              );
             }
             const surface = CanvasKit.MakeCanvasSurface(canvas);
             _flutter.window.flutterCanvasKit = CanvasKit;
