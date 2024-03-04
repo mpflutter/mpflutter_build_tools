@@ -1,7 +1,7 @@
 name: mpflutter_build_tools
 description: The MPFlutter Build Tools
 
-version: 2.3.2
+version: 2.3.3
 
 environment:
   sdk: ">=3.1.1 <4.0.0"
