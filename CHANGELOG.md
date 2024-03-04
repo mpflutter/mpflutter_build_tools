@@ -1,5 +1,10 @@
 # ChangeLog
 
+## 2.3.4
+
+fix:
+- Keyboard 高度获取问题
+
 ## 2.3.3
 
 fix:
