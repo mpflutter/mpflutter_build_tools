@@ -144,6 +144,9 @@ export const main = {
   },
 
   onkeyboardheightchange(e) {
+    if (wxSystemInfo.platform === "android") {
+      return FlutterHostView.shared.onkeyboardheightchange(e);
+    }
     if (e.detail.height <= 0 && wx._mpflutter_hasFocus) {
       return;
     }
