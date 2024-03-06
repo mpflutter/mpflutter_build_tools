@@ -144,7 +144,16 @@ export const main = {
   },
 
   onkeyboardheightchange(e) {
-    FlutterHostView.shared.onkeyboardheightchange(e);
+    if (e.detail.height <= 0 && wx._mpflutter_hasFocus) {
+      return;
+    }
+    if (this.callOnkeyboardheightchangeTimer) {
+      clearTimeout(this.callOnkeyboardheightchangeTimer);
+    }
+    this.callOnkeyboardheightchangeTimer = setTimeout(() => {
+      this.callOnkeyboardheightchangeTimer = undefined;
+      FlutterHostView.shared.onkeyboardheightchange(e);
+    }, 100);
   },
 
   onWXKeyboardheightchange(detail) {
