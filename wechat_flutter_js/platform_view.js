@@ -202,12 +202,16 @@ export class FlutterPlatformViewManager {
         ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(0)}%);`;
         if (
           self.data.PVWrapper.removed === false &&
-          self.data.PVWrapper.style === wrapper
+          self.data.PVWrapper.style === wrapper &&
+          self.data.PVWrapper.top === viewOption.wrapper.top &&
+          self.data.PVWrapper.bottom === viewOption.wrapper.bottom
         )
           return;
           this.setData({
           "PVWrapper.removed": false,
           "PVWrapper.style": wrapper,
+          "PVWrapper.top": viewOption.wrapper.top,
+          "PVWrapper.bottom": viewOption.wrapper.bottom,
         });
       }
     } else {
