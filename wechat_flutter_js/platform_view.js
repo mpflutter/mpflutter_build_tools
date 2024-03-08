@@ -115,9 +115,9 @@ export class FlutterPlatformViewManager {
       targetElement.style = style;
       targetElement.props = { ...viewOption.props };
       const keyPath = blockName + `.[${targetIndex}]`;
-      this.setData({ [keyPath]: targetElement });
+      this.setData({ [keyPath]: targetElement }, true);
       // wrapper
-      this.updateWrapper(viewOption);
+      this.updateWrapper(viewOption, true);
     } else {
       // style
       const styleKeyPath = blockName + `.[${targetIndex}].style`;
@@ -184,7 +184,7 @@ export class FlutterPlatformViewManager {
     this.updateWrapper({});
   }
 
-  updateWrapper(viewOption) {
+  updateWrapper(viewOption, ignoreBatching) {
     const self = this.FlutterHostView.shared.self;
     const hasPV =
       Object.keys(this).filter((it) => it.endsWith("_pvcb")).length > 0;
@@ -207,16 +207,16 @@ export class FlutterPlatformViewManager {
           self.data.PVWrapper.bottom === viewOption.wrapper.bottom
         )
           return;
-          this.setData({
+        this.setData({
           "PVWrapper.removed": false,
           "PVWrapper.style": wrapper,
           "PVWrapper.top": viewOption.wrapper.top,
           "PVWrapper.bottom": viewOption.wrapper.bottom,
-        });
+        }, ignoreBatching);
       }
     } else {
       if (self.data.PVWrapper.removed === true) return;
-      this.setData({ "PVWrapper.removed": true });
+      this.setData({ "PVWrapper.removed": true }, ignoreBatching);
     }
   }
 
@@ -234,8 +234,8 @@ export class FlutterPlatformViewManager {
     this.batchData = {};
   }
 
-  setData(data) {
-    if (this.batching === true) {
+  setData(data, ignoreBatching) {
+    if (this.batching === true && !ignoreBatching) {
       Object.assign(this.batchData, data);
     } else {
       const self = this.FlutterHostView.shared.self;
