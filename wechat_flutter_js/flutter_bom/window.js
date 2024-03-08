@@ -12,7 +12,7 @@ const {
 
 function arrayBufferToUtf8String(arrayBuffer) {
   const uint8Array = new Uint8Array(arrayBuffer);
-  let utf8String = '';
+  let utf8String = "";
 
   for (let i = 0; i < uint8Array.length; i++) {
     utf8String += String.fromCharCode(uint8Array[i]);
@@ -299,6 +299,49 @@ export class FlutterMiniProgramMockWindow {
       });
     });
   };
+  // MiniTex
+  async MiniTexInit(CanvasKit) {
+    const {
+      MiniTex
+    } = await new Promise((resolve) => {
+      require("../../../canvaskit/pages/minitex/index", resolve);
+    });
+    let iconDatas = {};
+    const fs = wx.getFileSystemManager();
+
+    const loadSVGFont = async (iconPath) => {
+      await new Promise((resolve) => {
+        require(`../../../${iconPath.split("/")[1]}/pages/index`, resolve);
+      });
+      const svgExists = await new Promise((resolve) => {
+        fs.getFileInfo({
+          filePath: iconPath + ".svg.br",
+          success: () => {
+            resolve(true);
+          },
+          fail: () => {
+            resolve(false);
+          },
+        });
+      });
+      if (svgExists) {
+        return wx.getFileSystemManager().readCompressedFileSync({
+          filePath: iconPath + ".svg.br",
+          compressionAlgorithm: "br",
+        });
+      }
+    };
+    const materialIconPath =
+      require("../assets").default["/assets/fonts/MaterialIcons-Regular.otf"];
+    console.log("materialIconPath", materialIconPath, )
+    if (materialIconPath) {
+      const materialIconsData = await loadSVGFont(materialIconPath);
+      if (materialIconsData) {
+        iconDatas["MaterialIcons"] = arrayBufferToUtf8String(materialIconsData);
+      }
+    }
+    MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio, embeddingFonts, iconDatas);
+  }
   // bizs
   flutterConfiguration = {
     assetBase: "/",
@@ -350,18 +393,7 @@ export class FlutterMiniProgramMockWindow {
           const ckLoaded = CanvasKitInit(canvas);
           ckLoaded.then(async (CanvasKit) => {
             if (useMiniTex) {
-              const {
-                MiniTex
-              } = await new Promise((resolve) => {
-                require("../../../canvaskit/pages/minitex/index", resolve);
-              });
-              const materialIconsData = wx.getFileSystemManager().readCompressedFileSync({
-                filePath: "assets/fonts/MaterialIcons-Regular.otf.json.br",
-                compressionAlgorithm: "br",
-              })
-              MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio, embeddingFonts, {
-                "MaterialIcons": arrayBufferToUtf8String(materialIconsData)
-              });
+              await this.MiniTexInit(CanvasKit);
             }
             const surface = CanvasKit.MakeCanvasSurface(canvas);
             _flutter.window.flutterCanvasKit = CanvasKit;

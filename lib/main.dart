@@ -772,11 +772,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
   }
 
   Future _generateMiniTexIconFonts() async {
-    final mainDartJSFile = File(
-      join("build", 'wechat_tmp', 'pages', 'index', 'main.dart.js'),
-    );
-    final requireMiniTex =
-        useMiniTex || mainDartJSFile.readAsStringSync().contains("\"MiniTex\"");
+    final requireMiniTex = useMiniTex;
     if (requireMiniTex) {
       final files =
           Directory(join('build', 'wechat_tmp')).listSync(recursive: true);
@@ -795,8 +791,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
                 },
               ),
             ));
-            File(join(file.path + ".json"))
-                .writeAsStringSync(fontPathRes.data!);
+            File(join(file.path + ".svg")).writeAsStringSync(fontPathRes.data!);
           }
         }
       }
