@@ -41,10 +41,12 @@ export const main = {
       return;
     }
     require("./mpjs");
-    await Promise.all([loadAssetPages(), loadCanvasKitPages(), loadPlugins()]);
-    if (useMiniTex && wxSystemInfo.platform === "android") {
-      await loadRobotoFont();
-    }
+    await Promise.all([
+      loadAssetPages(),
+      loadCanvasKitPages(),
+      loadPlugins(),
+      loadRobotoFont(),
+    ]);
 
     setupFlutterHostView(this);
     setupAppLifeCycleListener();
@@ -270,6 +272,9 @@ async function loadPlugins() {
 }
 
 function loadRobotoFont() {
+  if (!(useMiniTex && wxSystemInfo.platform === "android")) {
+    return;
+  }
   return new Promise((resolve) => {
     let resolved = false;
     setTimeout(() => {
@@ -281,7 +286,7 @@ function loadRobotoFont() {
       global: true,
       family: "Roboto",
       source:
-        'url("https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf")',
+        'url("https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/lato-font/3.0.0/fonts/lato-normal/lato-normal.woff")',
       scopes: ["native"],
       success: function () {
         if (resolved) return;
