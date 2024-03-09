@@ -13,6 +13,7 @@ import './sourcemap.server.dart';
 
 bool licenseGrant = false;
 bool useMiniTex = false;
+bool useNoFontCanvasKit = false;
 final compactVersion = '3.16.7';
 
 late Directory _mpflutterSrcRoot;
@@ -267,6 +268,11 @@ class WechatBuilder {
         Directory(join('build', 'wechat_tmp', 'canvaskit', 'pages'));
     canvaskitOut.createSync(recursive: true);
     _copyDirectory(canvaskitSrc, canvaskitOut);
+    if (useNoFontCanvasKit) {
+      final noFontCanvaskitSrc =
+          Directory(join(_mpflutterSrcRoot.path, 'canvaskit_no_font'));
+      _copyDirectory(noFontCanvaskitSrc, canvaskitOut);
+    }
   }
 
   void _copyFlutterSkeleton(List<String> arguments) {
