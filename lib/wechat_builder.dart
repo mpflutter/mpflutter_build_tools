@@ -63,7 +63,8 @@ class WechatBuilder {
             ...[
               '--web-renderer',
               'canvaskit',
-              '--dart-define=mpflutter.library.core=true'
+              '--dart-define=mpflutter.library.core=true',
+              '--dart-define=mpflutter.buildtools.deferloadmain=true'
             ],
             ...arguments.contains('--debug')
                 ? ['--source-maps', '--dart2js-optimization', 'O1']
@@ -160,6 +161,7 @@ class WechatBuilder {
     _makeDisableFeatures();
     _makeShadowPages();
     _enableMiniTex();
+    _mergeSubpackages();
     _removeLicenseTipsFlag();
     wechatOutDir.deleteSync();
     wechatTmpDir.renameSync(wechatOutDir.path);
@@ -709,6 +711,47 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
           File(join(file.path + ".svg")).writeAsStringSync(fontPathRes.data!);
         }
       }
+    }
+  }
+
+  void _mergeSubpackages() {
+    final appJSONData = json
+        .decode(File(join(wechatTmpDir.path, 'app.json')).readAsStringSync());
+    final newAppJSONSubpackages = [];
+    final appJSONSubpackages = appJSONData["subpackages"];
+    var mainPkgSize =
+        calculateDirectorySizeSync(Directory(join(wechatTmpDir.path, "pages")));
+    if (appJSONSubpackages is List) {
+      appJSONSubpackages.sort((aPkg, bPkg) {
+        final a = aPkg["name"] as String;
+        final b = bPkg["name"] as String;
+        if (a.startsWith('canvaskit') && !b.startsWith('canvaskit')) {
+          return -1; // a排在b前面
+        } else if (b.startsWith('canvaskit') && !a.startsWith('canvaskit')) {
+          return 1; // b排在a前面
+        } else if (a.startsWith('mpflutter_wechat_') &&
+            !b.startsWith('mpflutter_wechat_')) {
+          return -1; // a排在b前面
+        } else if (b.startsWith('mpflutter_wechat_') &&
+            !a.startsWith('mpflutter_wechat_')) {
+          return 1; // b排在a前面
+        } else {
+          return 0; // 保持原有顺序
+        }
+      });
+      appJSONSubpackages.forEach((curPkg) {
+        final root = curPkg["root"] as String;
+        final rootDir = Directory(join(wechatTmpDir.path, root));
+        final rootDirSize = calculateDirectorySizeSync(rootDir);
+        if (mainPkgSize + rootDirSize < 2 * 1000 * 1000) {
+          mainPkgSize += rootDirSize;
+        } else {
+          newAppJSONSubpackages.add(curPkg);
+        }
+      });
+      appJSONData["subpackages"] = newAppJSONSubpackages;
+      File(join(wechatTmpDir.path, 'app.json'))
+          .writeAsStringSync(json.encode(appJSONData));
     }
   }
 

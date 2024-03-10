@@ -76,3 +76,16 @@ void copyDirectory(Directory source, Directory destination) {
     }
   });
 }
+
+int calculateDirectorySizeSync(Directory directory) {
+  int totalSize = 0;
+  final entities = directory.listSync();
+  for (var entity in entities) {
+    if (entity is File) {
+      totalSize += entity.lengthSync();
+    } else if (entity is Directory) {
+      totalSize += calculateDirectorySizeSync(entity);
+    }
+  }
+  return totalSize;
+}
