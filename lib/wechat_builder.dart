@@ -33,8 +33,24 @@ class WechatBuilder {
     return result;
   }
 
+  void createEntryIfNeeded() {
+    final mainFile = File(join('lib', 'main.mpflutter.dart'));
+    if (!mainFile.existsSync()) {
+      mainFile
+          .writeAsStringSync("""import './main.dart' deferred as origin_main;
+
+void main(List<String> args) async {
+  await origin_main.loadLibrary();
+  origin_main.main();
+}
+""");
+    }
+  }
+
   Future buildFlutterWeb(List<String> arguments) async {
     print("[INFO] 正在构建 flutter for web 产物");
+
+    createEntryIfNeeded();
 
     // remove flutter build dir
     final flutterBuildDir = Directory(join('.dart_tool', 'flutter_build'));
@@ -61,6 +77,7 @@ class WechatBuilder {
                 element == "--debug" ||
                 element == '--printstack')),
             ...[
+              '--target=lib/main.mpflutter.dart',
               '--web-renderer',
               'canvaskit',
               '--dart-define=mpflutter.library.core=true',
