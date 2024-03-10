@@ -1,5 +1,11 @@
 # ChangeLog
 
+## 2.4.1
+
+fix:
+- 修正 MiniTex utf-16 图标绘制问题。
+- 修正 Text height 未垂直居中问题。
+
 ## 2.4.0
 
 feat: 
