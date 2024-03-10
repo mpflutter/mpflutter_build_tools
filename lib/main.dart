@@ -268,7 +268,7 @@ class WechatBuilder {
         Directory(join('build', 'wechat_tmp', 'canvaskit', 'pages'));
     canvaskitOut.createSync(recursive: true);
     _copyDirectory(canvaskitSrc, canvaskitOut);
-    if (useNoFontCanvasKit) {
+    if (useMiniTex && useNoFontCanvasKit) {
       final noFontCanvaskitSrc =
           Directory(join(_mpflutterSrcRoot.path, 'canvaskit_no_font'));
       _copyDirectory(noFontCanvaskitSrc, canvaskitOut);
@@ -754,12 +754,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
   }
 
   void _enableMiniTex() {
-    final mainDartJSFile = File(
-      join("build", 'wechat_tmp', 'pages', 'index', 'main.dart.js'),
-    );
-    final requireMiniTex =
-        useMiniTex || mainDartJSFile.readAsStringSync().contains("\"MiniTex\"");
-    if (requireMiniTex) {
+    if (useMiniTex) {
       final fontManifestFile = File(
         join("build", 'web', 'assets', 'FontManifest.json'),
       );
