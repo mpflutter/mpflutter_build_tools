@@ -8,15 +8,20 @@ const drawer_1 = require("./impl/drawer");
 const paragraph_1 = require("./adapter/paragraph");
 const paragraph_builder_1 = require("./adapter/paragraph_builder");
 const logger_1 = require("./logger");
+const polyfill_1 = require("./polyfill");
 // import { logger } from "./logger";
 class MiniTex {
-    static install(canvasKit, pixelRatio, embeddingFonts) {
+    static install(canvasKit, pixelRatio, embeddingFonts, iconFonts) {
+        if (typeof canvasKit.ParagraphBuilder === "undefined") {
+            (0, polyfill_1.installPolyfill)(canvasKit);
+            paragraph_builder_1.ParagraphBuilder.usingPolyfill = true;
+        }
         // logger.profileMode = true;
         logger_1.logger.setLogLevel(logger_1.LogLevel.ERROR);
         drawer_1.Drawer.pixelRatio = pixelRatio;
         const originMakeFromFontCollectionMethod = canvasKit.ParagraphBuilder.MakeFromFontCollection;
         canvasKit.ParagraphBuilder.MakeFromFontCollection = function (style, fontCollection) {
-            return paragraph_builder_1.ParagraphBuilder.MakeFromFontCollection(originMakeFromFontCollectionMethod, style, fontCollection, embeddingFonts);
+            return paragraph_builder_1.ParagraphBuilder.MakeFromFontCollection(originMakeFromFontCollectionMethod, style, fontCollection, embeddingFonts, iconFonts);
         };
         const originDrawParagraphMethod = canvasKit.Canvas.prototype.drawParagraph;
         canvasKit.Canvas.prototype.drawParagraph = function (paragraph, dx, dy) {

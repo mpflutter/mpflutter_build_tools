@@ -6,6 +6,17 @@ const { wxSystemInfo } = require("../system_info");
 const { useMiniTex, embeddingFonts } = require("../minitex");
 const { Event } = require("./event");
 
+function arrayBufferToUtf8String(arrayBuffer) {
+  const uint8Array = new Uint8Array(arrayBuffer);
+  let utf8String = "";
+
+  for (let i = 0; i < uint8Array.length; i++) {
+    utf8String += String.fromCharCode(uint8Array[i]);
+  }
+
+  return decodeURIComponent(escape(utf8String));
+}
+
 export class FlutterMiniProgramMockWindow {
   // globals
   parseFloat = parseFloat;
@@ -56,7 +67,7 @@ export class FlutterMiniProgramMockWindow {
     search: "",
     pathname: "",
   };
-  localStorage = new (require("./storage").LocalStorage)();
+  localStorage = new(require("./storage").LocalStorage)();
   performance = {
     now: () => {
       return new Date().getTime();
@@ -183,12 +194,12 @@ export class FlutterMiniProgramMockWindow {
                 const result = {
                   done: false,
                   value: new Uint8Array(
-                    br
-                      ? fs.readCompressedFileSync({
-                          filePath: subPackageUrl,
-                          compressionAlgorithm: "br",
-                        })
-                      : fs.readFileSync(subPackageUrl)
+                    br ?
+                    fs.readCompressedFileSync({
+                      filePath: subPackageUrl,
+                      compressionAlgorithm: "br",
+                    }) :
+                    fs.readFileSync(subPackageUrl)
                   ),
                 };
                 bodyReadDone = true;
@@ -198,12 +209,12 @@ export class FlutterMiniProgramMockWindow {
           },
         };
         const arrayBuffer = async () => {
-          const originBuffer = br
-            ? fs.readCompressedFileSync({
-                filePath: subPackageUrl,
-                compressionAlgorithm: "br",
-              })
-            : fs.readFileSync(subPackageUrl);
+          const originBuffer = br ?
+            fs.readCompressedFileSync({
+              filePath: subPackageUrl,
+              compressionAlgorithm: "br",
+            }) :
+            fs.readFileSync(subPackageUrl);
           const newBuffer = new ArrayBuffer(originBuffer.byteLength);
           const sourceArray = new Uint8Array(originBuffer);
           const targetArray = new Uint8Array(newBuffer);
@@ -303,6 +314,49 @@ export class FlutterMiniProgramMockWindow {
       });
     });
   };
+  // MiniTex
+  async MiniTexInit(CanvasKit) {
+    const {
+      MiniTex
+    } = await new Promise((resolve) => {
+      require("../../../canvaskit/pages/minitex/index", resolve);
+    });
+    let iconDatas = {};
+    const fs = wx.getFileSystemManager();
+
+    const loadSVGFont = async (iconPath) => {
+      await new Promise((resolve) => {
+        require(`../../../${iconPath.split("/")[1]}/pages/index`, resolve);
+      });
+      const svgExists = await new Promise((resolve) => {
+        fs.getFileInfo({
+          filePath: iconPath + ".svg.br",
+          success: () => {
+            resolve(true);
+          },
+          fail: () => {
+            resolve(false);
+          },
+        });
+      });
+      if (svgExists) {
+        return wx.getFileSystemManager().readCompressedFileSync({
+          filePath: iconPath + ".svg.br",
+          compressionAlgorithm: "br",
+        });
+      }
+    };
+    const materialIconPath =
+      require("../assets").default["/assets/fonts/MaterialIcons-Regular.otf"];
+    console.log("materialIconPath", materialIconPath, )
+    if (materialIconPath) {
+      const materialIconsData = await loadSVGFont(materialIconPath);
+      if (materialIconsData) {
+        iconDatas["MaterialIcons"] = arrayBufferToUtf8String(materialIconsData);
+      }
+    }
+    MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio, embeddingFonts, iconDatas);
+  }
   // bizs
   flutterConfiguration = {
     assetBase: "/",
@@ -316,7 +370,10 @@ export class FlutterMiniProgramMockWindow {
           size: true,
         })
         .exec(async (res) => {
-          const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
+          const {
+            CanvasKitInit,
+            GLVersion
+          } = await new Promise((resolve) => {
             require("../../../canvaskit/pages/canvaskit", resolve);
           });
           const _flutter = getApp()._flutter;
@@ -351,14 +408,7 @@ export class FlutterMiniProgramMockWindow {
           const ckLoaded = CanvasKitInit(canvas);
           ckLoaded.then(async (CanvasKit) => {
             if (useMiniTex) {
-              const { MiniTex } = await new Promise((resolve) => {
-                require("../../../canvaskit/pages/minitex/index", resolve);
-              });
-              MiniTex.install(
-                CanvasKit,
-                wxSystemInfo.devicePixelRatio,
-                embeddingFonts
-              );
+              await this.MiniTexInit(CanvasKit);
             }
             const surface = CanvasKit.MakeCanvasSurface(canvas);
             _flutter.window.flutterCanvasKit = CanvasKit;
