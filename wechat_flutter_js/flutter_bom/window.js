@@ -348,11 +348,18 @@ export class FlutterMiniProgramMockWindow {
     };
     const materialIconPath =
       require("../assets").default["/assets/fonts/MaterialIcons-Regular.otf"];
-    console.log("materialIconPath", materialIconPath, )
     if (materialIconPath) {
       const materialIconsData = await loadSVGFont(materialIconPath);
       if (materialIconsData) {
         iconDatas["MaterialIcons"] = arrayBufferToUtf8String(materialIconsData);
+      }
+    }
+    const cupertinoIconPath =
+      require("../assets").default["/assets/packages/cupertino_icons/assets/CupertinoIcons.ttf"];
+    if (cupertinoIconPath) {
+      const cupertinoIconData = await loadSVGFont(cupertinoIconPath);
+      if (cupertinoIconData) {
+        iconDatas["packages/cupertino_icons/CupertinoIcons"] = arrayBufferToUtf8String(cupertinoIconData);
       }
     }
     MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio, embeddingFonts, iconDatas);
