@@ -112,7 +112,7 @@ export class FlutterMiniProgramMockWindow {
     }
     return new Promise(async (resolve, reject) => {
       if (
-        url.startsWith("https://fonts.gstatic.com/s/notosanssc/") &&
+        url.startsWith("https://fonts.gstatic.com/s/") &&
         (url.endsWith(".otf") || url.endsWith(".ttf"))
       ) {
         let mUrl = "/assets/fonts/NotoSansSC-Regular.ttf";
