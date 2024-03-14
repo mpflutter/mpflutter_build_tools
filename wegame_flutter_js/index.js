@@ -31,6 +31,13 @@ export class Main {
     this.canvas.width = this.canvas.width * wxSystemInfo.pixelRatio;
     this.canvas.height = this.canvas.height * wxSystemInfo.pixelRatio;
     setupFlutterApp(this.canvas);
+
+    for (var i = 0; i < 10; i++) {
+      setTimeout(() => {
+        FlutterHostView.shared.onwebglcontextlost?.();
+        FlutterHostView.shared.onwebglcontextrestored?.();
+      }, i * 100);
+    }
   }
 
   setData() {}

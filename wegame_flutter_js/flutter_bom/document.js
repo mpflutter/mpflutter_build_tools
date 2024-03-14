@@ -38,7 +38,7 @@ export class FlutterMiniProgramMockDocument {
       const isOffScreen = _flutter.activeCanvasBinded === true;
       let canvas = !isOffScreen
         ? _flutter.activeCanvas
-        : wx.createOffscreenCanvas({
+        : wx.createCanvas({
             type: GLVersion >= 2 ? "webgl2" : "webgl",
             width: 1,
             height: 1,
@@ -66,7 +66,7 @@ export class FlutterMiniProgramMockDocument {
         };
       } else {
         recreateOffScrrenCanvas = function () {
-          let newCanvas = wx.createOffscreenCanvas({
+          let newCanvas = wx.createCanvas({
             type: GLVersion >= 2 ? "webgl2" : "webgl",
             width: canvas._width,
             height: canvas._height,
@@ -111,6 +111,7 @@ export class FlutterMiniProgramMockDocument {
         enumerable: true,
         configurable: true,
       });
+      canvas.style.setProperty = () => {};
       return canvas;
     } else if (tag === "flutter-view") {
       const el = new (require("./element").FlutterMiniProgramMockElement)();
