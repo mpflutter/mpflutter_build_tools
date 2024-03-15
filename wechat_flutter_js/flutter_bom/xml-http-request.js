@@ -143,16 +143,14 @@ export class XMLHttpRequest {
     this.$_status = statusCode;
     this.$_resHeader = header;
     this.$_callReadyStateChange(XMLHttpRequest.HEADERS_RECEIVED);
-    if (data) {
-      this.$_callReadyStateChange(XMLHttpRequest.LOADING);
-      this.$$trigger("loadstart");
-      if (this.$_responseType === "blob") {
-        this.$_response = new Blob([data]);
-      } else {
-        this.$_response = data;
-      }
-      this.$$trigger("loadend");
+    this.$_callReadyStateChange(XMLHttpRequest.LOADING);
+    this.$$trigger("loadstart");
+    if (this.$_responseType === "blob") {
+      this.$_response = new Blob([data]);
+    } else {
+      this.$_response = data ?? new ArrayBuffer(0);
     }
+    this.$$trigger("loadend");
   }
   $_requestFail({ errMsg }) {
     this.$_status = 0;

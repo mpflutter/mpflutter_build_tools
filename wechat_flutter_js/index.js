@@ -18,14 +18,14 @@ export const main = {
 
   onUnload() {
     FlutterHostView.shared.onwebglcontextlost?.();
-    wx.offKeyboardHeightChange(this.onkeyboardheightchange.bind(this));
+    wx.offKeyboardHeightChange(this.onWXKeyboardheightchange.bind(this));
   },
 
   async onLoad() {
     await new Promise((resolve) => {
       // 微信小程序 getSystemInfoAsync 接口在 PC 上是存在 BUG 的
       // https://developers.weixin.qq.com/community/develop/doc/000e46e65dc4e0be8a305ecb161c00?highLine=getsysteminfoasync%2520fail
-      const res = wx.getSystemInfoSync()
+      const res = wx.getSystemInfoSync();
       Object.assign(wxSystemInfo, res);
       resolve();
     });
@@ -45,10 +45,8 @@ export const main = {
       loadAssetPages(),
       loadCanvasKitPages(),
       loadPlugins(),
+      loadRobotoFont(),
     ]);
-    if (useMiniTex && wxSystemInfo.platform === "android") {
-      await loadRobotoFont();
-    }
 
     setupFlutterHostView(this);
     setupAppLifeCycleListener();
@@ -65,7 +63,7 @@ export const main = {
         await setupFlutterApp(canvas);
       });
 
-    wx.onKeyboardHeightChange(this.onkeyboardheightchange.bind(this));
+    wx.onKeyboardHeightChange(this.onWXKeyboardheightchange.bind(this));
   },
 
   onEnter() {
@@ -147,17 +145,26 @@ export const main = {
     callFlutterTouchEvent("ontouchcancel", arguments);
   },
 
-  onkeyboardheightchange(detail) {
-    let a = { detail: detail };
-    if (shouldDelayKeyboardHeightChange()) {
-      setTimeout(() => {
-        if (!FlutterHostView.shared.inputHasFocus) {
-          FlutterHostView.shared.onkeyboardheightchange.apply(null, [a]);
-        }
-      }, 100);
+  onkeyboardheightchange(e) {
+    if (wxSystemInfo.platform === "android") {
+      return FlutterHostView.shared.onkeyboardheightchange(e);
+    }
+    if (e.detail.height <= 0 && wx._mpflutter_hasFocus) {
       return;
     }
-    FlutterHostView.shared.onkeyboardheightchange.apply(null, [a]);
+    if (this.callOnkeyboardheightchangeTimer) {
+      clearTimeout(this.callOnkeyboardheightchangeTimer);
+    }
+    this.callOnkeyboardheightchangeTimer = setTimeout(() => {
+      this.callOnkeyboardheightchangeTimer = undefined;
+      FlutterHostView.shared.onkeyboardheightchange(e);
+    }, 100);
+  },
+
+  onWXKeyboardheightchange(detail) {
+    if (detail.height <= 0) {
+      this.onkeyboardheightchange({ detail: detail });
+    }
   },
 
   onPageContainerHide() {
@@ -237,7 +244,7 @@ export const main = {
       const event = e.type;
       const pvid = e.target.id;
       const detail = e.detail;
-      getApp()._flutter.self.platformViewManager.onPVCB({
+      return getApp()._flutter.self.platformViewManager.onPVCB({
         pvid,
         event,
         detail,
@@ -265,18 +272,31 @@ async function loadPlugins() {
 }
 
 function loadRobotoFont() {
+  if (!(useMiniTex && wxSystemInfo.platform === "android")) {
+    return;
+  }
   return new Promise((resolve) => {
+    let resolved = false;
+    setTimeout(() => {
+      if (resolved) return;
+      resolved = true;
+      resolve();
+    }, 2000);
     wx.loadFontFace({
       global: true,
       family: "Roboto",
       source:
-        "https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf",
+        'url("https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/lato-font/3.0.0/fonts/lato-normal/lato-normal.woff")',
       scopes: ["native"],
       success: function () {
+        if (resolved) return;
+        resolved = true;
         resolve();
       },
       fail: function (err) {
+        if (resolved) return;
         console.log("fail to load roboto", err);
+        resolved = true;
         resolve();
       },
     });

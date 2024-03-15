@@ -182,11 +182,13 @@ globalThis.FlutterHostView = FlutterHostView;
      */
     async loadEntrypoint(options) {
       if (wxSystemInfo.safeArea) {
-        _flutter.self.safeAreaInsetTop = Math.max(wxSystemInfo.safeArea.top, wxSystemInfo.statusBarHeight);
+        _flutter.self.safeAreaInsetTop = Math.max(
+          wxSystemInfo.safeArea.top,
+          wxSystemInfo.statusBarHeight
+        );
         _flutter.self.safeAreaInsetBottom =
           wxSystemInfo.windowHeight - wxSystemInfo.safeArea.bottom;
-      }
-      else {
+      } else {
         _flutter.self.safeAreaInsetTop = 0;
         _flutter.self.safeAreaInsetBottom = 0;
       }
@@ -250,6 +252,8 @@ globalThis.FlutterHostView = FlutterHostView;
     HTMLTextAreaElement: require("./flutter_bom/input")
       .FlutterMiniProgramMockInputElement,
     encodeImage: require("./flutter_bom/image_encoder").encodeImage,
+    encodeImageToFilePath: require("./flutter_bom/image_encoder")
+      .encodeImageToFilePath,
     $__dart_deferred_initializers__: [],
     dartDeferredLibraryLoader: function (uri, res, rej) {
       const pkgs = require("./pkgs").default;
@@ -278,7 +282,10 @@ globalThis.FlutterHostView = FlutterHostView;
     XMLHttpRequest: require("./flutter_bom/xml-http-request").XMLHttpRequest,
   };
   FlutterHostView.shared.onkeyboardheightchange = (e) => {
-    _flutter.self.keyboardHeightChanged(e.detail.height);
+    if (e.detail.height != null && e.detail.height != undefined) {
+      _flutter.self.keyboardHeightChanged(e.detail.height);
+      _flutter.self.window.keyboardHeightChanged(e.detail.height);
+    }
   };
   FlutterHostView.shared.onAndroidBackPressed = () => {
     _flutter.self.androidBackPressed();
@@ -299,6 +306,7 @@ globalThis.FlutterHostView = FlutterHostView;
   globalThis.localStorage = _flutter.self.localStorage;
   globalThis.Blob = _flutter.self.Blob;
   globalThis.FileReader = _flutter.self.FileReader;
+  globalThis.performance = _flutter.self.window.performance;
 
   let originObjectStringFunction = Object.prototype.toString;
   Object.prototype.toString = function () {

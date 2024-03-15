@@ -74,33 +74,24 @@ function loadAssetPages() {
     wx.loadSubpackage({
       name: "assets",
       success: function () {
-        // resolve();
-        wx.loadSubpackage({
-          name: "assets1",
-          success: function () {
-            resolve();
-          },
-          fail: function () {
-            reject();
-          },
-        });
+        resolve();
       },
       fail: function () {
-        reject();
+        resolve();
       },
     });
   });
 }
 
 function loadCanvasKitPages() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     wx.loadSubpackage({
       name: "canvaskit",
       success: function () {
         resolve();
       },
       fail: function () {
-        reject();
+        resolve();
       },
     });
   });

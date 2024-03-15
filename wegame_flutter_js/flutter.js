@@ -260,20 +260,22 @@ globalThis.FlutterHostView = FlutterHostView;
         typeof require.async === "function"
       ) {
         if (pkgs[uri]) {
-          require("../../" +
-            pkgs[uri] +
-            "/pages" +
-            uri.replace(".part.js", ".part"), function () {
-            // console.log(uri, "done");
-            res();
-          }, function (err) {
-            console.error(err);
-          });
+          console.log("load", pkgs[uri] + "/pages" + uri.replace(".part.js", ".part"))
+          wx.loadSubpackage({
+            // complete: complete,
+            fail: function() {
+              console.error(err);
+              rej();
+            },
+            name: pkgs[uri],
+            success: function() {
+              require( "../../" + pkgs[uri] + "/pages" + uri.replace(".part.js", ".part"));
+              res();
+            },
+          })
         } else {
-          require("./" + uri, function () {
-            // console.log(uri, "done");
-            res();
-          });
+          require( "../../" + pkgs[uri] + "/pages" + uri.replace(".part.js", ".part"));
+          res();
         }
       }
     },

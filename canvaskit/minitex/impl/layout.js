@@ -13,8 +13,8 @@ class LetterMeasurer {
     static measureLetters(span, context) {
         let advances = [0];
         let curPosWidth = 0;
-        for (let index = 0; index < span.text.length; index++) {
-            const letter = span.text[index];
+        for (let index = 0; index < span.charSequence.length; index++) {
+            const letter = span.charSequence[index];
             let wordWidth = (() => {
                 if ((0, util_1.isSquareCharacter)(letter)) {
                     return this.measureSquareCharacter(context);
@@ -25,7 +25,7 @@ class LetterMeasurer {
             })();
             if (span.hasWordSpacing() &&
                 letter === " " &&
-                (0, util_1.isEnglishWord)(span.text[index - 1])) {
+                (0, util_1.isEnglishWord)(span.charSequence[index - 1])) {
                 wordWidth = span.style.wordSpacing;
             }
             else if (span.hasLetterSpacing()) {
@@ -114,9 +114,7 @@ class TextLayout {
         if (layoutWidth < 0) {
             layoutWidth = this.previousLayoutWidth;
         }
-        else {
-            this.previousLayoutWidth = layoutWidth;
-        }
+        this.previousLayoutWidth = layoutWidth;
         this.initCanvas();
         this.glyphInfos = [];
         let currentLineMetrics = {
@@ -142,42 +140,50 @@ class TextLayout {
         let lineMetrics = [];
         const spans = (0, span_1.spanWithNewline)(this.paragraph.spans);
         spans.forEach((span) => {
-            var _a, _b, _c;
+            var _a, _b, _c, _d;
             if (span instanceof span_1.TextSpan) {
                 TextLayout.sharedLayoutContext.font = span.toCanvasFont();
-                const matrics = TextLayout.sharedLayoutContext.measureText(span.text);
-                if (!matrics.fontBoundingBoxAscent) {
+                const matrics = TextLayout.sharedLayoutContext.measureText(span.originText);
+                let iconFontWidth = 0;
+                if (this.paragraph.iconFontData) {
+                    const fontSize = (_a = span.style.fontSize) !== null && _a !== void 0 ? _a : 14;
+                    iconFontWidth = fontSize;
+                    currentLineMetrics.ascent = fontSize;
+                    currentLineMetrics.descent = 0;
+                    span.letterBaseline = fontSize;
+                    span.letterHeight = fontSize;
+                }
+                else {
                     const mHeight = TextLayout.sharedLayoutContext.measureText("M").width;
                     currentLineMetrics.ascent = mHeight * 1.15;
                     currentLineMetrics.descent = mHeight * 0.35;
                     span.letterBaseline = mHeight * 1.15;
                     span.letterHeight = mHeight * 1.15 + mHeight * 0.35;
                 }
-                else {
-                    currentLineMetrics.ascent = matrics.fontBoundingBoxAscent;
-                    currentLineMetrics.descent = matrics.fontBoundingBoxDescent;
-                    span.letterBaseline = matrics.fontBoundingBoxAscent;
-                    span.letterHeight =
-                        matrics.fontBoundingBoxAscent + matrics.fontBoundingBoxDescent;
-                }
                 if (span.style.heightMultiplier && span.style.heightMultiplier > 0) {
                     currentLineMetrics.heightMultiplier = Math.max(currentLineMetrics.heightMultiplier, span.style.heightMultiplier / 1.5);
                 }
                 currentLineMetrics.height = Math.max(currentLineMetrics.height, currentLineMetrics.ascent + currentLineMetrics.descent);
                 currentLineMetrics.baseline = Math.max(currentLineMetrics.baseline, currentLineMetrics.ascent);
-                if (currentLineMetrics.width + matrics.width < layoutWidth &&
+                if (this.paragraph.iconFontData) {
+                    const textWidth = span.charSequence.length * iconFontWidth;
+                    currentLineMetrics.endIndex += span.charSequence.length;
+                    currentLineMetrics.width += textWidth;
+                }
+                else if (currentLineMetrics.width + matrics.width < layoutWidth &&
                     !span.hasLetterSpacing() &&
                     !span.hasWordSpacing() &&
                     !forceCalcGlyphInfos) {
+                    // fast measure
                     if (span instanceof span_1.NewlineSpan) {
                         const newLineMatrics = this.createNewLine(currentLineMetrics);
                         lineMetrics.push(currentLineMetrics);
                         currentLineMetrics = newLineMatrics;
                     }
                     else {
-                        currentLineMetrics.endIndex += span.text.length;
+                        currentLineMetrics.endIndex += span.charSequence.length;
                         currentLineMetrics.width += matrics.width;
-                        if (((_b = (_a = span.style.fontStyle) === null || _a === void 0 ? void 0 : _a.slant) === null || _b === void 0 ? void 0 : _b.value) === skia_2.FontSlant.Italic) {
+                        if (((_c = (_b = span.style.fontStyle) === null || _b === void 0 ? void 0 : _b.slant) === null || _c === void 0 ? void 0 : _c.value) === skia_2.FontSlant.Italic) {
                             currentLineMetrics.width += 2;
                         }
                     }
@@ -188,18 +194,22 @@ class TextLayout {
                     if (span instanceof span_1.NewlineSpan) {
                         advances = [0, 0];
                     }
+                    if (Math.abs(advances[advances.length - 1] - layoutWidth) < 10 &&
+                        layoutWidth === this.previousLayoutWidth) {
+                        layoutWidth = advances[advances.length - 1];
+                    }
                     let currentWord = "";
                     let currentWordWidth = 0;
                     let currentWordLength = 0;
                     let nextWordWidth = 0;
                     let canBreak = true;
                     let forceBreak = false;
-                    for (let index = 0; index < span.text.length; index++) {
-                        const letter = span.text[index];
+                    for (let index = 0; index < span.charSequence.length; index++) {
+                        const letter = span.charSequence[index];
                         currentWord += letter;
                         let currentLetterLeft = currentWordWidth;
-                        let spanEnded = span.text[index + 1] === undefined;
-                        let nextWord = (_c = currentWord + span.text[index + 1]) !== null && _c !== void 0 ? _c : "";
+                        let spanEnded = span.charSequence[index + 1] === undefined;
+                        let nextWord = (_d = currentWord + span.charSequence[index + 1]) !== null && _d !== void 0 ? _d : "";
                         if (advances[index + 1] === undefined) {
                             currentWordWidth += advances[index] - advances[index - 1];
                         }
@@ -251,7 +261,7 @@ class TextLayout {
                             continue;
                         }
                         else if (!forceBreak &&
-                            currentLineMetrics.width + currentWordWidth < layoutWidth) {
+                            currentLineMetrics.width + currentWordWidth <= layoutWidth) {
                             currentLineMetrics.width += currentWordWidth;
                             currentLineMetrics.endIndex += currentWordLength;
                             currentWord = "";
@@ -260,7 +270,7 @@ class TextLayout {
                             canBreak = true;
                         }
                         else if (forceBreak ||
-                            currentLineMetrics.width + currentWordWidth >= layoutWidth) {
+                            currentLineMetrics.width + currentWordWidth > layoutWidth) {
                             const newLineMatrics = this.createNewLine(currentLineMetrics);
                             lineMetrics.push(currentLineMetrics);
                             currentLineMetrics = newLineMatrics;

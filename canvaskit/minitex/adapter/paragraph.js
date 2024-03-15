@@ -9,14 +9,15 @@ const layout_1 = require("../impl/layout");
 const span_1 = require("../impl/span");
 const logger_1 = require("../logger");
 const skia_1 = require("./skia");
+let drawParagraphSharedPaint;
 const drawParagraph = function (CanvasKit, skCanvas, paragraph, dx, dy) {
     let drawStartTime;
     if (logger_1.logger.profileMode) {
         drawStartTime = new Date().getTime();
     }
-    const drawer = new drawer_1.Drawer(paragraph);
     let canvasImg = paragraph.skImageCache;
     if (!canvasImg) {
+        const drawer = new drawer_1.Drawer(paragraph);
         const imageData = drawer.draw();
         canvasImg = CanvasKit.MakeImage({
             width: imageData.width,
@@ -31,7 +32,8 @@ const drawParagraph = function (CanvasKit, skCanvas, paragraph, dx, dy) {
     }
     const srcRect = CanvasKit.XYWHRect(0, 0, paragraph.skImageWidth, paragraph.skImageHeight);
     const dstRect = CanvasKit.XYWHRect(Math.ceil(dx), Math.ceil(dy), paragraph.skImageWidth / drawer_1.Drawer.pixelRatio, paragraph.skImageHeight / drawer_1.Drawer.pixelRatio);
-    const skPaint = new CanvasKit.Paint();
+    const skPaint = drawParagraphSharedPaint !== null && drawParagraphSharedPaint !== void 0 ? drawParagraphSharedPaint : new CanvasKit.Paint();
+    drawParagraphSharedPaint = skPaint;
     skCanvas.drawImageRect(canvasImg, srcRect, dstRect, skPaint);
     if (logger_1.logger.profileMode) {
         const drawCostTime = new Date().getTime() - drawStartTime;
@@ -40,13 +42,17 @@ const drawParagraph = function (CanvasKit, skCanvas, paragraph, dx, dy) {
 };
 exports.drawParagraph = drawParagraph;
 class Paragraph extends skia_1.SkEmbindObject {
-    constructor(spans, paragraphStyle) {
+    constructor(spans, paragraphStyle, iconFontData) {
         super();
         this.spans = spans;
         this.paragraphStyle = paragraphStyle;
+        this.iconFontData = iconFontData;
         this._type = "SkParagraph";
         this.isMiniTex = true;
         this._textLayout = new layout_1.TextLayout(this);
+        if (this.iconFontData) {
+            this.iconFontMap = JSON.parse(this.iconFontData);
+        }
     }
     delete() {
         if (this.skImageCache) {
@@ -268,7 +274,7 @@ class Paragraph extends skia_1.SkEmbindObject {
             const lastLine = this._textLayout.lineMetrics[this._textLayout.lineMetrics.length - 1];
             if (end > lastLine.endIndex &&
                 lastSpan instanceof span_1.TextSpan &&
-                lastSpan.text.endsWith("\n")) {
+                lastSpan.originText.endsWith("\n")) {
                 return [
                     {
                         rect: new Float32Array([

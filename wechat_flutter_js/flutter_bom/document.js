@@ -133,7 +133,7 @@ export class FlutterMiniProgramMockDocument {
   }
 
   hasFocus() {
-    return false;
+    return wx._mpflutter_hasFocus === true;
   }
 
   createEvent() {

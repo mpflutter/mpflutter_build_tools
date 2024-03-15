@@ -41,7 +41,7 @@ class Drawer {
             linesUndrawed[it.lineNumber] = it.endIndex - it.startIndex;
         });
         spans.forEach((span) => {
-            var _a, _b, _c, _d, _e, _f;
+            var _a, _b, _c, _d, _e, _f, _g;
             if (didExceedMaxLines)
                 return;
             if (span instanceof span_1.TextSpan) {
@@ -49,18 +49,18 @@ class Drawer {
                     spanLetterStartIndex++;
                     return;
                 }
-                let spanUndrawLength = span.text.length;
-                let spanLetterEndIndex = spanLetterStartIndex + span.text.length;
+                let spanUndrawLength = span.charSequence.length;
+                let spanLetterEndIndex = spanLetterStartIndex + span.charSequence.length;
                 const lineMetrics = this.paragraph.getLineMetricsOfRange(spanLetterStartIndex, spanLetterEndIndex);
                 context.font = span.toCanvasFont();
                 while (spanUndrawLength > 0) {
-                    let currentDrawText = "";
+                    let currentDrawText = [];
                     let currentDrawLine;
                     for (let index = 0; index < lineMetrics.length; index++) {
                         const line = lineMetrics[index];
                         if (linesUndrawed[line.lineNumber] > 0) {
                             const currentDrawLength = Math.min(linesUndrawed[line.lineNumber], spanUndrawLength);
-                            currentDrawText = span.text.substring(span.text.length - spanUndrawLength, span.text.length - spanUndrawLength + currentDrawLength);
+                            currentDrawText = span.charSequence.slice(span.charSequence.length - spanUndrawLength, span.charSequence.length - spanUndrawLength + currentDrawLength);
                             spanUndrawLength -= currentDrawLength;
                             linesUndrawed[line.lineNumber] -= currentDrawLength;
                             currentDrawLine = line;
@@ -76,8 +76,8 @@ class Drawer {
                         const trimLength = (0, util_1.isSquareCharacter)(currentDrawText[currentDrawText.length - 1])
                             ? 1
                             : 3;
-                        currentDrawText =
-                            (_a = currentDrawText.substring(0, currentDrawText.length - trimLength) + this.paragraph.paragraphStyle.ellipsis) !== null && _a !== void 0 ? _a : "...";
+                        currentDrawText = currentDrawText.slice(0, currentDrawText.length - trimLength);
+                        currentDrawText.push(...Array.from((_a = this.paragraph.paragraphStyle.ellipsis) !== null && _a !== void 0 ? _a : "..."));
                         didExceedMaxLines = true;
                     }
                     let drawingLeft = (() => {
@@ -105,13 +105,14 @@ class Drawer {
                     })();
                     const drawingRight = drawingLeft +
                         (() => {
-                            if (currentDrawText === "\n") {
+                            if (currentDrawText.length === 1 && currentDrawText[0] === "\n") {
                                 return 0;
                             }
                             const extraLetterSpacing = span.hasLetterSpacing()
                                 ? currentDrawText.length * span.style.letterSpacing
                                 : 0;
-                            return (context.measureText(currentDrawText).width + extraLetterSpacing);
+                            return (context.measureText(currentDrawText.join("")).width +
+                                extraLetterSpacing);
                         })();
                     linesDrawingRightBounds[currentDrawLine.lineNumber] = drawingRight;
                     const textTop = currentDrawLine.baseline * currentDrawLine.heightMultiplier -
@@ -136,7 +137,15 @@ class Drawer {
                         context.shadowBlur = (_f = span.style.shadows[0].blurRadius) !== null && _f !== void 0 ? _f : 0;
                     }
                     context.fillStyle = span.toTextFillStyle();
-                    if (span.hasLetterSpacing() ||
+                    if (this.paragraph.iconFontData) {
+                        for (let index = 0; index < currentDrawText.length; index++) {
+                            const currentDrawLetter = currentDrawText[index];
+                            const letterWidth = (_g = span.style.fontSize) !== null && _g !== void 0 ? _g : 14;
+                            this.fillIcon(context, currentDrawLetter, letterWidth, drawingLeft, textBaseline + currentDrawLine.yOffset);
+                            drawingLeft += letterWidth;
+                        }
+                    }
+                    else if (span.hasLetterSpacing() ||
                         span.hasWordSpacing() ||
                         span.hasJustifySpacing(this.paragraph.paragraphStyle)) {
                         const letterSpacing = span.hasLetterSpacing()
@@ -164,7 +173,7 @@ class Drawer {
                         }
                     }
                     else {
-                        context.fillText(currentDrawText, drawingLeft, textBaseline + currentDrawLine.yOffset);
+                        context.fillText(currentDrawText.join(""), drawingLeft, textBaseline + currentDrawLine.yOffset);
                     }
                     context.restore();
                     logger_1.logger.debug("Drawer.draw.fillText", currentDrawText, drawingLeft, textBaseline + currentDrawLine.yOffset);
@@ -185,6 +194,56 @@ class Drawer {
         });
         context.restore();
         return context.getImageData(0, 0, width, height);
+    }
+    fillIcon(context, text, fontSize, x, y) {
+        var _a;
+        const svgPath = (_a = this.paragraph.iconFontMap) === null || _a === void 0 ? void 0 : _a[text];
+        if (!svgPath) {
+            console.log("fill icon not found", text.charCodeAt(0).toString(16));
+            return;
+        }
+        const pathCommands = svgPath.match(/[A-Za-z]\d+([\.\d,]+)?/g);
+        if (!pathCommands)
+            return;
+        context.save();
+        context.beginPath();
+        let lastControlPoint = null;
+        pathCommands.forEach((command) => {
+            const type = command.charAt(0);
+            const args = command
+                .substring(1)
+                .split(",")
+                .map(parseFloat)
+                .map((it, index) => {
+                let value = it;
+                if (index % 2 === 1) {
+                    value = 150 - value + 150;
+                }
+                return value * (fontSize / 300);
+            });
+            if (type === "M") {
+                context.moveTo(args[0], args[1]);
+            }
+            else if (type === "L") {
+                context.lineTo(args[0], args[1]);
+            }
+            else if (type === "C") {
+                context.bezierCurveTo(args[0], args[1], args[2], args[3], args[4], args[5]);
+                lastControlPoint = [args[2], args[3]];
+            }
+            else if (type === "Q") {
+                context.quadraticCurveTo(args[0], args[1], args[2], args[3]);
+                lastControlPoint = [args[0], args[1]];
+            }
+            else if (type === "A") {
+                // no need A
+            }
+            else if (type === "Z") {
+                context.closePath();
+            }
+        });
+        context.fill();
+        context.restore();
     }
     computeJustifySpacing(text, lineWidth, justifyWidth) {
         let count = 0;
