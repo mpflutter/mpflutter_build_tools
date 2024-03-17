@@ -23,7 +23,7 @@ export class Main {
       Object.assign(wxSystemInfo, res);
       resolve();
     });
-    await Promise.all([loadAssetPages(), loadCanvasKitPages()]);
+    await Promise.all([loadAssetPages(), loadCanvasKitPages(), loadPlugins()]);
     FlutterHostView.shared.self = this;
     getApp()._flutter.window.requestAnimationFrame =
       this.canvas.requestAnimationFrame;

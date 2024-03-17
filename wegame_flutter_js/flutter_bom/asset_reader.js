@@ -7,7 +7,7 @@ export async function getAssetPath(key) {
   if (!key.startsWith("/")) {
     normalizeKey = "/" + key;
   }
-  let subPackageUrl = require("../assets").default[key] ?? key;
+  let subPackageUrl = require("../assets").default[normalizeKey] ?? normalizeKey;
   await new Promise((resolve) => {
     wx.loadSubpackage({
       name: subPackageUrl.split("/")[1],
@@ -39,7 +39,7 @@ export async function isAssetExist(key) {
   return brExists;
 }
 
-export async function readAssetAsBuffer() {
+export async function readAssetAsBuffer(key) {
   const filePath = await getAssetPath(key);
   const fs = wx.getFileSystemManager();
   return fs.readCompressedFileSync({
@@ -48,7 +48,7 @@ export async function readAssetAsBuffer() {
   });
 }
 
-export async function readAssetAsText() {
+export async function readAssetAsText(key) {
   const filePath = await getAssetPath(key);
   const tmpFile = wx.env.USER_DATA_PATH + "/brtext_tmp";
   fs.writeFileSync(

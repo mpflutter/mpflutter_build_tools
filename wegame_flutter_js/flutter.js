@@ -264,8 +264,8 @@ globalThis.FlutterHostView = FlutterHostView;
           wx.loadSubpackage({
             // complete: complete,
             fail: function() {
-              console.error(err);
-              rej();
+              require( "../../" + pkgs[uri] + "/pages" + uri.replace(".part.js", ".part"));
+              res();
             },
             name: pkgs[uri],
             success: function() {

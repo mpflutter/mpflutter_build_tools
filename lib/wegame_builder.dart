@@ -435,18 +435,16 @@ $subPkgJS
     final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
     (pkgConfigData["packages"] as List).forEach((it) {
       final name = it['name'];
-      if (name is String && name.startsWith('mpflutter_')) {
-        final rootUri = fixRootUri(it['rootUri']);
-        if (rootUri.isEmpty) return;
-        if (File(
-          join(Directory.fromUri(Uri.parse(rootUri)).path, 'wegame', 'main.js'),
-        ).existsSync()) {
-          maybeWeChatPkgs[name] = Directory.fromUri(Uri.parse(rootUri));
-        }
+      final rootUri = fixRootUri(it['rootUri']);
+      if (rootUri.isEmpty) return;
+      if (File(
+        join(Directory.fromUri(Uri.parse(rootUri)).path, 'wegame', 'main.js'),
+      ).existsSync()) {
+        maybeWeChatPkgs[name] = Directory.fromUri(Uri.parse(rootUri));
       }
     });
     if (maybeWeChatPkgs.length > 0) {
-      print("发现 ${maybeWeChatPkgs.length} 个 MPFlutter 微信插件，它们将被添加到产物中。");
+      print("发现 ${maybeWeChatPkgs.length} 个 MPFlutter 微信小游戏插件，它们将被添加到产物中。");
     }
     maybeWeChatPkgs.forEach((name, dir) {
       _copyPubPackageToWechat(name, dir);
@@ -471,23 +469,10 @@ $subPkgJS
     var indexJS = indexJSFile.readAsStringSync();
     indexJS = indexJS.replaceAll("// loadPlugins", """
 await Promise.all([
-${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {require("../../$key/pages/main", resolve);}),')).values.join("\n")}
+${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {wx.loadSubpackage({name: "$key",success: function () {require("../../$key/pages/main", resolve);},fail: function () {require("../../$key/pages/main", resolve);},});}),')).values.join("\n")}
 ])
 """);
     indexJSFile.writeAsStringSync(indexJS);
-    // add main.wxml to index.wxml
-    final indexWxmlFile =
-        File(join(wegameTmpDir.path, 'pages', 'index', 'index.wxml'));
-    var indexWxmlContent = indexWxmlFile.readAsStringSync();
-    indexWxmlContent = indexWxmlContent.replaceAll(
-      "<!--PlatformViewBlocks-->",
-      maybeWeChatPkgs
-          .map((key, value) => MapEntry(key,
-              File(join(value.path, 'wegame', 'main.wxml')).readAsStringSync()))
-          .values
-          .join("\n"),
-    );
-    indexWxmlFile.writeAsStringSync(indexWxmlContent);
   }
 
   void _copyPubPackageToWechat(String pkgName, Directory pkgSrc) {
@@ -496,6 +481,8 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     File(join(pkgOut.path, 'index.js')).writeAsStringSync('Page({})');
     File(join(pkgOut.path, 'index.json')).writeAsStringSync('{}');
     File(join(pkgOut.path, 'index.wxml')).writeAsStringSync('<view></view>');
+    File(join(pkgOut.path, '..', 'game.js')).writeAsStringSync('');
+    File(join(pkgOut.path, '..', 'game.json')).writeAsStringSync('{}');
     copyDirectory(
       Directory(join(pkgSrc.path, 'wegame')),
       Directory(pkgOut.path),
