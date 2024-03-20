@@ -47,7 +47,7 @@ export class FlutterMiniProgramMockDocument {
       let mockElement =
         new(require("./element").FlutterMiniProgramMockElement)();
       mockElement.tagName = "canvas";
-      mockElement.isOnScreenCanvas = !isOffScreen;
+      mockElement.isOffscreenCanvas = isOffScreen;
       for (const key in mockElement) {
         canvas[key] = mockElement[key];
       }
