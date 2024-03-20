@@ -34,12 +34,11 @@ class WegameBuilder {
 
   void createEntryIfNeeded() {
     final mainFile = File(join('lib', 'main.mpflutter.dart'));
-    if (!mainFile.existsSync()) {
-      mainFile
-          .writeAsStringSync("""import './main.dart' deferred as origin_main;
+    if (!mainFile.existsSync() ||
+        mainFile.readAsStringSync().contains('deferred as')) {
+      mainFile.writeAsStringSync("""import './main.dart' as origin_main;
 
 void main(List<String> args) async {
-  await origin_main.loadLibrary();
   origin_main.main();
 }
 """);
