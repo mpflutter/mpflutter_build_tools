@@ -613,9 +613,14 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     final mainDartJSFile =
         File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
     var content = mainDartJSFile.readAsStringSync();
-    if (content.contains("if(s){s=this.gjH()")) {
-      content =
-          content.replaceAll("if(s){s=this.gjH()", "if(true){s=this.gjH()");
+    if (content.contains(
+      RegExp("if\\([a-z]\\)(\\{[a-z]=this..*\\(\\)\n.\\.toString)",
+          multiLine: true),
+    )) {
+      content = content.replaceAllMapped(
+          RegExp("if\\([a-z]\\)(\\{[a-z]=this..*\\(\\)\n.\\.toString)",
+              multiLine: true),
+          (match) => "if(true)${match.group(1)}");
       mainDartJSFile.writeAsStringSync(content);
     }
   }
