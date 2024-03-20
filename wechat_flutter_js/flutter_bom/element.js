@@ -57,17 +57,31 @@ export class FlutterMiniProgramMockElement {
       }
     } else if (this.tagName === "canvas") {
       if (event === "webglcontextlost") {
-        FlutterHostView.shared.onwebglcontextlost = () => {
+        if (!this.isOffscreenCanvas) {
+          FlutterHostView.shared.onwebglcontextlost = () => {
+            const event = new Event();
+            event.target = this;
+            callback(event);
+          };
+        }
+        this.onwebglcontextlost = () => {
           const event = new Event();
           event.target = this;
           callback(event);
-        };
+        }
       } else if (event === "webglcontextrestored") {
-        FlutterHostView.shared.onwebglcontextrestored = () => {
+        if (!this.isOffscreenCanvas) {
+          FlutterHostView.shared.onwebglcontextrestored = () => {
+            const event = new Event();
+            event.target = this;
+            callback(event);
+          };
+        }
+        this.onwebglcontextrestored = () => {
           const event = new Event();
           event.target = this;
           callback(event);
-        };
+        }
       }
     }
   };

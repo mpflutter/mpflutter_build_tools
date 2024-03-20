@@ -175,6 +175,7 @@ void main(List<String> args) async {
     await _openDevMode(arguments);
     _addLogStack(arguments);
     _fixEnterkeyhint();
+    _fixCanvasReuseContextIssue();
     _makeDisableFeatures();
     _makeShadowPages();
     _enableMiniTex();
@@ -615,6 +616,26 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     if (content.contains("if(s){s=this.gjH()")) {
       content =
           content.replaceAll("if(s){s=this.gjH()", "if(true){s=this.gjH()");
+      mainDartJSFile.writeAsStringSync(content);
+    }
+  }
+
+  // https://github.com/mpflutter/mpflutter/issues/552
+  void _fixCanvasReuseContextIssue() {
+    final mainDartJSFile =
+        File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
+    var content = mainDartJSFile.readAsStringSync();
+    if (content.contains("factory.isLive\$1(_this)")) {
+      content = content.replaceAll("factory.isLive\$1(_this)", "true");
+      mainDartJSFile.writeAsStringSync(content);
+    } else if (content.contains(RegExp(
+        "if\\(.*\\(.*\\)\\)\\{(.*\\..*=!0\n.*\\.preventDefault\\(\\)\\}else .*\\..*\\(\\)\\},)",
+        multiLine: true))) {
+      content = content.replaceFirstMapped(
+          RegExp(
+              "if\\(.*\\(.*\\)\\)\\{(.*\\..*=!0\n.*\\.preventDefault\\(\\)\\}else .*\\..*\\(\\)\\},)",
+              multiLine: true),
+          (match) => "if(true){${match.group(1)}");
       mainDartJSFile.writeAsStringSync(content);
     }
   }

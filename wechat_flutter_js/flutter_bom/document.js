@@ -47,6 +47,7 @@ export class FlutterMiniProgramMockDocument {
       let mockElement =
         new(require("./element").FlutterMiniProgramMockElement)();
       mockElement.tagName = "canvas";
+      mockElement.isOnScreenCanvas = !isOffScreen;
       for (const key in mockElement) {
         canvas[key] = mockElement[key];
       }
@@ -62,6 +63,8 @@ export class FlutterMiniProgramMockDocument {
         };
       } else {
         recreateOffScrrenCanvas = function() {
+          mockElement.onwebglcontextlost?.();
+          mockElement.onwebglcontextrestored?.();
           let newCanvas = wx.createOffscreenCanvas({
             type: GLVersion >= 2 ? "webgl2" : "webgl",
             width: canvas._width,
