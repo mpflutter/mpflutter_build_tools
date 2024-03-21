@@ -43,7 +43,7 @@ export class FlutterMiniProgramMockDocument {
       });
       setTimeout(() => {
         _flutter.activeCanvasBinded = true;
-      }, 1000);
+      }, 0);
       let mockElement =
         new(require("./element").FlutterMiniProgramMockElement)();
       mockElement.tagName = "canvas";
