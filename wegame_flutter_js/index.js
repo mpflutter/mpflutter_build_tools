@@ -30,6 +30,9 @@ export class Main {
     getApp()._flutter.activeCanvas = this.canvas;
     this.canvas.width = this.canvas.width * wxSystemInfo.pixelRatio;
     this.canvas.height = this.canvas.height * wxSystemInfo.pixelRatio;
+    wx.onKeyboardHeightChange((detail) => {
+      FlutterHostView.shared.onkeyboardheightchange({ detail });
+    });
     setupFlutterApp(this.canvas);
 
     for (var i = 0; i < 10; i++) {

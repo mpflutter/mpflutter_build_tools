@@ -53,13 +53,14 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
 
   set value(v) {
     this._value = v;
-    this.viewOption.props.value = v;
-    this.platformViewManager.updateView(this.viewOption);
+    wx.updateKeyboard({ value: v });
   }
 
   get inputmode() {
-    return this.viewOption.props.type;
+    return this._type;
   }
+
+  _type = "";
 
   set inputmode(v) {
     let newValue = v;
@@ -70,14 +71,16 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     } else {
       newValue = "text";
     }
-    this.viewOption.props.type = newValue;
+    this._type = newValue;
   }
+
+  _password = false;
 
   set type(v) {
     if (v === "password") {
-      this.viewOption.props.password = true;
+      this._password = true;
     } else {
-      this.viewOption.props.password = false;
+      this._password = false;
     }
   }
 
@@ -85,51 +88,64 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     return "none";
   }
 
+  _confirmType = "";
+
   set enterkeyhint(v) {
-    this.viewOption.props.confirmType = v;
+    this._confirmType = v;
   }
 
   selectionStart = 0;
   selectionEnd = 0;
   setSelectionRange(start, end) {
-    this.preventDispose = true;
     this.selectionStart = start;
     this.selectionEnd = end;
-    this.viewOption.props.selectionStart = start;
-    this.viewOption.props.selectionEnd = end;
-    this.viewOption.props.focus = false;
-    this.platformViewManager.updateView(this.viewOption);
-    setTimeout(() => {
-      this.preventDispose = false;
-      this.viewOption.props.focus = true;
-      this.platformViewManager.updateView(this.viewOption);
-    }, 64);
   }
   focus = () => {
-    this.viewOption.props.focus = true;
-    this.platformViewManager.updateView(this.viewOption);
+    this._completed = false;
+    wx.showKeyboard({
+      defaultValue: this._value,
+      confirmType: this._confirmType,
+      multiple: this.$$clazz$$ === "MPFlutter_Wechat_TextArea",
+    });
+    wx.offKeyboardInput(this.onKeyboardInput.bind(this));
+    wx.offKeyboardConfirm(this.onKeyboardConfirm.bind(this));
+    wx.offKeyboardComplete(this.onKeyboardComplete.bind(this));
+    wx.onKeyboardInput(this.onKeyboardInput.bind(this));
+    wx.onKeyboardConfirm(this.onKeyboardConfirm.bind(this));
+    wx.onKeyboardComplete(this.onKeyboardComplete.bind(this));
   };
   select = () => {};
   blur = () => {
-    if (this.preventDispose) return;
-    this.viewOption.props.focus = false;
-    this.platformViewManager.updateView(this.viewOption);
+    wx.hideKeyboard({});
   };
   remove = () => {
-    if (this.preventDispose) return;
-    this.viewOption.props.focus = false;
-    this.platformViewManager.updateView(this.viewOption);
-    setTimeout(() => {
-      this.platformViewManager.disposeView(this.viewOption);
-    }, 32);
+    wx.hideKeyboard({});
+  };
+  onKeyboardInput = (detail) => {
+    this.onInput?.(detail);
+  };
+  onKeyboardConfirm = (detail) => {
+    if (this._completed) return;
+    this._completed = true;
+    const keyboardEvent = new globalThis.KeyboardEvent();
+    keyboardEvent.keyCode = 13;
+    this.onKeydown?.(keyboardEvent);
+  };
+  onKeyboardComplete = (detail) => {
+    if (this._completed) return;
+    this._completed = true;
+    this.onBlur?.();
+    wx.offKeyboardInput(this.onKeyboardInput.bind(this));
+    wx.offKeyboardConfirm(this.onKeyboardConfirm.bind(this));
+    wx.offKeyboardComplete(this.onKeyboardComplete.bind(this));
   };
   addEventListener = (event, callback) => {
     let self = this;
     if (event === "input") {
       this.onInput = (detail) => {
         self._value = detail.value;
-        self.selectionStart = detail.cursor;
-        self.selectionEnd = detail.cursor;
+        self.selectionStart = detail.value.length;
+        self.selectionEnd = detail.value.length;
         callback.apply(callback, [detail]);
       };
     } else if (event === "blur") {
@@ -146,6 +162,7 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
 export class FlutterMiniProgramMockTextAreaElement extends FlutterMiniProgramMockInputElement {
   constructor() {
     super("MPFlutter_Wechat_TextArea");
+    this.$$clazz$$ = "MPFlutter_Wechat_TextArea";
   }
 }
 
