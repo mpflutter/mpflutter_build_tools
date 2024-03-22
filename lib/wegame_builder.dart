@@ -1,10 +1,10 @@
 part of 'main.dart';
 
-final wechatSrc = Directory('wechat');
-final wechatTmpDir = Directory(join('build', 'wechat_tmp'));
-final wechatOutDir = Directory(join('build', 'wechat'));
+final wegameSrc = Directory('wegame');
+final wegameTmpDir = Directory(join('build', 'wegame_tmp'));
+final wegameOutDir = Directory(join('build', 'wegame'));
 
-class WechatBuilder {
+class WegameBuilder {
   List<String> findNonCompatiblesPackagesNames() {
     final List<String> result = [];
     final pkgConfig = File(join('.dart_tool', 'package_config.json'));
@@ -34,12 +34,11 @@ class WechatBuilder {
 
   void createEntryIfNeeded() {
     final mainFile = File(join('lib', 'main.mpflutter.dart'));
-    if (!mainFile.existsSync()) {
-      mainFile
-          .writeAsStringSync("""import './main.dart' deferred as origin_main;
+    if (!mainFile.existsSync() ||
+        mainFile.readAsStringSync().contains('deferred as')) {
+      mainFile.writeAsStringSync("""import './main.dart' as origin_main;
 
 void main(List<String> args) async {
-  await origin_main.loadLibrary();
   origin_main.main();
 }
 """);
@@ -57,7 +56,7 @@ void main(List<String> args) async {
         ? flutterBuildDir.listSync().map((e) => e.path).toList()
         : <String>[];
 
-    // create wechat dir
+    // create wegame dir
     if (webOut.existsSync()) {
       webOut.deleteSync(recursive: true);
     }
@@ -72,7 +71,7 @@ void main(List<String> args) async {
             'web',
             ...([...arguments]..removeWhere((element) =>
                 element == "--devmode" ||
-                element == "--wechat" ||
+                element == "--wegame" ||
                 element == "--debug" ||
                 element == '--printstack')),
             ...[
@@ -147,23 +146,23 @@ void main(List<String> args) async {
     await buildWeb();
   }
 
-  Future buildFlutterWechat(List<String> arguments) async {
-    print("[INFO] 正在构建 wechat 产物");
+  Future buildFlutterWegame(List<String> arguments) async {
+    print("[INFO] 正在构建 wegame 产物");
     // create wechat dir
-    if (wechatOutDir.existsSync()) {
-      wechatOutDir.deleteSync(recursive: true);
+    if (wegameOutDir.existsSync()) {
+      wegameOutDir.deleteSync(recursive: true);
     }
-    if (wechatTmpDir.existsSync()) {
-      wechatTmpDir.deleteSync(recursive: true);
+    if (wegameTmpDir.existsSync()) {
+      wegameTmpDir.deleteSync(recursive: true);
     }
     // copy src dir to build
-    final wechatSrc = Directory('wechat');
-    if (!wechatSrc.existsSync()) {
-      throw '工程目录下不存在 wechat 文件夹，请先按照教程初始化 wechat 工程。';
+    final wegameSrc = Directory('wegame');
+    if (!wegameSrc.existsSync()) {
+      throw '工程目录下不存在 wegame 文件夹，请先按照教程初始化 wegame 工程。';
     }
-    wechatTmpDir.createSync();
-    wechatOutDir.createSync();
-    copyDirectory(wechatSrc, wechatTmpDir);
+    wegameTmpDir.createSync();
+    wegameOutDir.createSync();
+    copyDirectory(wegameSrc, wegameTmpDir);
     _copyCanvaskitWasm(arguments);
     _copyFlutterSkeleton(arguments);
     _copyAssets(arguments);
@@ -174,20 +173,18 @@ void main(List<String> args) async {
     await _openDevMode(arguments);
     _addLogStack(arguments);
     _fixEnterkeyhint();
-    _fixCanvasReuseContextIssue();
     _makeDisableFeatures();
-    _makeShadowPages();
     _enableMiniTex();
     _mergeSubpackages();
     _removeLicenseTipsFlag();
-    wechatOutDir.deleteSync();
-    wechatTmpDir.renameSync(wechatOutDir.path);
+    wegameOutDir.deleteSync();
+    wegameTmpDir.renameSync(wegameOutDir.path);
   }
 
   void _copyCanvaskitWasm(List<String> arguments) {
     final canvaskitSrc = Directory(join(_mpflutterSrcRoot.path, 'canvaskit'));
     final canvaskitOut =
-        Directory(join(wechatTmpDir.path, 'canvaskit', 'pages'));
+        Directory(join(wegameTmpDir.path, 'canvaskit', 'pages'));
     canvaskitOut.createSync(recursive: true);
     copyDirectory(canvaskitSrc, canvaskitOut);
     if (useMiniTex && useNoFontCanvasKit) {
@@ -195,13 +192,23 @@ void main(List<String> args) async {
           Directory(join(_mpflutterSrcRoot.path, 'canvaskit_no_font'));
       copyDirectory(noFontCanvaskitSrc, canvaskitOut);
     }
+    final jsFile =
+        File(join(wegameTmpDir.path, 'canvaskit', 'pages', 'canvaskit.js'));
+    final newContent = jsFile
+        .readAsStringSync()
+        .replaceFirst("const GLVersion = 2;", "const GLVersion = 1;")
+        .replaceFirst("Object.assign(w,sa);", "");
+    jsFile.writeAsStringSync(newContent);
+    File(join(wegameTmpDir.path, 'canvaskit', 'game.js')).writeAsStringSync('');
+    File(join(wegameTmpDir.path, 'canvaskit', 'game.json'))
+        .writeAsStringSync('{}');
   }
 
   void _copyFlutterSkeleton(List<String> arguments) {
     final wechatFlutterJSSrc =
-        Directory(join(_mpflutterSrcRoot.path, 'wechat_flutter_js'));
+        Directory(join(_mpflutterSrcRoot.path, 'wegame_flutter_js'));
     final wechatFlutterJSOut =
-        Directory(join(wechatTmpDir.path, 'pages', 'index'));
+        Directory(join(wegameTmpDir.path, 'pages', 'index'));
     copyDirectory(wechatFlutterJSSrc, wechatFlutterJSOut);
   }
 
@@ -247,16 +254,18 @@ void main(List<String> args) async {
 
     subPkgs.asMap().forEach((key, value) {
       final keyId = key == 0 ? "" : key.toString();
-      final pkgDirRoot = join(wechatTmpDir.path, 'assets' + keyId);
+      final pkgDirRoot = join(wegameTmpDir.path, 'assets' + keyId);
       Directory(pkgDirRoot).createSync();
       Directory(join(pkgDirRoot, 'pages')).createSync();
+      File(join(pkgDirRoot, 'game.js')).writeAsStringSync('');
+      File(join(pkgDirRoot, 'game.json')).writeAsStringSync('{}');
       File(join(pkgDirRoot, 'pages', 'index.js')).writeAsStringSync('Page({})');
       File(join(pkgDirRoot, 'pages', 'index.json')).writeAsStringSync('{}');
       File(join(pkgDirRoot, 'pages', 'index.wxml'))
           .writeAsStringSync('<view></view>');
       value.forEach((element) {
         final srcOut = element.replaceFirst(join(webOut.path, "assets"),
-            join(wechatTmpDir.path, "assets${keyId}"));
+            join(wegameTmpDir.path, "assets${keyId}"));
         Directory(srcOut).parent.createSync(recursive: true);
         File(element).copySync(srcOut);
       });
@@ -275,7 +284,7 @@ void main(List<String> args) async {
         }
       });
     });
-    File(join(wechatTmpDir.path, 'pages', 'index', 'assets.js'))
+    File(join(wegameTmpDir.path, 'pages', 'index', 'assets.js'))
         .writeAsStringSync('''
 export default {
 $subPkgAsset
@@ -283,13 +292,12 @@ $subPkgAsset
 ''');
 
     final appJSONData = json
-        .decode(File(join(wechatTmpDir.path, 'app.json')).readAsStringSync());
+        .decode(File(join(wegameTmpDir.path, 'game.json')).readAsStringSync());
     final appJSONSubpackages = appJSONData["subpackages"] ??
         [
           {
             "name": "canvaskit",
             "root": "canvaskit",
-            "pages": ["pages/index"]
           },
         ];
     subPkgs.asMap().forEach((key, value) {
@@ -297,11 +305,10 @@ $subPkgAsset
       appJSONSubpackages.add({
         "name": "assets" + keyId.toString(),
         "root": "assets" + keyId.toString(),
-        "pages": ["pages/index"]
       });
     });
     appJSONData["subpackages"] = appJSONSubpackages;
-    File(join(wechatTmpDir.path, 'app.json'))
+    File(join(wegameTmpDir.path, 'game.json'))
         .writeAsStringSync(json.encode(appJSONData));
   }
 
@@ -325,25 +332,27 @@ $subPkgAsset
       subPkgs.add(currentPkgFiles);
     }
     File(join(webOut.path, 'main.dart.js'))
-        .copySync(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
+        .copySync(join(wegameTmpDir.path, 'pages', 'index', 'main.dart.js'));
     if (File(join(webOut.path, 'main.dart.js.map')).existsSync()) {
       File(join(webOut.path, 'main.dart.js.map')).copySync(
-          join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js.map'));
+          join(wegameTmpDir.path, 'pages', 'index', 'main.dart.js.map'));
       String fileContent =
-          File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js.map'))
+          File(join(wegameTmpDir.path, 'pages', 'index', 'main.dart.js.map'))
               .readAsStringSync();
       fileContent = fixSourceMap(fileContent);
-      File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js.map'))
+      File(join(wegameTmpDir.path, 'pages', 'index', 'main.dart.js.map'))
           .writeAsStringSync(fileContent);
     }
     subPkgs.asMap().forEach((key, value) {
-      final pkgDirRoot = join(wechatTmpDir.path, 'pkg' + key.toString());
+      final pkgDirRoot = join(wegameTmpDir.path, 'pkg' + key.toString());
       Directory(pkgDirRoot).createSync();
       Directory(join(pkgDirRoot, 'pages')).createSync();
       File(join(pkgDirRoot, 'pages', 'index.js')).writeAsStringSync('Page({})');
       File(join(pkgDirRoot, 'pages', 'index.json')).writeAsStringSync('{}');
       File(join(pkgDirRoot, 'pages', 'index.wxml'))
           .writeAsStringSync('<view></view>');
+      File(join(pkgDirRoot, 'game.js')).writeAsStringSync('');
+      File(join(pkgDirRoot, 'game.json')).writeAsStringSync('{}');
       value.forEach((element) {
         File(join(webOut.path, element))
             .copySync(join(pkgDirRoot, 'pages', element));
@@ -365,43 +374,40 @@ $subPkgAsset
         subPkgJS += '"/$element": "pkg$key",\n';
       });
     });
-    File(join(wechatTmpDir.path, 'pages', 'index', 'pkgs.js'))
+    File(join(wegameTmpDir.path, 'pages', 'index', 'pkgs.js'))
         .writeAsStringSync('''
 export default {
 $subPkgJS
 }
 ''');
     final appJSONData = json
-        .decode(File(join(wechatTmpDir.path, 'app.json')).readAsStringSync());
+        .decode(File(join(wegameTmpDir.path, 'game.json')).readAsStringSync());
     final appJSONSubpackages = appJSONData["subpackages"] ??
         [
           {
             "name": "canvaskit",
             "root": "canvaskit",
-            "pages": ["pages/index"]
           },
           {
             "name": "assets",
             "root": "assets",
-            "pages": ["pages/index"]
           }
         ];
     subPkgs.asMap().forEach((key, value) {
       appJSONSubpackages.add({
         "name": "pkg" + key.toString(),
         "root": "pkg" + key.toString(),
-        "pages": ["pages/index"]
       });
     });
     appJSONData["subpackages"] = appJSONSubpackages;
-    File(join(wechatTmpDir.path, 'app.json'))
+    File(join(wegameTmpDir.path, 'game.json'))
         .writeAsStringSync(json.encode(appJSONData));
     // 添加环境变量到 js 头部
-    _insertJSVars(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
+    _insertJSVars(join(wegameTmpDir.path, 'pages', 'index', 'main.dart.js'));
     subPkgs.asMap().forEach((key, value) {
       value.forEach((element) {
         _insertJSVars(
-            join(wechatTmpDir.path, 'pkg' + key.toString(), 'pages', element));
+            join(wegameTmpDir.path, 'pkg' + key.toString(), 'pages', element));
       });
     });
     // Ignore ES6 -> ES5
@@ -412,12 +418,12 @@ $subPkgJS
       });
     });
     final projectConfigJSONData = json.decode(
-        File(join(wechatTmpDir.path, 'project.config.json'))
+        File(join(wegameTmpDir.path, 'project.config.json'))
             .readAsStringSync());
     final originIgnoreList =
         projectConfigJSONData["setting"]["babelSetting"]["ignore"] as List;
     originIgnoreList.addAll(ignoreList);
-    File(join(wechatTmpDir.path, 'project.config.json')).writeAsStringSync(
+    File(join(wegameTmpDir.path, 'project.config.json')).writeAsStringSync(
       JsonEncoder.withIndent("  ").convert(projectConfigJSONData),
     );
   }
@@ -428,25 +434,23 @@ $subPkgJS
     final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
     (pkgConfigData["packages"] as List).forEach((it) {
       final name = it['name'];
-      if (name is String && name.startsWith('mpflutter_')) {
-        final rootUri = fixRootUri(it['rootUri']);
-        if (rootUri.isEmpty) return;
-        if (File(
-          join(Directory.fromUri(Uri.parse(rootUri)).path, 'wechat', 'main.js'),
-        ).existsSync()) {
-          maybeWeChatPkgs[name] = Directory.fromUri(Uri.parse(rootUri));
-        }
+      final rootUri = fixRootUri(it['rootUri']);
+      if (rootUri.isEmpty) return;
+      if (File(
+        join(Directory.fromUri(Uri.parse(rootUri)).path, 'wegame', 'main.js'),
+      ).existsSync()) {
+        maybeWeChatPkgs[name] = Directory.fromUri(Uri.parse(rootUri));
       }
     });
     if (maybeWeChatPkgs.length > 0) {
-      print("发现 ${maybeWeChatPkgs.length} 个 MPFlutter 微信插件，它们将被添加到产物中。");
+      print("发现 ${maybeWeChatPkgs.length} 个 MPFlutter 微信小游戏插件，它们将被添加到产物中。");
     }
     maybeWeChatPkgs.forEach((name, dir) {
       _copyPubPackageToWechat(name, dir);
     });
-    // rewrite the app.json of subPackages
+    // rewrite the game.json of subPackages
     final appJSONData = json
-        .decode(File(join(wechatTmpDir.path, 'app.json')).readAsStringSync());
+        .decode(File(join(wegameTmpDir.path, 'game.json')).readAsStringSync());
     final appJSONSubpackages = appJSONData['subpackages'] as List<dynamic>;
     maybeWeChatPkgs.forEach((name, dir) {
       appJSONSubpackages.add({
@@ -456,41 +460,30 @@ $subPkgJS
       });
     });
     appJSONData["subpackages"] = appJSONSubpackages;
-    File(join(wechatTmpDir.path, 'app.json'))
+    File(join(wegameTmpDir.path, 'game.json'))
         .writeAsStringSync(json.encode(appJSONData));
     // load main.js in index.js
     final indexJSFile =
-        File(join(wechatTmpDir.path, 'pages', 'index', 'index.js'));
+        File(join(wegameTmpDir.path, 'pages', 'index', 'index.js'));
     var indexJS = indexJSFile.readAsStringSync();
     indexJS = indexJS.replaceAll("// loadPlugins", """
 await Promise.all([
-${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {require("../../$key/pages/main", resolve);}),')).values.join("\n")}
+${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {wx.loadSubpackage({name: "$key",success: function () {require("../../$key/pages/main", resolve);},fail: function () {require("../../$key/pages/main", resolve);},});}),')).values.join("\n")}
 ])
 """);
     indexJSFile.writeAsStringSync(indexJS);
-    // add main.wxml to index.wxml
-    final indexWxmlFile =
-        File(join(wechatTmpDir.path, 'pages', 'index', 'index.wxml'));
-    var indexWxmlContent = indexWxmlFile.readAsStringSync();
-    indexWxmlContent = indexWxmlContent.replaceAll(
-      "<!--PlatformViewBlocks-->",
-      maybeWeChatPkgs
-          .map((key, value) => MapEntry(key,
-              File(join(value.path, 'wechat', 'main.wxml')).readAsStringSync()))
-          .values
-          .join("\n"),
-    );
-    indexWxmlFile.writeAsStringSync(indexWxmlContent);
   }
 
   void _copyPubPackageToWechat(String pkgName, Directory pkgSrc) {
-    final pkgOut = Directory(join(wechatTmpDir.path, pkgName, 'pages'));
+    final pkgOut = Directory(join(wegameTmpDir.path, pkgName, 'pages'));
     pkgOut.createSync(recursive: true);
     File(join(pkgOut.path, 'index.js')).writeAsStringSync('Page({})');
     File(join(pkgOut.path, 'index.json')).writeAsStringSync('{}');
     File(join(pkgOut.path, 'index.wxml')).writeAsStringSync('<view></view>');
+    File(join(pkgOut.path, '..', 'game.js')).writeAsStringSync('');
+    File(join(pkgOut.path, '..', 'game.json')).writeAsStringSync('{}');
     copyDirectory(
-      Directory(join(pkgSrc.path, 'wechat')),
+      Directory(join(pkgSrc.path, 'wegame')),
       Directory(pkgOut.path),
     );
   }
@@ -501,7 +494,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
       final myIP = await getIP();
       if (myIP == null) {
         print(
-          "[WARN] 无法获取本地局域网 IP 地址，请自行在 build/wechat/pages/index/mpjs.js 中修改 127.0.0.1 为你的 IP。",
+          "[WARN] 无法获取本地局域网 IP 地址，请自行在 build/wegame/pages/index/mpjs.js 中修改 127.0.0.1 为你的 IP。",
         );
         return;
       }
@@ -509,12 +502,12 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
         "[INFO] 已获取到你的局域网 IP：$myIP",
       );
       print(
-        "[INFO] 已替换 build/wechat/pages/index/mpjs.js 文件中的 IP 地址",
+        "[INFO] 已替换 build/wegame/pages/index/mpjs.js 文件中的 IP 地址",
       );
-      var content = File(join(wechatTmpDir.path, 'pages', 'index', 'mpjs.js'))
+      var content = File(join(wegameTmpDir.path, 'pages', 'index', 'mpjs.js'))
           .readAsStringSync();
       content = content.replaceAll("127.0.0.1", myIP);
-      File(join(wechatTmpDir.path, 'pages', 'index', 'mpjs.js'))
+      File(join(wegameTmpDir.path, 'pages', 'index', 'mpjs.js'))
           .writeAsStringSync(content);
       if (File(join('macos', 'Runner', 'DebugProfile.entitlements'))
           .existsSync()) {
@@ -540,7 +533,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
       }
       return;
     }
-    File(join(wechatTmpDir.path, 'pages', 'index', 'mpjs.js'))
+    File(join(wegameTmpDir.path, 'pages', 'index', 'mpjs.js'))
         .writeAsStringSync("");
   }
 
@@ -558,12 +551,14 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
   void _compressAssets(List<String> arguments) {
     for (var i = 0; i < 100; i++) {
       final keyId = i == 0 ? "" : i.toString();
-      final dir = Directory(join(wechatTmpDir.path, 'assets${keyId}'));
+      final dir = Directory(join(wegameTmpDir.path, 'assets${keyId}'));
       if (dir.existsSync()) {
         dir.listSync(recursive: true).forEach((element) {
           if (element.statSync().type == FileSystemEntityType.directory) return;
           if (element.path.endsWith('index.js') ||
               element.path.endsWith('index.json') ||
+              element.path.endsWith('game.js') ||
+              element.path.endsWith('game.json') ||
               element.path.endsWith('index.wxml')) return;
           try {
             final codec = BrotliCodec(level: BrotliOption.maxLevel);
@@ -598,7 +593,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
       return;
     }
     final mainDartJSFile =
-        File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
+        File(join(wegameTmpDir.path, 'pages', 'index', 'main.dart.js'));
     var content = mainDartJSFile.readAsStringSync();
     content = content.replaceAll("console.log(string);",
         'const error = new Error();console.log(string);console.info("=== 这是本次 Log 堆栈信息（不是错误） ===", error);');
@@ -610,43 +605,18 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
 
   void _fixEnterkeyhint() {
     final mainDartJSFile =
-        File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
+        File(join(wegameTmpDir.path, 'pages', 'index', 'main.dart.js'));
     var content = mainDartJSFile.readAsStringSync();
-    if (content.contains(
-      RegExp("if\\([a-z]\\)(\\{[a-z]=this..*\\(\\)\n.\\.toString)",
-          multiLine: true),
-    )) {
-      content = content.replaceAllMapped(
-          RegExp("if\\([a-z]\\)(\\{[a-z]=this..*\\(\\)\n.\\.toString)",
-              multiLine: true),
-          (match) => "if(true)${match.group(1)}");
-      mainDartJSFile.writeAsStringSync(content);
-    }
-  }
-
-  // https://github.com/mpflutter/mpflutter/issues/552
-  void _fixCanvasReuseContextIssue() {
-    final mainDartJSFile =
-        File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
-    var content = mainDartJSFile.readAsStringSync();
-    if (content.contains("factory.isLive\$1(_this)")) {
-      content = content.replaceAll("factory.isLive\$1(_this)", "true");
-      mainDartJSFile.writeAsStringSync(content);
-    } else if (content.contains(RegExp(
-        "if\\(.*\\(.*\\)\\)\\{(.*\\..*=!0\n.*\\.preventDefault\\(\\)\\}else .*\\..*\\(\\)\\},)",
-        multiLine: true))) {
-      content = content.replaceFirstMapped(
-          RegExp(
-              "if\\(.*\\(.*\\)\\)\\{(.*\\..*=!0\n.*\\.preventDefault\\(\\)\\}else .*\\..*\\(\\)\\},)",
-              multiLine: true),
-          (match) => "if(true){${match.group(1)}");
+    if (content.contains("if(s){s=this.gjH()")) {
+      content =
+          content.replaceAll("if(s){s=this.gjH()", "if(true){s=this.gjH()");
       mainDartJSFile.writeAsStringSync(content);
     }
   }
 
   void _makeDisableFeatures() {
     final indexJSFile =
-        File(join(wechatTmpDir.path, 'pages', 'index', 'index.js'));
+        File(join(wegameTmpDir.path, 'pages', 'index', 'index.js'));
     var changed = false;
     var content = indexJSFile.readAsStringSync();
     if (_disableFeatures["wechat_share_app_message"] == true) {
@@ -669,35 +639,6 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     }
   }
 
-  void _makeShadowPages() {
-    _shadowPages.forEach((shadowPage) {
-      File(
-        join(wechatTmpDir.path, 'pages', 'index', 'index.json'),
-      ).copySync(
-        join(wechatTmpDir.path, 'pages', 'index', '$shadowPage.json'),
-      );
-      File(join(wechatTmpDir.path, 'pages', 'index', '$shadowPage.wxml'))
-          .writeAsStringSync(
-        '<include src="index.wxml"/>',
-      );
-      File(join(wechatTmpDir.path, 'pages', 'index', '$shadowPage.js'))
-          .writeAsStringSync(
-        "Page(require('./index').main)",
-      );
-    });
-    if (_shadowPages.length > 0) {
-      final appJSONData = json
-          .decode(File(join(wechatTmpDir.path, 'app.json')).readAsStringSync());
-      final appJSONPages = appJSONData['pages'] as List<dynamic>;
-      _shadowPages.forEach((element) {
-        appJSONPages.add('pages/index/$element');
-      });
-      appJSONData["pages"] = appJSONPages;
-      File(join(wechatTmpDir.path, 'app.json'))
-          .writeAsStringSync(json.encode(appJSONData));
-    }
-  }
-
   void _enableMiniTex() {
     if (useMiniTex) {
       final fontManifestFile = File(
@@ -708,11 +649,11 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
       final embeddingFonts =
           fontManifestData.map((it) => '"' + it['family'] + '"');
       File(
-        join(wechatTmpDir.path, 'pages', 'index', 'minitex.js'),
+        join(wegameTmpDir.path, 'pages', 'index', 'minitex.js'),
       ).writeAsStringSync(
           """export const useMiniTex = true;\nexport const embeddingFonts = [${embeddingFonts.join(",")}]""");
     } else {
-      Directory(join(wechatTmpDir.path, "canvaskit", "pages", "minitex"))
+      Directory(join(wegameTmpDir.path, "canvaskit", "pages", "minitex"))
           .deleteSync(recursive: true);
     }
   }
@@ -721,7 +662,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     final requireMiniTex = useMiniTex;
     if (requireMiniTex) {
       final files =
-          Directory(join(wechatTmpDir.path)).listSync(recursive: true);
+          Directory(join(wegameTmpDir.path)).listSync(recursive: true);
       for (var file in files) {
         if (file.path.endsWith("MaterialIcons-Regular.otf")) {
           final materialIcons = File(file.path);
@@ -758,11 +699,11 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
 
   void _mergeSubpackages() {
     final appJSONData = json
-        .decode(File(join(wechatTmpDir.path, 'app.json')).readAsStringSync());
+        .decode(File(join(wegameTmpDir.path, 'game.json')).readAsStringSync());
     final newAppJSONSubpackages = [];
     final appJSONSubpackages = appJSONData["subpackages"];
     var mainPkgSize =
-        calculateDirectorySizeSync(Directory(join(wechatTmpDir.path, "pages")));
+        calculateDirectorySizeSync(Directory(join(wegameTmpDir.path, "pages")));
     if (appJSONSubpackages is List) {
       appJSONSubpackages.sort((aPkg, bPkg) {
         final a = aPkg["name"] as String;
@@ -783,7 +724,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
       });
       appJSONSubpackages.forEach((curPkg) {
         final root = curPkg["root"] as String;
-        final rootDir = Directory(join(wechatTmpDir.path, root));
+        final rootDir = Directory(join(wegameTmpDir.path, root));
         final rootDirSize = calculateDirectorySizeSync(rootDir);
         if (mainPkgSize + rootDirSize < 2 * 1000 * 1000) {
           mainPkgSize += rootDirSize;
@@ -792,14 +733,14 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
         }
       });
       appJSONData["subpackages"] = newAppJSONSubpackages;
-      File(join(wechatTmpDir.path, 'app.json'))
+      File(join(wegameTmpDir.path, 'game.json'))
           .writeAsStringSync(json.encode(appJSONData));
     }
   }
 
   void _removeLicenseTipsFlag() {
     if (!licenseGrant) return;
-    final file = File(join(wechatTmpDir.path, 'pages', 'index', 'index.wxml'));
+    final file = File(join(wegameTmpDir.path, 'pages', 'index', 'index.wxml'));
     var content = file.readAsStringSync();
     content = content.replaceAll(
         '<image style="position: absolute;right:0;top:0;width:66px;height:66px;z-index: 10000" src="{{licenseUrl}}" />',

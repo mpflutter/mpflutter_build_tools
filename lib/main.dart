@@ -15,6 +15,7 @@ import './sourcemap.server.dart';
 import 'utils.dart';
 
 part 'wechat_builder.dart';
+part 'wegame_builder.dart';
 
 /// 当前 MPFlutter 支持的最高版本 Flutter SDK
 final compactVersion = '3.16.7';
@@ -90,6 +91,19 @@ Future main(List<String> arguments) async {
     } catch (e) {
       print("[ERROR] 构建失败，失败信息： $e");
     }
+  } else if (arguments.contains("--wegame")) {
+    print("[INFO] 正在构建 wegame 小程序");
+    final builder = WegameBuilder();
+    try {
+      await builder.buildFlutterWeb(arguments);
+      await builder.buildFlutterWegame(arguments);
+      print("[INFO] 构建成功，产物在 build/wegame 目录，使用微信开发者工具导入预览、上传、发布。");
+      if (arguments.contains('--debug')) {
+        runSourceMapServer();
+      }
+    } catch (e) {
+      print("[ERROR] 构建失败，失败信息： $e");
+    }
   }
 }
 
@@ -120,3 +134,5 @@ void init() {
     }
   });
 }
+
+final webOut = Directory(join('build', 'web'));
