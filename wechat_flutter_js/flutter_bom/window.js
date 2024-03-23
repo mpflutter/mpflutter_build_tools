@@ -4,6 +4,12 @@
 
 const { wxSystemInfo } = require("../system_info");
 const { useMiniTex, embeddingFonts } = require("../minitex");
+const {
+  isAsset,
+  isAssetExist,
+  readAssetAsBuffer,
+  readAssetAsText,
+} = require("./asset_reader");
 const { Event } = require("./event");
 
 function arrayBufferToUtf8String(arrayBuffer) {
@@ -67,7 +73,7 @@ export class FlutterMiniProgramMockWindow {
     search: "",
     pathname: "",
   };
-  localStorage = new(require("./storage").LocalStorage)();
+  localStorage = new (require("./storage").LocalStorage)();
   performance = {
     now: () => {
       return new Date().getTime();
@@ -111,33 +117,6 @@ export class FlutterMiniProgramMockWindow {
       options = {};
     }
     return new Promise(async (resolve, reject) => {
-      if (
-        url.startsWith("https://fonts.gstatic.com/s/") &&
-        (url.endsWith(".otf") || url.endsWith(".ttf"))
-      ) {
-        let mUrl = "/assets/fonts/NotoSansSC-Regular.ttf";
-        let subPackageUrl = require("../assets").default[mUrl] ?? mUrl;
-        await new Promise((resolve) => {
-          require(`../../../${
-            subPackageUrl.split("/")[1]
-          }/pages/index`, resolve);
-        });
-        const fs = wx.getFileSystemManager();
-        const brExists = await new Promise((resolve) => {
-          fs.getFileInfo({
-            filePath: subPackageUrl + ".br",
-            success: () => {
-              resolve(true);
-            },
-            fail: () => {
-              resolve(false);
-            },
-          });
-        });
-        if (brExists) {
-          url = mUrl;
-        }
-      }
       if (useMiniTex && url.startsWith("https://fonts.gstatic.com/s/")) {
         const responseData = {
           ok: true,
@@ -156,30 +135,16 @@ export class FlutterMiniProgramMockWindow {
         }, 32);
         return;
       }
-      if (url.startsWith("/")) {
-        let subPackageUrl = require("../assets").default[url] ?? url;
-        await new Promise((resolve) => {
-          require(`../../../${
-            subPackageUrl.split("/")[1]
-          }/pages/index`, resolve);
-        });
-        let br = false;
-        const fs = wx.getFileSystemManager();
-
-        const brExists = await new Promise((resolve) => {
-          fs.getFileInfo({
-            filePath: subPackageUrl + ".br",
-            success: () => {
-              resolve(true);
-            },
-            fail: () => {
-              resolve(false);
-            },
-          });
-        });
-        if (brExists) {
-          br = true;
-          subPackageUrl = subPackageUrl + ".br";
+      if (
+        url.startsWith("https://fonts.gstatic.com/s/") &&
+        (url.endsWith(".otf") || url.endsWith(".ttf"))
+      ) {
+        url = "/assets/fonts/NotoSansSC-Regular.ttf";
+      }
+      if (isAsset(url)) {
+        if (!(await isAssetExist(url))) {
+          reject(new Error("404"));
+          return;
         }
         let bodyReadDone = false;
         const body = {
@@ -191,16 +156,10 @@ export class FlutterMiniProgramMockWindow {
                     done: true,
                   };
                 }
+                const arrayBuffer = await readAssetAsBuffer(url);
                 const result = {
                   done: false,
-                  value: new Uint8Array(
-                    br ?
-                    fs.readCompressedFileSync({
-                      filePath: subPackageUrl,
-                      compressionAlgorithm: "br",
-                    }) :
-                    fs.readFileSync(subPackageUrl)
-                  ),
+                  value: new Uint8Array(arrayBuffer),
                 };
                 bodyReadDone = true;
                 return result;
@@ -209,12 +168,7 @@ export class FlutterMiniProgramMockWindow {
           },
         };
         const arrayBuffer = async () => {
-          const originBuffer = br ?
-            fs.readCompressedFileSync({
-              filePath: subPackageUrl,
-              compressionAlgorithm: "br",
-            }) :
-            fs.readFileSync(subPackageUrl);
+          const originBuffer = await readAssetAsBuffer(url);
           const newBuffer = new ArrayBuffer(originBuffer.byteLength);
           const sourceArray = new Uint8Array(originBuffer);
           const targetArray = new Uint8Array(newBuffer);
@@ -222,23 +176,7 @@ export class FlutterMiniProgramMockWindow {
           return newBuffer;
         };
         const text = async () => {
-          if (br) {
-            const tmpFile = wx.env.USER_DATA_PATH + "/brtext_tmp";
-            fs.writeFileSync(
-              tmpFile,
-              fs.readCompressedFileSync({
-                filePath: subPackageUrl,
-                compressionAlgorithm: "br",
-              })
-            );
-            const localFileText = fs.readFileSync(tmpFile, "utf8");
-            fs.removeSavedFile({
-              filePath: tmpFile,
-            });
-            return localFileText;
-          }
-          const localFileText = fs.readFileSync(subPackageUrl, "utf-8");
-          return localFileText;
+          return await readAssetAsText(url);
         };
         const json = async () => {
           const localFileText = await text();
@@ -316,9 +254,7 @@ export class FlutterMiniProgramMockWindow {
   };
   // MiniTex
   async MiniTexInit(CanvasKit) {
-    const {
-      MiniTex
-    } = await new Promise((resolve) => {
+    const { MiniTex } = await new Promise((resolve) => {
       require("../../../canvaskit/pages/minitex/index", resolve);
     });
     let iconDatas = {};
@@ -355,14 +291,22 @@ export class FlutterMiniProgramMockWindow {
       }
     }
     const cupertinoIconPath =
-      require("../assets").default["/assets/packages/cupertino_icons/assets/CupertinoIcons.ttf"];
+      require("../assets").default[
+        "/assets/packages/cupertino_icons/assets/CupertinoIcons.ttf"
+      ];
     if (cupertinoIconPath) {
       const cupertinoIconData = await loadSVGFont(cupertinoIconPath);
       if (cupertinoIconData) {
-        iconDatas["packages/cupertino_icons/CupertinoIcons"] = arrayBufferToUtf8String(cupertinoIconData);
+        iconDatas["packages/cupertino_icons/CupertinoIcons"] =
+          arrayBufferToUtf8String(cupertinoIconData);
       }
     }
-    MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio, embeddingFonts, iconDatas);
+    MiniTex.install(
+      CanvasKit,
+      wxSystemInfo.devicePixelRatio,
+      embeddingFonts,
+      iconDatas
+    );
   }
   // bizs
   flutterConfiguration = {
@@ -377,10 +321,7 @@ export class FlutterMiniProgramMockWindow {
           size: true,
         })
         .exec(async (res) => {
-          const {
-            CanvasKitInit,
-            GLVersion
-          } = await new Promise((resolve) => {
+          const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
             require("../../../canvaskit/pages/canvaskit", resolve);
           });
           const _flutter = getApp()._flutter;

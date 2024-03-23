@@ -86,12 +86,6 @@ export class FlutterMiniProgramMockWindow {
       options = {};
     }
     return new Promise(async (resolve, reject) => {
-      if (
-        url.startsWith("https://fonts.gstatic.com/s/") &&
-        (url.endsWith(".otf") || url.endsWith(".ttf"))
-      ) {
-        url = "/assets/fonts/NotoSansSC-Regular.ttf";
-      }
       if (useMiniTex && url.startsWith("https://fonts.gstatic.com/s/")) {
         const responseData = {
           ok: true,
@@ -109,6 +103,12 @@ export class FlutterMiniProgramMockWindow {
           resolve(responseData);
         }, 32);
         return;
+      }
+      if (
+        url.startsWith("https://fonts.gstatic.com/s/") &&
+        (url.endsWith(".otf") || url.endsWith(".ttf"))
+      ) {
+        url = "/assets/fonts/NotoSansSC-Regular.ttf";
       }
       if (isAsset(url)) {
         if (!(await isAssetExist(url))) {

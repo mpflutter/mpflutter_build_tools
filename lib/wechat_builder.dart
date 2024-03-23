@@ -428,14 +428,12 @@ $subPkgJS
     final pkgConfigData = json.decode(pkgConfig.readAsStringSync());
     (pkgConfigData["packages"] as List).forEach((it) {
       final name = it['name'];
-      if (name is String && name.startsWith('mpflutter_')) {
-        final rootUri = fixRootUri(it['rootUri']);
-        if (rootUri.isEmpty) return;
-        if (File(
-          join(Directory.fromUri(Uri.parse(rootUri)).path, 'wechat', 'main.js'),
-        ).existsSync()) {
-          maybeWeChatPkgs[name] = Directory.fromUri(Uri.parse(rootUri));
-        }
+      final rootUri = fixRootUri(it['rootUri']);
+      if (rootUri.isEmpty) return;
+      if (File(
+        join(Directory.fromUri(Uri.parse(rootUri)).path, 'wechat', 'main.js'),
+      ).existsSync()) {
+        maybeWeChatPkgs[name] = Directory.fromUri(Uri.parse(rootUri));
       }
     });
     if (maybeWeChatPkgs.length > 0) {

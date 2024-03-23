@@ -4,6 +4,11 @@
 
 const { Blob } = require("./blob");
 const { Event } = require("./event");
+const {
+  isAsset,
+  isAssetExist,
+  readAssetAsBuffer,
+} = require("./asset_reader");
 const SUPPORT_METHOD = [
   "OPTIONS",
   "GET",
@@ -255,7 +260,7 @@ export class XMLHttpRequest {
       this.$_header[header] = value;
     }
   }
-  send(data) {
+  async send(data) {
     if (this.$_url.indexOf("?use-native-codec=true") >= 0) {
       this.$_url = this.$_url.replace("?use-native-codec=true", "");
       const imageIndex = getApp()._flutter.imageCacheNextIndex;
@@ -324,6 +329,27 @@ export class XMLHttpRequest {
         },
       });
       return;
+    }
+    if (isAsset(this.$_url)) {
+      if (!(await isAssetExist(this.$_url))) return;
+      this.$$trigger("loadstart");
+      try {
+        const arrayBuffer = await readAssetAsBuffer(this.$_url);
+        this.$_status = 200;
+        this.$_resHeader = {};
+        this.$_callReadyStateChange(XMLHttpRequest.HEADERS_RECEIVED);
+        this.$_callReadyStateChange(XMLHttpRequest.LOADING);
+        this.$_response = arrayBuffer;
+        this.$$trigger("loadend");
+        setTimeout(() => {
+          this.$_callReadyStateChange(XMLHttpRequest.DONE);
+          this.$$trigger("load");
+        }, 50);
+      } catch (error) {
+        this.$_status = 0;
+        this.$_statusText = "local file load failed";
+        this.$$trigger("error");
+      }
     }
     if (this.$_readyState !== XMLHttpRequest.OPENED) return;
     if (data instanceof Uint8Array) {

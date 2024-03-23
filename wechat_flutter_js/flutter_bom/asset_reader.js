@@ -7,7 +7,7 @@ export async function getAssetPath(key) {
   if (!key.startsWith("/")) {
     normalizeKey = "/" + key;
   }
-  let subPackageUrl = require("../assets").default[normalizeKey] ?? normalizeKey;
+  let subPackageUrl = require("../assets").default[normalizeKey];
   if (subPackageUrl === undefined) {
     if (normalizeKey.startsWith("/assets/assets/")) {
       normalizeKey = normalizeKey.replace(/\/assets\/assets\//, "/assets/");
@@ -17,15 +17,7 @@ export async function getAssetPath(key) {
     subPackageUrl = require("../assets").default[normalizeKey] ?? normalizeKey;
   }
   await new Promise((resolve) => {
-    wx.loadSubpackage({
-      name: subPackageUrl.split("/")[1],
-      success: function () {
-        resolve();
-      },
-      fail: function () {
-        resolve();
-      },
-    });
+    require(`../../../${subPackageUrl.split("/")[1]}/pages/index`, resolve);
   });
   return subPackageUrl + ".br";
 }
