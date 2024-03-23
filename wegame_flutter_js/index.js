@@ -15,6 +15,25 @@ export class Main {
     this.addEventListeners();
   }
 
+  async fixAndroidGLParams(canvas) {
+    if (wxSystemInfo.platform !== "android") return;
+    const ctxGetter = canvas.getContext;
+    canvas.getContext = function (type, v) {
+      const ctx = ctxGetter(type, v);
+      const originGetParameter = ctx.getParameter.bind(ctx);
+      ctx.getParameter = function (v) {
+        const value = originGetParameter(v);
+        if (v === 7938) {
+          return "WebGL 1.0 (OpenGL ES 2.0 Chromium)";
+        } else if (v === 35724) {
+          return "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)";
+        }
+        return value;
+      };
+      return ctx;
+    };
+  }
+
   async run() {
     await new Promise((resolve) => {
       // 微信小程序 getSystemInfoAsync 接口在 PC 上是存在 BUG 的
@@ -23,6 +42,7 @@ export class Main {
       Object.assign(wxSystemInfo, res);
       resolve();
     });
+    this.fixAndroidGLParams(this.canvas);
     await Promise.all([loadAssetPages(), loadCanvasKitPages(), loadPlugins()]);
     FlutterHostView.shared.self = this;
     getApp()._flutter.window.requestAnimationFrame =
@@ -50,6 +70,9 @@ export class Main {
     wx.onTouchMove(this.ontouchmove.bind(this));
     wx.onTouchEnd(this.ontouchend.bind(this));
     wx.onTouchCancel(this.ontouchcancel.bind(this));
+    wx.onShow(() => {
+      FlutterHostView.shared.onShow?.();
+    });
   }
 
   ontouchstart() {

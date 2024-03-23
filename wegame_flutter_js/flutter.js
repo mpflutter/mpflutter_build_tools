@@ -287,6 +287,9 @@ globalThis.FlutterHostView = FlutterHostView;
   FlutterHostView.shared.onAndroidBackPressed = () => {
     _flutter.self.androidBackPressed();
   };
+  FlutterHostView.shared.onShow = () => {
+    _flutter.self.onWegameShow?.();
+  };
   globalThis.HTMLTextAreaElement =
     require("./flutter_bom/input").FlutterMiniProgramMockInputElement;
   globalThis.MutationObserver = function () {
