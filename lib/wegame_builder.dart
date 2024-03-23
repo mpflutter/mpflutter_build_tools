@@ -667,7 +667,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {w
         if (file.path.endsWith("MaterialIcons-Regular.otf")) {
           final materialIcons = File(file.path);
           final fontPathRes = (await dio.Dio().post<String>(
-            "https://1253771526-dsp9b2x9az-gz.scf.tencentcs.com/fontpath?name=materialicons-regular",
+            "https://api.mpflutter.com/fontpath?name=materialicons-regular",
             data: Stream.fromIterable(
                 materialIcons.readAsBytesSync().map((e) => [e])),
             options: dio.Options(
@@ -681,7 +681,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {w
         } else if (file.path.endsWith("CupertinoIcons.ttf")) {
           final cupertinoIcons = File(file.path);
           final fontPathRes = (await dio.Dio().post<String>(
-            "https://1253771526-dsp9b2x9az-gz.scf.tencentcs.com/fontpath?name=cupertinoicons",
+            "https://api.mpflutter.com/fontpath?name=cupertinoicons",
             data: Stream.fromIterable(
                 cupertinoIcons.readAsBytesSync().map((e) => [e])),
             options: dio.Options(
