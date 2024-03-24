@@ -79,7 +79,7 @@ void main(List<String> args) async {
               '--web-renderer',
               'canvaskit',
               '--dart-define=mpflutter.library.core=true',
-              '--dart-define=mpflutter.buildtools.deferloadmain=true'
+              '--dart-define=mpflutter.library.target.wegame=true',
             ],
             ...arguments.contains('--debug')
                 ? ['--source-maps', '--dart2js-optimization', 'O1']
