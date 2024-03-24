@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart' as dio;
 import 'package:es_compression/brotli.dart';
+import 'package:mpflutter_build_tools/eventlog.dart';
 import 'package:path/path.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 import './sourcemap.server.dart';
@@ -60,6 +61,7 @@ void addShadowPage(String pageName) {
 
 // === 以下是编译程序主逻辑 ===
 
+EventLog? _mpflutterEventLog;
 late Directory _mpflutterSrcRoot;
 
 Future main(List<String> arguments) async {
@@ -80,29 +82,85 @@ Future main(List<String> arguments) async {
 
   if (arguments.contains("--wechat")) {
     print("[INFO] 正在构建 wechat 小程序");
+    _mpflutterEventLog = EventLog({
+      "arguments": arguments,
+      "target": "wechat",
+      "system": {
+        "osname": Platform.operatingSystem,
+        "osversion": Platform.operatingSystemVersion,
+      },
+      "minitex": {
+        "useMiniTex": useMiniTex,
+        "useNoFontCanvasKit": useNoFontCanvasKit,
+      },
+      "license": {
+        "licenseGrant": licenseGrant,
+        "appid": (() {
+          try {
+            final projectConfigJSONData = json.decode(
+              File(join('wechat', 'project.config.json')).readAsStringSync(),
+            );
+            return projectConfigJSONData["appid"];
+          } catch (e) {
+            return "";
+          }
+        })(),
+      }
+    });
+    _mpflutterEventLog?.buildStart();
     final builder = WechatBuilder();
     try {
       await builder.buildFlutterWeb(arguments);
       await builder.buildFlutterWechat(arguments);
       print("[INFO] 构建成功，产物在 build/wechat 目录，使用微信开发者工具导入预览、上传、发布。");
+      await _mpflutterEventLog?.buildSuccess();
       if (arguments.contains('--debug')) {
         runSourceMapServer();
       }
     } catch (e) {
       print("[ERROR] 构建失败，失败信息： $e");
+      await _mpflutterEventLog?.buildFail("-1", "$e");
     }
   } else if (arguments.contains("--wegame")) {
     print("[INFO] 正在构建 wegame 小程序");
+    _mpflutterEventLog = EventLog({
+      "arguments": arguments,
+      "target": "wegame",
+      "system": {
+        "osname": Platform.operatingSystem,
+        "osversion": Platform.operatingSystemVersion,
+      },
+      "minitex": {
+        "useMiniTex": useMiniTex,
+        "useNoFontCanvasKit": useNoFontCanvasKit,
+      },
+      "license": {
+        "licenseGrant": licenseGrant,
+        "appid": (() {
+          try {
+            final projectConfigJSONData = json.decode(
+              File(join('wegame', 'project.config.json')).readAsStringSync(),
+            );
+            return projectConfigJSONData["appid"];
+          } catch (e) {
+            return "";
+          }
+        })(),
+      }
+    });
+    _mpflutterEventLog?.buildStart();
     final builder = WegameBuilder();
     try {
       await builder.buildFlutterWeb(arguments);
       await builder.buildFlutterWegame(arguments);
       print("[INFO] 构建成功，产物在 build/wegame 目录，使用微信开发者工具导入预览、上传、发布。");
+      await _mpflutterEventLog?.buildSuccess();
       if (arguments.contains('--debug')) {
         runSourceMapServer();
       }
     } catch (e) {
       print("[ERROR] 构建失败，失败信息： $e");
+      await _mpflutterEventLog?.buildFail("-1", "$e");
     }
   }
 }
