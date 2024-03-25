@@ -149,6 +149,10 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
   remove = () => {
     if (this.preventDispose) return;
     this.viewOption.props.focus = false;
+    if (wx._mpflutter_focusNode === this.viewOption.pvid) {
+      wx._mpflutter_focusNode = null;
+      wx._mpflutter_hasFocus = false;
+    }
     this.updateView();
     setTimeout(() => {
       this.platformViewManager.disposeView(this.viewOption);
