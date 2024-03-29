@@ -22,10 +22,14 @@ export const main = {
   },
 
   async onLoad() {
-    await new Promise((resolve) => {
+    await new Promise(async (resolve) => {
       // 微信小程序 getSystemInfoAsync 接口在 PC 上是存在 BUG 的
       // https://developers.weixin.qq.com/community/develop/doc/000e46e65dc4e0be8a305ecb161c00?highLine=getsysteminfoasync%2520fail
-      const res = wx.getSystemInfoSync();
+      let res = wx.getSystemInfoSync();
+      if (res.windowHeight != res.screenHeight) {
+        await new Promise((r) => setTimeout(r, 500));
+        res = wx.getSystemInfoSync();
+      }
       Object.assign(wxSystemInfo, res);
       resolve();
     });
