@@ -20,10 +20,14 @@ export async function getAssetPath(key) {
     wx.loadSubpackage({
       name: subPackageUrl.split("/")[1],
       success: function () {
-        resolve();
+        setTimeout(() => {
+          resolve();
+        }, 10);
       },
       fail: function () {
-        resolve();
+        setTimeout(() => {
+          resolve();
+        }, 10);
       },
     });
   });
