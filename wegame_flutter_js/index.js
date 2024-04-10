@@ -54,13 +54,6 @@ export class Main {
       FlutterHostView.shared.onkeyboardheightchange({ detail });
     });
     setupFlutterApp(this.canvas);
-
-    for (var i = 0; i < 10; i++) {
-      setTimeout(() => {
-        FlutterHostView.shared.onwebglcontextlost?.();
-        FlutterHostView.shared.onwebglcontextrestored?.();
-      }, i * 100);
-    }
   }
 
   setData() {}
@@ -124,7 +117,10 @@ function loadCanvasKitPages() {
 }
 
 async function loadPlugins() {
-  // loadPlugins
+  await Promise.all([
+
+])
+
 }
 
 function setupFlutterApp(canvas) {
@@ -136,6 +132,10 @@ function setupFlutterApp(canvas) {
           .then(function (appRunner) {
             appRunner.runApp();
             resolve();
+            setTimeout(() => {
+              FlutterHostView.shared.onwebglcontextlost?.();
+              FlutterHostView.shared.onwebglcontextrestored?.();
+            }, 100);
           })
           .catch(function (e) {
             console.error(e);
