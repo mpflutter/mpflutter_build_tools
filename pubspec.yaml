@@ -12,4 +12,4 @@ dependencies:
   path: ">=1.8.0"
   yaml_edit: ^2.1.1
   es_compression: ^2.0.11
-  dio: ">=4.0.0"
+  dio: ">=5.0.0"
