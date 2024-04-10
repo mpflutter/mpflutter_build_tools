@@ -43,6 +43,7 @@ export class Main {
       resolve();
     });
     this.fixAndroidGLParams(this.canvas);
+    require("./mpjs");
     await Promise.all([loadAssetPages(), loadCanvasKitPages(), loadPlugins()]);
     FlutterHostView.shared.self = this;
     getApp()._flutter.window.requestAnimationFrame =
