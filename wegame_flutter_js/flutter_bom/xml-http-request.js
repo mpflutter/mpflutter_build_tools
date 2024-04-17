@@ -260,7 +260,12 @@ export class XMLHttpRequest {
   }
   async send(data) {
     if (this.$_url.indexOf("?use-native-codec=true") >= 0) {
-      this.$_url = this.$_url.replace("?use-native-codec=true", "");
+      if (this.$_url.endsWith("?use-native-codec=true")) {
+        this.$_url = this.$_url.replace("?use-native-codec=true", "");
+      }
+      else {
+        this.$_url = this.$_url.replace("?use-native-codec=true&", "?").replace("?use-native-codec=true", "");
+      }
       const imageIndex = getApp()._flutter.imageCacheNextIndex;
       getApp()._flutter.imageCacheNextIndex++;
       const canvas = getApp()._flutter.activeCanvas;
