@@ -13,6 +13,7 @@ import 'package:mpflutter_build_tools/eventlog.dart';
 import 'package:path/path.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 import './sourcemap.server.dart';
+import 'fvm.dart';
 import 'utils.dart';
 
 part 'wechat_builder.dart';
@@ -166,8 +167,20 @@ Future main(List<String> arguments) async {
 }
 
 void checkFlutterVersion() async {
-  final process =
-      await Process.start('flutter', ['--version'], runInShell: true);
+  if (useFvm()) {
+    print("[提示]检测到存在 .fvmrc 配置文件，本次构建使用 fvm 执行构建。");
+  }
+  final process = useFvm()
+      ? await Process.start(
+          'fvm',
+          ['flutter', '--version'],
+          runInShell: true,
+        )
+      : await Process.start(
+          'flutter',
+          ['--version'],
+          runInShell: true,
+        );
   final output = await process.stdout.transform(utf8.decoder).join();
   final versionPattern = RegExp(r'Flutter\s+(\d+\.\d+\.\d+)');
   final match = versionPattern.firstMatch(output);

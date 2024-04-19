@@ -65,8 +65,9 @@ void main(List<String> args) async {
       final completer = Completer();
       // 转发请求至Flutter命令
       final flutterProcess = await Process.start(
-          'flutter',
+          useFvm() ? 'fvm' : 'flutter',
           [
+            useFvm() ? 'flutter' : '',
             'build',
             'web',
             ...([...arguments]..removeWhere((element) =>
@@ -84,7 +85,7 @@ void main(List<String> args) async {
             ...arguments.contains('--debug')
                 ? ['--source-maps', '--dart2js-optimization', 'O1']
                 : [],
-          ],
+          ]..removeWhere((element) => element.isEmpty),
           runInShell: true);
 
       // 获取Flutter命令的输出
