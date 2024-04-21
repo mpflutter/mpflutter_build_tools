@@ -29,6 +29,9 @@ export const main = {
       if (res.windowHeight != res.screenHeight) {
         await new Promise((r) => setTimeout(r, 500));
         res = wx.getSystemInfoSync();
+        if (res.windowHeight != res.screenHeight) {
+          res.windowHeight = res.screenHeight;
+        }
       }
       Object.assign(wxSystemInfo, res);
       resolve();
