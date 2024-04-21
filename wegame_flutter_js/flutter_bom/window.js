@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 const { wxSystemInfo } = require("../system_info");
-const { useMiniTex } = require("../minitex");
+const { useMiniTex, embeddingFonts } = require("../minitex");
 const {
   isAsset,
   isAssetExist,
@@ -221,6 +221,20 @@ export class FlutterMiniProgramMockWindow {
       });
     });
   };
+  // MiniTex
+  // MiniTex
+  async MiniTexInit(CanvasKit) {
+    const { MiniTex } = await new Promise((resolve) => {
+      require("../../../canvaskit/pages/minitex/index", resolve);
+    });
+    let iconDatas = {};
+    MiniTex.install(
+      CanvasKit,
+      wxSystemInfo.devicePixelRatio,
+      embeddingFonts,
+      iconDatas,
+    );
+  }
   // bizs
   flutterConfiguration = {
     assetBase: "/",
@@ -263,10 +277,7 @@ export class FlutterMiniProgramMockWindow {
       const ckLoaded = CanvasKitInit(canvas);
       ckLoaded.then(async (CanvasKit) => {
         if (useMiniTex) {
-          const { MiniTex } = await new Promise((resolve) => {
-            require("../../../canvaskit/pages/minitex/index", resolve);
-          });
-          MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio);
+          await this.MiniTexInit(CanvasKit);
         }
         const surface = CanvasKit.MakeCanvasSurface(canvas);
         _flutter.window.flutterCanvasKit = CanvasKit;
