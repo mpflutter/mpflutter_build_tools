@@ -18,6 +18,7 @@ const SUPPORT_METHOD = [
   "DELETE",
   "TRACE",
   "CONNECT",
+  "PATCH",
 ];
 const STATUS_TEXT_MAP = {
   100: "Continue",
@@ -249,8 +250,14 @@ export class XMLHttpRequest {
   }
   open(method, url) {
     if (typeof method === "string") method = method.toUpperCase();
-    if (SUPPORT_METHOD.indexOf(method) < 0) return;
-    if (!url || typeof url !== "string") return;
+    if (SUPPORT_METHOD.indexOf(method) < 0) {
+      console.error(`url = ${url}, method = ${method}, invalid method.`)
+      return;
+    }
+    if (!url || typeof url !== "string") {
+      console.error(`url = ${url}, invalid url.`)
+      return;
+    }
     this.$_method = method;
     this.$_url = url;
     this.$_callReadyStateChange(XMLHttpRequest.OPENED);
