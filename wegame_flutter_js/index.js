@@ -118,10 +118,7 @@ function loadCanvasKitPages() {
 }
 
 async function loadPlugins() {
-  await Promise.all([
-
-])
-
+  // loadPlugins
 }
 
 function setupFlutterApp(canvas) {
