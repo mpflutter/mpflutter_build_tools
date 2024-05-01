@@ -275,8 +275,7 @@ export class XMLHttpRequest {
       }
       const imageIndex = getApp()._flutter.imageCacheNextIndex;
       getApp()._flutter.imageCacheNextIndex++;
-      const canvas = getApp()._flutter.activeCanvas;
-      const img = canvas.createImage();
+      const img = wx.createImage();
       getApp()._flutter.imageCache[imageIndex] = img;
       img.onload = () => {
         this.$_status = 200;
