@@ -180,6 +180,7 @@ void main(List<String> args) async {
     _makeShadowPages();
     _enableMiniTex();
     _mergeSubpackages();
+    _removeRepeatPages();
     _removeLicenseTipsFlag();
     wechatOutDir.deleteSync();
     wechatTmpDir.renameSync(wechatOutDir.path);
@@ -783,8 +784,18 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
       appJSONSubpackages.forEach((curPkg) {
         final root = curPkg["root"] as String;
         final rootDir = Directory(join(wechatTmpDir.path, root));
+        final mustBeSubpackage = (() {
+          try {
+            final wxmlContent =
+                File(join(wechatTmpDir.path, root, 'pages', 'index.wxml'))
+                    .readAsStringSync();
+            return wxmlContent.isNotEmpty && wxmlContent != "<view></view>";
+          } catch (e) {
+            return false;
+          }
+        })();
         final rootDirSize = calculateDirectorySizeSync(rootDir);
-        if (mainPkgSize + rootDirSize < 2 * 1000 * 1000) {
+        if (mainPkgSize + rootDirSize < 2 * 1000 * 1000 && !mustBeSubpackage) {
           mainPkgSize += rootDirSize;
         } else {
           newAppJSONSubpackages.add(curPkg);
@@ -794,6 +805,14 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
       File(join(wechatTmpDir.path, 'app.json'))
           .writeAsStringSync(json.encode(appJSONData));
     }
+  }
+
+  void _removeRepeatPages() {
+    final appJSONData = json
+        .decode(File(join(wechatTmpDir.path, 'app.json')).readAsStringSync());
+    appJSONData["pages"] = Set.from(appJSONData["pages"]).toList();
+    File(join(wechatTmpDir.path, 'app.json'))
+        .writeAsStringSync(json.encode(appJSONData));
   }
 
   void _removeLicenseTipsFlag() {
