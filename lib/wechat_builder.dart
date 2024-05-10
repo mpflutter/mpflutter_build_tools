@@ -796,6 +796,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
         })();
         final rootDirSize = calculateDirectorySizeSync(rootDir);
         if (mainPkgSize + rootDirSize < 2 * 1000 * 1000 && !mustBeSubpackage) {
+          File(join(wechatTmpDir.path, root, 'pages', 'index.js')).writeAsStringSync('');
           mainPkgSize += rootDirSize;
         } else {
           newAppJSONSubpackages.add(curPkg);
