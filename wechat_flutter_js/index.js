@@ -38,6 +38,7 @@ export const main = {
     });
     this.setData({ windowHeight: wxSystemInfo.windowHeight });
     if (FlutterHostView.shared.onwebglcontextrestored) {
+      await new Promise((r) => setTimeout(r, 100));
       this.restoreCanvas();
       setupFlutterHostView(this);
       this.setData({
