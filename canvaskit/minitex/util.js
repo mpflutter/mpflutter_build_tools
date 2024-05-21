@@ -97,6 +97,13 @@ function createCanvas(width, height) {
             height: height,
         });
     }
+    else if (typeof wx === "object" && typeof wx.createCanvas === "function") {
+        return wx.createCanvas({
+            type: "2d",
+            width: width,
+            height: height,
+        });
+    }
     else if (typeof window === "object") {
         const canvas = document.createElement("canvas");
         canvas.width = width;
