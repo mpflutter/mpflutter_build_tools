@@ -266,8 +266,11 @@ void main(List<String> args) async {
       File(join(pkgDirRoot, 'pages', 'index.wxml'))
           .writeAsStringSync('<view></view>');
       value.forEach((element) {
-        final srcOut = element.replaceFirst(join(webOut.path, "assets"),
-            join(wegameTmpDir.path, "assets${keyId}"));
+        var srcOut = element.replaceFirst(join(webOut.path, "assets"),
+            join(wechatTmpDir.path, "assets${keyId}"));
+        srcOut = srcOut.replaceAllMapped(RegExp(r'(\d)\.(\d)x'), (Match match) {
+          return match.group(1)! + "_" + match.group(2)! + "x";
+        });
         Directory(srcOut).parent.createSync(recursive: true);
         File(element).copySync(srcOut);
       });
@@ -277,12 +280,20 @@ void main(List<String> args) async {
     subPkgs.asMap().forEach((key, value) {
       final keyId = key == 0 ? "" : key.toString();
       value.forEach((element) {
+        var srcOut = element;
+        srcOut = srcOut.replaceAllMapped(RegExp(r'(\d)\.(\d)x'), (Match match) {
+          return match.group(1)! + "_" + match.group(2)! + "x";
+        });
         if (element.contains("\\")) {
+          srcOut = srcOut
+              .replaceAll("\\", "/")
+              .replaceFirst("build/web/assets/", "/assets${keyId}/");
           subPkgAsset +=
-              '"${element.replaceAll("\\", "/").replaceFirst("build/web/", "/")}": "${element.replaceAll("\\", "/").replaceFirst("build/web/assets/", "/assets${keyId}/")}",\n';
+              '"${element.replaceAll("\\", "/").replaceFirst("build/web/", "/")}": "${srcOut}",\n';
         } else {
+          srcOut = srcOut.replaceFirst("build/web/assets/", "/assets${keyId}/");
           subPkgAsset +=
-              '"${element.replaceFirst("build/web/", "/")}": "${element.replaceFirst("build/web/assets/", "/assets${keyId}/")}",\n';
+              '"${element.replaceFirst("build/web/", "/")}": "${srcOut}",\n';
         }
       });
     });
