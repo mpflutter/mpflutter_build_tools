@@ -18,6 +18,7 @@ import 'utils.dart';
 
 part 'wechat_builder.dart';
 part 'wegame_builder.dart';
+part 'douyin_builder.dart';
 
 /// 当前 MPFlutter 支持的最高版本 Flutter SDK
 final compactVersion = '3.16.7';
@@ -163,6 +164,47 @@ Future main(List<String> arguments) async {
       print("[ERROR] 构建失败，失败信息： $e");
       await _mpflutterEventLog?.buildFail("-1", "$e");
     }
+  } else if (arguments.contains("--douyin")) {
+    print("[INFO] 正在构建 douyin 小程序");
+    _mpflutterEventLog = EventLog({
+      "arguments": arguments,
+      "target": "douyin",
+      "system": {
+        "osname": Platform.operatingSystem,
+        "osversion": Platform.operatingSystemVersion,
+      },
+      "minitex": {
+        "useMiniTex": useMiniTex,
+        "useNoFontCanvasKit": useNoFontCanvasKit,
+      },
+      "license": {
+        "licenseGrant": licenseGrant,
+        "appid": (() {
+          try {
+            final projectConfigJSONData = json.decode(
+              File(join('wechat', 'project.config.json')).readAsStringSync(),
+            );
+            return projectConfigJSONData["appid"];
+          } catch (e) {
+            return "";
+          }
+        })(),
+      }
+    });
+    _mpflutterEventLog?.buildStart();
+    final builder = DouyinBuilder();
+    try {
+      await builder.buildFlutterWeb(arguments);
+      await builder.buildFlutterDouyin(arguments);
+      print("[INFO] 构建成功，产物在 build/douyin 目录，使用抖音开发者工具导入预览、上传、发布。");
+      await _mpflutterEventLog?.buildSuccess();
+      if (arguments.contains('--debug')) {
+        runSourceMapServer();
+      }
+    } catch (e) {
+      print("[ERROR] 构建失败，失败信息： $e");
+      await _mpflutterEventLog?.buildFail("-1", "$e");
+    }
   }
 }
 
@@ -191,21 +233,6 @@ void checkFlutterVersion() async {
     if (flutterVersion != null &&
         compareVersions(flutterVersion, compactVersion) > 0) {
       throw "你当前的 Flutter SDK 版本是 $flutterVersion，请勿使用高于 $compactVersion 版本的 Flutter SDK，MPFlutter 尚未兼容你当前的版本。";
-    }
-  }
-  if (arguments.contains("--douyin")) {
-    print("[INFO] 正在构建 douyin 小程序");
-    final builder = DouyinBuilder();
-    try {
-      builder.disableNonCompatiblesPackages(arguments);
-      await builder.buildFlutterWeb(arguments);
-      await builder.buildFlutterDouyin(arguments);
-      print("[INFO] 构建成功，产物在 build/douyin 目录，使用抖音开发者工具导入预览、上传、发布。");
-      if (arguments.contains('--debug')) {
-        runSourceMapServer();
-      }
-    } catch (e) {
-      print("[ERROR] 构建失败，失败信息： $e");
     }
   }
 }
