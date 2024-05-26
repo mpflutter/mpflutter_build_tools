@@ -64,7 +64,7 @@ export class FlutterPlatformViewManager {
 
   onPVCB(option) {
     if (this[option.pvid + "_pvcb"]) {
-      return this[option.pvid + "_pvcb"](option.event, option.detail ?? {});
+      this[option.pvid + "_pvcb"](option.event, option.detail ?? {});
     }
   }
 
@@ -115,9 +115,9 @@ export class FlutterPlatformViewManager {
       targetElement.style = style;
       targetElement.props = { ...viewOption.props };
       const keyPath = blockName + `.[${targetIndex}]`;
-      this.setData({ [keyPath]: targetElement }, true);
+      self.setData({ [keyPath]: targetElement });
       // wrapper
-      this.updateWrapper(viewOption, true);
+      this.updateWrapper(viewOption);
     } else {
       // style
       const styleKeyPath = blockName + `.[${targetIndex}].style`;
@@ -135,7 +135,7 @@ export class FlutterPlatformViewManager {
         style += "top: -1000px;pointer-events:none;";
       }
       if (targetElement.style !== style) {
-        this.setData({
+        self.setData({
           [styleKeyPath]: style,
         });
       }
@@ -152,7 +152,7 @@ export class FlutterPlatformViewManager {
             )
           ) {
             const keyPath = blockName + `.[${targetIndex}].props.${targetKey}`;
-            this.setData({
+            self.setData({
               [keyPath]: viewOption.props[targetKey],
             });
           }
@@ -177,14 +177,14 @@ export class FlutterPlatformViewManager {
     }
     if (targetIndex !== undefined) {
       const keyPath = blockName + `.[${targetIndex}].removed`;
-      this.setData({ [keyPath]: true });
+      self.setData({ [keyPath]: true });
     }
     this[viewOption.pvid + "_deleted"] = true;
     delete this[viewOption.pvid + "_pvcb"];
     this.updateWrapper({});
   }
 
-  updateWrapper(viewOption, ignoreBatching) {
+  updateWrapper(viewOption) {
     const self = this.FlutterHostView.shared.self;
     const hasPV =
       Object.keys(this).filter((it) => it.endsWith("_pvcb")).length > 0;
@@ -202,44 +202,17 @@ export class FlutterPlatformViewManager {
         ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(0)}%);`;
         if (
           self.data.PVWrapper.removed === false &&
-          self.data.PVWrapper.style === wrapper &&
-          self.data.PVWrapper.top === viewOption.wrapper.top &&
-          self.data.PVWrapper.bottom === viewOption.wrapper.bottom
+          self.data.PVWrapper.style === wrapper
         )
           return;
-        this.setData({
+        self.setData({
           "PVWrapper.removed": false,
           "PVWrapper.style": wrapper,
-          "PVWrapper.top": viewOption.wrapper.top,
-          "PVWrapper.bottom": viewOption.wrapper.bottom,
-        }, ignoreBatching);
+        });
       }
     } else {
       if (self.data.PVWrapper.removed === true) return;
-      this.setData({ "PVWrapper.removed": true }, ignoreBatching);
-    }
-  }
-
-  batchSetDataBegin() {
-    this.batching = true;
-    this.batchData = {};
-  }
-
-  batchSetDataCommit() {
-    if (Object.keys(this.batchData).length > 0) {
-      const self = this.FlutterHostView.shared.self;
-      self.setData(this.batchData);
-    }
-    this.batching = false;
-    this.batchData = {};
-  }
-
-  setData(data, ignoreBatching) {
-    if (this.batching === true && !ignoreBatching) {
-      Object.assign(this.batchData, data);
-    } else {
-      const self = this.FlutterHostView.shared.self;
-      self.setData(data);
+      self.setData({ "PVWrapper.removed": true });
     }
   }
 }

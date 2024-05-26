@@ -6,13 +6,17 @@
   </page-container>
 
   <block wx:for="{{MPFlutter_Wechat_Input_Block}}" wx:key="pvid">
-    <input wx:if="{{!item.removed}}" key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" value="{{item.props.value}}" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="false" confirm-hold="false" hold-keyboard="true" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange"></input>
+    <input wx:if="{{!item.removed}}" key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" maxlength="-1" value="{{item.props.value}}" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="{{false}}" confirm-hold="{{true}}" hold-keyboard="{{true}}" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange"></input>
   </block>
   <block wx:for="{{MPFlutter_Wechat_TextArea_Block}}" wx:key="pvid">
-    <textarea wx:if="{{!item.removed}}" key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" value="{{item.props.value}}" show-confirm-bar="false" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="false" confirm-hold="false" hold-keyboard="true" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange" />
+    <textarea wx:if="{{!item.removed}}" key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" maxlength="-1" value="{{item.props.value}}" show-confirm-bar="true" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="{{false}}" confirm-hold="{{true}}" hold-keyboard="{{false}}" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange" />
   </block>
 
   <view wx:if="{{!PVWrapper.removed}}" style="{{PVWrapper.style}}z-index:9999;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2">
+    <!-- Top Mask -->
+    <view style="position:absolute;top:0px;width:100vw;height:{{PVWrapper.top}}px;background-color:transparent;z-index: 20000;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2" />
+    <!-- Bottom Mask -->
+    <view style="position:absolute;bottom:0px;width:100vw;height:{{PVWrapper.bottom}}px;background-color:transparent;z-index: 20000;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2" />
     <!--PlatformViewBlocks-->
   </view>
 

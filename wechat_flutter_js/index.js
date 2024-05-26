@@ -6,6 +6,7 @@
 // 获取应用实例
 const { FlutterHostView } = require("./flutter");
 const { wxSystemInfo } = require("./system_info");
+const { useMiniTex } = require("./minitex");
 
 export const main = {
   data: {
@@ -17,20 +18,27 @@ export const main = {
 
   onUnload() {
     FlutterHostView.shared.onwebglcontextlost?.();
-    wx.offKeyboardHeightChange(this.onkeyboardheightchange.bind(this));
+    wx.offKeyboardHeightChange(this.onWXKeyboardheightchange.bind(this));
   },
 
   async onLoad() {
-    await new Promise((resolve) => {
-      wx.getSystemInfoAsync({
-        success: (res) => {
-          Object.assign(wxSystemInfo, res);
-          resolve();
-        },
-      });
+    await new Promise(async (resolve) => {
+      // 微信小程序 getSystemInfoAsync 接口在 PC 上是存在 BUG 的
+      // https://developers.weixin.qq.com/community/develop/doc/000e46e65dc4e0be8a305ecb161c00?highLine=getsysteminfoasync%2520fail
+      let res = wx.getSystemInfoSync();
+      if (res.windowHeight != res.screenHeight) {
+        await new Promise((r) => setTimeout(r, 500));
+        res = wx.getSystemInfoSync();
+        if (res.windowHeight != res.screenHeight) {
+          res.windowHeight = res.screenHeight;
+        }
+      }
+      Object.assign(wxSystemInfo, res);
+      resolve();
     });
     this.setData({ windowHeight: wxSystemInfo.windowHeight });
     if (FlutterHostView.shared.onwebglcontextrestored) {
+      await new Promise((r) => setTimeout(r, 100));
       this.restoreCanvas();
       setupFlutterHostView(this);
       this.setData({
@@ -41,9 +49,12 @@ export const main = {
       return;
     }
     require("./mpjs");
-    await loadAssetPages();
-    await loadCanvasKitPages();
-    await loadPlugins();
+    await Promise.all([
+      loadAssetPages(),
+      loadCanvasKitPages(),
+      loadPlugins(),
+      loadRobotoFont(),
+    ]);
 
     setupFlutterHostView(this);
     setupAppLifeCycleListener();
@@ -60,7 +71,7 @@ export const main = {
         await setupFlutterApp(canvas);
       });
 
-    wx.onKeyboardHeightChange(this.onkeyboardheightchange.bind(this));
+    wx.onKeyboardHeightChange(this.onWXKeyboardheightchange.bind(this));
   },
 
   onEnter() {
@@ -101,6 +112,9 @@ export const main = {
   ontouchend() {
     if (this.data.shouldCatchBack) return;
     FlutterHostView.shared.touching = false;
+    let moveEvent = { ...arguments[0] };
+    moveEvent.type = "touchmove";
+    callFlutterTouchEvent("ontouchmove", [moveEvent]);
     callFlutterTouchEvent("ontouchend", arguments);
   },
 
@@ -126,6 +140,9 @@ export const main = {
     if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = false;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
+    let moveEvent = { ...arguments[0] };
+    moveEvent.type = "touchmove";
+    callFlutterTouchEvent("ontouchmove", [moveEvent]);
     callFlutterTouchEvent("ontouchend", arguments);
   },
 
@@ -136,17 +153,29 @@ export const main = {
     callFlutterTouchEvent("ontouchcancel", arguments);
   },
 
-  onkeyboardheightchange(detail) {
-    let a = { detail: detail };
-    if (shouldDelayKeyboardHeightChange()) {
-      setTimeout(() => {
-        if (!FlutterHostView.shared.inputHasFocus) {
-          FlutterHostView.shared.onkeyboardheightchange.apply(null, [a]);
-        }
-      }, 100);
+  onkeyboardheightchange(e) {
+    if (wxSystemInfo.platform === "android") {
+      return FlutterHostView.shared.onkeyboardheightchange(e);
+    }
+    if (e.detail.height > 0 && !wx._mpflutter_hasFocus) {
       return;
     }
-    FlutterHostView.shared.onkeyboardheightchange.apply(null, [a]);
+    if (e.detail.height <= 0 && wx._mpflutter_hasFocus) {
+      return;
+    }
+    if (this.callOnkeyboardheightchangeTimer) {
+      clearTimeout(this.callOnkeyboardheightchangeTimer);
+    }
+    this.callOnkeyboardheightchangeTimer = setTimeout(() => {
+      this.callOnkeyboardheightchangeTimer = undefined;
+      FlutterHostView.shared.onkeyboardheightchange(e);
+    }, 100);
+  },
+
+  onWXKeyboardheightchange(detail) {
+    if (detail.height <= 0) {
+      this.onkeyboardheightchange({ detail: detail });
+    }
   },
 
   onPageContainerHide() {
@@ -174,24 +203,51 @@ export const main = {
   },
 
   onShareAppMessage(detail) {
-    if (!wx.mpcb.onShareAppMessage) return undefined;
-    return {
-      ...wx.mpcb.onShareAppMessage(detail),
-    };
+    if (wx.mpcb.onShareAppMessage) {
+      return {
+        ...wx.mpcb.onShareAppMessage(detail),
+      };
+    } else if (wx.mpcb.onShareAppMessageAsync) {
+      return {
+        promise: new Promise((resolve) => {
+          wx.mpcb.onShareAppMessageAsync(detail, (result) => {
+            resolve(result);
+          });
+        }),
+      };
+    }
   },
 
   onShareTimeline(detail) {
-    if (!wx.mpcb.onShareTimeline) return undefined;
-    return {
-      ...wx.mpcb.onShareTimeline(detail),
-    };
+    if (wx.mpcb.onShareTimeline) {
+      return {
+        ...wx.mpcb.onShareTimeline(detail),
+      };
+    } else if (wx.mpcb.onShareTimelineAsync) {
+      return {
+        promise: new Promise((resolve) => {
+          wx.mpcb.onShareTimelineAsync(detail, (result) => {
+            resolve(result);
+          });
+        }),
+      };
+    }
   },
 
   onAddToFavorites(detail) {
-    if (!wx.mpcb.onAddToFavorites) return undefined;
-    return {
-      ...wx.mpcb.onAddToFavorites(detail),
-    };
+    if (wx.mpcb.onAddToFavorites) {
+      return {
+        ...wx.mpcb.onAddToFavorites(detail),
+      };
+    } else if (wx.mpcb.onAddToFavoritesAsync) {
+      return {
+        promise: new Promise((resolve) => {
+          wx.mpcb.onAddToFavoritesAsync(detail, (result) => {
+            resolve(result);
+          });
+        }),
+      };
+    }
   },
 
   onPVCB(e) {
@@ -199,7 +255,7 @@ export const main = {
       const event = e.type;
       const pvid = e.target.id;
       const detail = e.detail;
-      getApp()._flutter.self.platformViewManager.onPVCB({
+      return getApp()._flutter.self.platformViewManager.onPVCB({
         pvid,
         event,
         detail,
@@ -224,6 +280,38 @@ function loadCanvasKitPages() {
 
 async function loadPlugins() {
   // loadPlugins
+}
+
+function loadRobotoFont() {
+  if (!(useMiniTex && wxSystemInfo.platform === "android")) {
+    return;
+  }
+  return new Promise((resolve) => {
+    let resolved = false;
+    setTimeout(() => {
+      if (resolved) return;
+      resolved = true;
+      resolve();
+    }, 2000);
+    wx.loadFontFace({
+      global: true,
+      family: "Roboto",
+      source:
+        'url("https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/lato-font/3.0.0/fonts/lato-normal/lato-normal.woff")',
+      scopes: ["native"],
+      success: function () {
+        if (resolved) return;
+        resolved = true;
+        resolve();
+      },
+      fail: function (err) {
+        if (resolved) return;
+        console.log("fail to load roboto", err);
+        resolved = true;
+        resolve();
+      },
+    });
+  });
 }
 
 function setupAppLifeCycleListener() {

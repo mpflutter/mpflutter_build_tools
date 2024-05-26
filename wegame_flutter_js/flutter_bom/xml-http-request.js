@@ -4,11 +4,7 @@
 
 const { Blob } = require("./blob");
 const { Event } = require("./event");
-const {
-  isAsset,
-  isAssetExist,
-  readAssetAsBuffer,
-} = require("./asset_reader");
+const { isAsset, isAssetExist, readAssetAsBuffer } = require("./asset_reader");
 const SUPPORT_METHOD = [
   "OPTIONS",
   "GET",
@@ -149,14 +145,16 @@ export class XMLHttpRequest {
     this.$_status = statusCode;
     this.$_resHeader = header;
     this.$_callReadyStateChange(XMLHttpRequest.HEADERS_RECEIVED);
-    this.$_callReadyStateChange(XMLHttpRequest.LOADING);
-    this.$$trigger("loadstart");
-    if (this.$_responseType === "blob") {
-      this.$_response = new Blob([data]);
-    } else {
-      this.$_response = data ?? new ArrayBuffer(0);
+    if (data) {
+      this.$_callReadyStateChange(XMLHttpRequest.LOADING);
+      this.$$trigger("loadstart");
+      if (this.$_responseType === "blob") {
+        this.$_response = new Blob([data]);
+      } else {
+        this.$_response = data;
+      }
+      this.$$trigger("loadend");
     }
-    this.$$trigger("loadend");
   }
   $_requestFail({ errMsg }) {
     this.$_status = 0;
@@ -277,8 +275,7 @@ export class XMLHttpRequest {
       }
       const imageIndex = getApp()._flutter.imageCacheNextIndex;
       getApp()._flutter.imageCacheNextIndex++;
-      const canvas = getApp()._flutter.activeCanvas;
-      const img = canvas.createImage();
+      const img = wx.createImage();
       getApp()._flutter.imageCache[imageIndex] = img;
       img.onload = () => {
         this.$_status = 200;

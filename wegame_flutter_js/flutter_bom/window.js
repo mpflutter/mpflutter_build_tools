@@ -10,18 +10,6 @@ const {
   readAssetAsBuffer,
   readAssetAsText,
 } = require("./asset_reader");
-const { Event } = require("./event");
-
-function arrayBufferToUtf8String(arrayBuffer) {
-  const uint8Array = new Uint8Array(arrayBuffer);
-  let utf8String = "";
-
-  for (let i = 0; i < uint8Array.length; i++) {
-    utf8String += String.fromCharCode(uint8Array[i]);
-  }
-
-  return decodeURIComponent(escape(utf8String));
-}
 
 export class FlutterMiniProgramMockWindow {
   // globals
@@ -44,18 +32,7 @@ export class FlutterMiniProgramMockWindow {
   }
 
   get innerHeight() {
-    return wxSystemInfo.windowHeight - this._keyboardHeight;
-  }
-
-  // keyboard
-
-  _keyboardHeight = 0;
-
-  keyboardHeightChanged(height) {
-    this._keyboardHeight = height;
-    if (this.onResize) {
-      this.onResize(new Event());
-    }
+    return wxSystemInfo.windowHeight;
   }
 
   // webs
@@ -89,16 +66,8 @@ export class FlutterMiniProgramMockWindow {
   dispatchEvent() {
     return true;
   }
-  addEventListener(event, callback) {
-    if (event === "resize") {
-      this.onResize = callback;
-    }
-  }
-  removeEventListener(event) {
-    if (event === "resize") {
-      this.onResize = undefined;
-    }
-  }
+  addEventListener(event, callback) {}
+  removeEventListener() {}
   getComputedStyle() {
     return {
       getPropertyValue: () => {
@@ -253,59 +222,17 @@ export class FlutterMiniProgramMockWindow {
     });
   };
   // MiniTex
+  // MiniTex
   async MiniTexInit(CanvasKit) {
     const { MiniTex } = await new Promise((resolve) => {
       require("../../../canvaskit/pages/minitex/index", resolve);
     });
     let iconDatas = {};
-    const fs = wx.getFileSystemManager();
-
-    const loadSVGFont = async (iconPath) => {
-      await new Promise((resolve) => {
-        require(`../../../${iconPath.split("/")[1]}/pages/index`, resolve);
-      });
-      const svgExists = await new Promise((resolve) => {
-        fs.getFileInfo({
-          filePath: iconPath + ".svg.br",
-          success: () => {
-            resolve(true);
-          },
-          fail: () => {
-            resolve(false);
-          },
-        });
-      });
-      if (svgExists) {
-        return wx.getFileSystemManager().readCompressedFileSync({
-          filePath: iconPath + ".svg.br",
-          compressionAlgorithm: "br",
-        });
-      }
-    };
-    const materialIconPath =
-      require("../assets").default["/assets/fonts/MaterialIcons-Regular.otf"];
-    if (materialIconPath) {
-      const materialIconsData = await loadSVGFont(materialIconPath);
-      if (materialIconsData) {
-        iconDatas["MaterialIcons"] = arrayBufferToUtf8String(materialIconsData);
-      }
-    }
-    const cupertinoIconPath =
-      require("../assets").default[
-        "/assets/packages/cupertino_icons/assets/CupertinoIcons.ttf"
-      ];
-    if (cupertinoIconPath) {
-      const cupertinoIconData = await loadSVGFont(cupertinoIconPath);
-      if (cupertinoIconData) {
-        iconDatas["packages/cupertino_icons/CupertinoIcons"] =
-          arrayBufferToUtf8String(cupertinoIconData);
-      }
-    }
     MiniTex.install(
       CanvasKit,
       wxSystemInfo.devicePixelRatio,
       embeddingFonts,
-      iconDatas
+      iconDatas,
     );
   }
   // bizs
@@ -313,60 +240,53 @@ export class FlutterMiniProgramMockWindow {
     assetBase: "/",
   };
   CanvasKitInit() {
-    return new Promise((resolve) => {
-      wx.createSelectorQuery()
-        .select("#my_canvas") // 在 WXML 中填入的 id
-        .fields({
-          node: true,
-          size: true,
-        })
-        .exec(async (res) => {
-          const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
-            require("../../../canvaskit/pages/canvaskit", resolve);
-          });
-          const _flutter = getApp()._flutter;
-          // Canvas 对象
-          let canvas = res[0].node;
+    return new Promise(async (resolve) => {
+      const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
+        console.log("load canvaskit");
+        require("../../../canvaskit/pages/canvaskit", resolve);
+      });
+      console.log("done canvaskit", CanvasKitInit);
+      const _flutter = getApp()._flutter;
+      // Canvas 对象
+      let canvas = _flutter.activeCanvas;
 
-          if (GLVersion > 1) {
-            const ctx = canvas.getContext("webgl2");
-            const originGetParameter = ctx.getParameter.bind(ctx);
-            ctx.getParameter = function (v) {
-              if (v === 7938) {
-                const value = originGetParameter(v);
-                if (value.indexOf("OpenGL ES 3.2") > 0) {
-                  return "WebGL 2.0 (OpenGL ES 3.2 Chromium)";
-                } else {
-                  return value;
-                }
-              } else if (v === 35724) {
-                const value = originGetParameter(v);
-                if (value.indexOf("OpenGL ES 3.2") > 0) {
-                  return "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.2 Chromium)";
-                } else {
-                  return value;
-                }
-              }
-              return originGetParameter(v);
-            };
+      if (GLVersion > 1) {
+        const ctx = canvas.getContext("webgl2");
+        const originGetParameter = ctx.getParameter.bind(ctx);
+        ctx.getParameter = function (v) {
+          if (v === 7938) {
+            const value = originGetParameter(v);
+            if (value.indexOf("OpenGL ES 3.2") > 0) {
+              return "WebGL 2.0 (OpenGL ES 3.2 Chromium)";
+            } else {
+              return value;
+            }
+          } else if (v === 35724) {
+            const value = originGetParameter(v);
+            if (value.indexOf("OpenGL ES 3.2") > 0) {
+              return "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.2 Chromium)";
+            } else {
+              return value;
+            }
           }
+          return originGetParameter(v);
+        };
+      }
 
-          _flutter.activeCanvas = canvas;
-          // 渲染上下文
-          const ckLoaded = CanvasKitInit(canvas);
-          ckLoaded.then(async (CanvasKit) => {
-            if (useMiniTex) {
-              await this.MiniTexInit(CanvasKit);
-            }
-            const surface = CanvasKit.MakeCanvasSurface(canvas);
-            _flutter.window.flutterCanvasKit = CanvasKit;
-            if (!globalThis.window) {
-              globalThis.window = _flutter.window;
-            }
-            globalThis.window.flutterCanvasKit = CanvasKit;
-            resolve(CanvasKit);
-          });
-        });
+      // 渲染上下文
+      const ckLoaded = CanvasKitInit(canvas);
+      ckLoaded.then(async (CanvasKit) => {
+        if (useMiniTex) {
+          await this.MiniTexInit(CanvasKit);
+        }
+        const surface = CanvasKit.MakeCanvasSurface(canvas);
+        _flutter.window.flutterCanvasKit = CanvasKit;
+        if (!globalThis.window) {
+          globalThis.window = _flutter.window;
+        }
+        globalThis.window.flutterCanvasKit = CanvasKit;
+        resolve(CanvasKit);
+      });
     });
   }
 }

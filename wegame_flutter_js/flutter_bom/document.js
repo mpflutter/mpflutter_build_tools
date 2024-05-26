@@ -2,7 +2,7 @@
 // Use of this source code is governed by a Apache-2.0 license that can be
 // found in the LICENSE file.
 
-const GLVersion = 2;
+const GLVersion = 1;
 
 export class FlutterMiniProgramMockDocument {
   addEventListener(event, callback) {}
@@ -10,7 +10,7 @@ export class FlutterMiniProgramMockDocument {
 
   documentElement = {};
 
-  body = new(require("./element").FlutterMiniProgramMockElement)();
+  body = new (require("./element").FlutterMiniProgramMockElement)();
 
   currentScript = {
     src: "/",
@@ -36,20 +36,23 @@ export class FlutterMiniProgramMockDocument {
     } else if (tag === "canvas") {
       const _flutter = getApp()._flutter;
       const isOffScreen = _flutter.activeCanvasBinded === true;
-      let canvas = !isOffScreen ? _flutter.activeCanvas : wx.createOffscreenCanvas({
-        type: GLVersion >= 2 ? "webgl2" : "webgl",
-        width: 1,
-        height: 1
-      });
+      let canvas = !isOffScreen
+        ? _flutter.activeCanvas
+        : wx.createCanvas({
+            type: GLVersion >= 2 ? "webgl2" : "webgl",
+            width: 1,
+            height: 1,
+          });
       setTimeout(() => {
         _flutter.activeCanvasBinded = true;
-      }, 0);
+      }, 1000);
       let mockElement =
-        new(require("./element").FlutterMiniProgramMockElement)();
+        new (require("./element").FlutterMiniProgramMockElement)();
       mockElement.tagName = "canvas";
-      mockElement.isOffscreenCanvas = isOffScreen;
       for (const key in mockElement) {
-        canvas[key] = mockElement[key];
+        try {
+          canvas[key] = mockElement[key];
+        } catch (error) {}
       }
       let recreateOffScrrenCanvas;
       if (!isOffScreen) {
@@ -62,13 +65,11 @@ export class FlutterMiniProgramMockDocument {
           }
         };
       } else {
-        recreateOffScrrenCanvas = function() {
-          mockElement.onwebglcontextlost?.();
-          mockElement.onwebglcontextrestored?.();
-          let newCanvas = wx.createOffscreenCanvas({
+        recreateOffScrrenCanvas = function () {
+          let newCanvas = wx.createCanvas({
             type: GLVersion >= 2 ? "webgl2" : "webgl",
             width: canvas._width,
-            height: canvas._height
+            height: canvas._height,
           });
           let oriGetContext = newCanvas.getContext.bind(newCanvas);
           canvas.getContext = function (type) {
@@ -78,7 +79,7 @@ export class FlutterMiniProgramMockDocument {
               return oriGetContext("webgl");
             }
           };
-        }
+        };
       }
       Object.defineProperty(canvas, "width", {
         get: function () {
@@ -110,33 +111,34 @@ export class FlutterMiniProgramMockDocument {
         enumerable: true,
         configurable: true,
       });
+      canvas.style.setProperty = () => {};
       return canvas;
     } else if (tag === "flutter-view") {
-      const el = new(require("./element").FlutterMiniProgramMockElement)();
+      const el = new (require("./element").FlutterMiniProgramMockElement)();
       el.tagName = "flutter-view";
       return el;
     } else if (tag === "input") {
-      const el = new(require("./input").FlutterMiniProgramMockInputElement)();
+      const el = new (require("./input").FlutterMiniProgramMockInputElement)();
       el.tagName = "input";
       return el;
     } else if (tag === "textarea") {
       const el =
-        new(require("./input").FlutterMiniProgramMockTextAreaElement)();
+        new (require("./input").FlutterMiniProgramMockTextAreaElement)();
       el.tagName = "textarea";
       return el;
     } else if (tag === "form") {
-      const el = new(require("./input").FlutterMiniProgramMockFormElement)();
+      const el = new (require("./input").FlutterMiniProgramMockFormElement)();
       el.tagName = "form";
       return el;
     } else {
-      const el = new(require("./element").FlutterMiniProgramMockElement)();
+      const el = new (require("./element").FlutterMiniProgramMockElement)();
       el.tagName = tag;
       return el;
     }
   }
 
   hasFocus() {
-    return wx._mpflutter_hasFocus === true;
+    return false;
   }
 
   createEvent() {
@@ -145,7 +147,7 @@ export class FlutterMiniProgramMockDocument {
     };
   }
 
-  head = new(require("./element").FlutterMiniProgramMockElement)();
+  head = new (require("./element").FlutterMiniProgramMockElement)();
 
   querySelector() {}
 

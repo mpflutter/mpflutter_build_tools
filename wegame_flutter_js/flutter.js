@@ -252,8 +252,6 @@ globalThis.FlutterHostView = FlutterHostView;
     HTMLTextAreaElement: require("./flutter_bom/input")
       .FlutterMiniProgramMockInputElement,
     encodeImage: require("./flutter_bom/image_encoder").encodeImage,
-    encodeImageToFilePath: require("./flutter_bom/image_encoder")
-      .encodeImageToFilePath,
     $__dart_deferred_initializers__: [],
     dartDeferredLibraryLoader: function (uri, res, rej) {
       const pkgs = require("./pkgs").default;
@@ -262,33 +260,35 @@ globalThis.FlutterHostView = FlutterHostView;
         typeof require.async === "function"
       ) {
         if (pkgs[uri]) {
-          require("../../" +
-            pkgs[uri] +
-            "/pages" +
-            uri.replace(".part.js", ".part"), function () {
-            // console.log(uri, "done");
-            res();
-          }, function (err) {
-            console.error(err);
-          });
+          console.log("load", pkgs[uri] + "/pages" + uri.replace(".part.js", ".part"))
+          wx.loadSubpackage({
+            // complete: complete,
+            fail: function() {
+              require( "../../" + pkgs[uri] + "/pages" + uri.replace(".part.js", ".part"));
+              res();
+            },
+            name: pkgs[uri],
+            success: function() {
+              require( "../../" + pkgs[uri] + "/pages" + uri.replace(".part.js", ".part"));
+              res();
+            },
+          })
         } else {
-          require("./" + uri, function () {
-            // console.log(uri, "done");
-            res();
-          });
+          require( "../../" + pkgs[uri] + "/pages" + uri.replace(".part.js", ".part"));
+          res();
         }
       }
     },
     XMLHttpRequest: require("./flutter_bom/xml-http-request").XMLHttpRequest,
   };
   FlutterHostView.shared.onkeyboardheightchange = (e) => {
-    if (e.detail.height != null && e.detail.height != undefined) {
-      _flutter.self.keyboardHeightChanged(e.detail.height);
-      _flutter.self.window.keyboardHeightChanged(e.detail.height);
-    }
+    _flutter.self.keyboardHeightChanged(e.detail.height);
   };
   FlutterHostView.shared.onAndroidBackPressed = () => {
     _flutter.self.androidBackPressed();
+  };
+  FlutterHostView.shared.onShow = () => {
+    _flutter.self.onWegameShow?.();
   };
   globalThis.HTMLTextAreaElement =
     require("./flutter_bom/input").FlutterMiniProgramMockInputElement;
@@ -306,7 +306,6 @@ globalThis.FlutterHostView = FlutterHostView;
   globalThis.localStorage = _flutter.self.localStorage;
   globalThis.Blob = _flutter.self.Blob;
   globalThis.FileReader = _flutter.self.FileReader;
-  globalThis.performance = _flutter.self.window.performance;
 
   let originObjectStringFunction = Object.prototype.toString;
   Object.prototype.toString = function () {
