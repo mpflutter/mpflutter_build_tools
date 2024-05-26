@@ -256,8 +256,8 @@ function setupFlutterHostView(self) {
 }
 
 function resizeCanvas(canvas) {
-  canvas.width = canvas.width * wxSystemInfo.pixelRatio;
-  canvas.height = canvas.height * wxSystemInfo.pixelRatio;
+  // canvas.width = canvas.width * wxSystemInfo.pixelRatio;
+  // canvas.height = canvas.height * wxSystemInfo.pixelRatio;
   getApp()._flutter.window.requestAnimationFrame = canvas.requestAnimationFrame;
 }
 

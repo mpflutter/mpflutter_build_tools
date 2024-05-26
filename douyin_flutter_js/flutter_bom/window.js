@@ -17,7 +17,8 @@ export class FlutterMiniProgramMockWindow {
 
   // screens
   get devicePixelRatio() {
-    return wxSystemInfo.pixelRatio;
+    return 1;
+    // return wxSystemInfo.pixelRatio;
   }
 
   get innerWidth() {
@@ -48,19 +49,19 @@ export class FlutterMiniProgramMockWindow {
     now: () => {
       return new Date().getTime();
     },
-    mark: function () {},
-    measure: function () {},
+    mark: function () { },
+    measure: function () { },
   };
   history = {
-    replaceState: () => {},
-    pushState: () => {},
+    replaceState: () => { },
+    pushState: () => { },
     state: {},
   };
   dispatchEvent() {
     return true;
   }
-  addEventListener(event, callback) {}
-  removeEventListener() {}
+  addEventListener(event, callback) { }
+  removeEventListener() { }
   getComputedStyle() {
     return {
       getPropertyValue: () => {
@@ -71,7 +72,7 @@ export class FlutterMiniProgramMockWindow {
   matchMedia() {
     return {
       matches: false,
-      addListener: () => {},
+      addListener: () => { },
     };
   }
   fetch = (url, options) => {
@@ -86,9 +87,8 @@ export class FlutterMiniProgramMockWindow {
         let mUrl = "/assets/fonts/NotoSansSC-Regular.ttf";
         let subPackageUrl = require("../assets").default[mUrl] ?? mUrl;
         await new Promise((resolve) => {
-          require(`../../../${
-            subPackageUrl.split("/")[1]
-          }/pages/index`, resolve);
+          require(`../../../${subPackageUrl.split("/")[1]
+            }/pages/index`, resolve);
         });
         const fs = tt.getFileSystemManager();
         const brExists = await new Promise((resolve) => {
@@ -123,9 +123,8 @@ export class FlutterMiniProgramMockWindow {
       if (url.startsWith("/")) {
         let subPackageUrl = require("../assets").default[url] ?? url;
         await new Promise((resolve) => {
-          require(`../../../${
-            subPackageUrl.split("/")[1]
-          }/pages/index`, resolve);
+          require(`../../../${subPackageUrl.split("/")[1]
+            }/pages/index`, resolve);
         });
         let br = false;
         let abPng = false;
@@ -321,7 +320,7 @@ export class FlutterMiniProgramMockWindow {
           size: true,
         })
         .exec((res) => {
-          const { CanvasKitInit, GLVersion } = require("../canvaskit");
+          const { CanvasKitInit, GLVersion, GlobalModules } = require("../canvaskit");
           const _flutter = getApp()._flutter;
           // Canvas 对象
           let canvas = res[0].node;
@@ -354,16 +353,21 @@ export class FlutterMiniProgramMockWindow {
 
           _flutter.activeCanvas = canvas;
           // 渲染上下文
-          const ckLoaded = CanvasKitInit(canvas);
-          ckLoaded.then((CanvasKit) => {
-            const surface = CanvasKit.MakeCanvasSurface(canvas);
-            _flutter.window.flutterCanvasKit = CanvasKit;
-            if (!global.window) {
-              global.window = _flutter.window;
-            }
-            global.window.flutterCanvasKit = CanvasKit;
-            resolve(CanvasKit);
-          });
+
+          const SkslInit = require("../sksl");
+          SkslInit().then((skslModule) => {
+            GlobalModules.skslModule = skslModule;
+            const ckLoaded = CanvasKitInit(canvas);
+            ckLoaded.then((CanvasKit) => {
+              const surface = CanvasKit.MakeCanvasSurface(canvas);
+              _flutter.window.flutterCanvasKit = CanvasKit;
+              if (!global.window) {
+                global.window = _flutter.window;
+              }
+              global.window.flutterCanvasKit = CanvasKit;
+              resolve(CanvasKit);
+            });
+          })
         });
     });
   }
