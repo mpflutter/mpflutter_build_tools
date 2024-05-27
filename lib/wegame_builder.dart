@@ -267,7 +267,7 @@ void main(List<String> args) async {
           .writeAsStringSync('<view></view>');
       value.forEach((element) {
         var srcOut = element.replaceFirst(join(webOut.path, "assets"),
-            join(wechatTmpDir.path, "assets${keyId}"));
+            join(wegameTmpDir.path, "assets${keyId}"));
         srcOut = srcOut.replaceAllMapped(RegExp(r'(\d)\.(\d)x'), (Match match) {
           return match.group(1)! + "_" + match.group(2)! + "x";
         });
