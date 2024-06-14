@@ -557,7 +557,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {w
     content = content.replaceAll(
         'new self.MutationObserver', 'new globalThis.MutationObserver');
     File(filePath).writeAsStringSync(
-        '''var self = getApp()._flutter.self;var XMLHttpRequest = self.XMLHttpRequest;var \$__dart_deferred_initializers__ = self.\$__dart_deferred_initializers__;var document = self.document;var window = self.window;''' +
+        '''var self = getApp()._flutter.self;var XMLHttpRequest = self.XMLHttpRequest;var \$__dart_deferred_initializers__ = self.\$__dart_deferred_initializers__;var document = self.document;var window = self.window;var WeakRef = self.WeakRef;''' +
             content);
   }
 

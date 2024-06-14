@@ -230,6 +230,7 @@ globalThis.FlutterHostView = FlutterHostView;
     Promise: Promise,
     Array: Array,
     Uint8Array: Uint8Array,
+    WeakRef: typeof WeakRef !== "undefined" ? WeakRef : require("./flutter_bom/weak_ref").WeakRef,
     platformViewManager:
       new (require("./platform_view").FlutterPlatformViewManager)(
         FlutterHostView
@@ -307,6 +308,7 @@ globalThis.FlutterHostView = FlutterHostView;
   globalThis.Blob = _flutter.self.Blob;
   globalThis.FileReader = _flutter.self.FileReader;
   globalThis.performance = _flutter.self.window.performance;
+  globalThis.WeakRef = _flutter.self.WeakRef;
 
   let originObjectStringFunction = Object.prototype.toString;
   Object.prototype.toString = function () {
