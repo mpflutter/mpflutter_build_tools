@@ -239,18 +239,7 @@ function setupFlutterHostView(self) {
   FlutterHostView.shared.self = self;
 
   FlutterHostView.shared.requireCatchBack = (shouldCatchBack) => {
-    FlutterHostView.shared.shouldCatchBack = shouldCatchBack;
-    const self = FlutterHostView.shared.self;
-    setTimeout(() => {
-      self.setData({
-        shouldCatchBack: !self.data.shouldCatchBack,
-      });
-      setTimeout(() => {
-        self.setData({
-          shouldCatchBack: shouldCatchBack,
-        });
-      }, 100);
-    }, 200);
+    // tt no need requireCatchBack
   };
 
 }

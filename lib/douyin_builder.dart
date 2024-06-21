@@ -168,7 +168,7 @@ void main(List<String> args) async {
     _copyCanvaskitWasm(arguments);
     _copyFlutterSkeleton(arguments);
     _copyAssets(arguments);
-    // await _generateMiniTexIconFonts();
+    await _generateMiniTexIconFonts();
     _compressAssets(arguments);
     _copyDartJS(arguments);
     _copyPubPackagesToDouyin(arguments);
@@ -187,12 +187,16 @@ void main(List<String> args) async {
   }
 
   void _copyCanvaskitWasm(List<String> arguments) {
-    final canvaskitSrc =
-        Directory(join(_mpflutterSrcRoot.path, 'canvaskit_douyin'));
+    final canvaskitSrc = Directory(join(_mpflutterSrcRoot.path, 'canvaskit'));
     final canvaskitOut =
         Directory(join(douyinTmpDir.path, 'canvaskit', 'pages'));
     canvaskitOut.createSync(recursive: true);
     copyDirectory(canvaskitSrc, canvaskitOut);
+    final canvaskitJSFile =
+        File(join(douyinTmpDir.path, 'canvaskit', 'pages', 'canvaskit.js'));
+    canvaskitJSFile.writeAsStringSync(canvaskitJSFile
+        .readAsStringSync()
+        .replaceFirst("GLVersion = 2", "GLVersion = 1"));
     // if (useMiniTex && useNoFontCanvasKit) {
     //   final noFontCanvaskitSrc =
     //       Directory(join(_mpflutterSrcRoot.path, 'canvaskit_no_font'));
@@ -709,44 +713,46 @@ ${maybeDouyinPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
   //   }
   // }
 
-  // Future _generateMiniTexIconFonts() async {
-  //   final requireMiniTex = useMiniTex;
-  //   if (requireMiniTex) {
-  //     final files =
-  //         Directory(join(douyinTmpDir.path)).listSync(recursive: true);
-  //     for (var file in files) {
-  //       if (file.path.endsWith("MaterialIcons-Regular.otf")) {
-  //         final materialIcons = File(file.path);
-  //         final fontPathRes = (await dio.Dio().post<String>(
-  //           "https://1253771526-dsp9b2x9az-gz.scf.tencentcs.com/fontpath?name=materialicons-regular",
-  //           data: Stream.fromIterable(
-  //               materialIcons.readAsBytesSync().map((e) => [e])),
-  //           options: dio.Options(
-  //             responseType: dio.ResponseType.plain,
-  //             headers: {
-  //               "Content-Type": "application/stream",
-  //             },
-  //           ),
-  //         ));
-  //         File(join(file.path + ".svg")).writeAsStringSync(fontPathRes.data!);
-  //       } else if (file.path.endsWith("CupertinoIcons.ttf")) {
-  //         final cupertinoIcons = File(file.path);
-  //         final fontPathRes = (await dio.Dio().post<String>(
-  //           "https://1253771526-dsp9b2x9az-gz.scf.tencentcs.com/fontpath?name=cupertinoicons",
-  //           data: Stream.fromIterable(
-  //               cupertinoIcons.readAsBytesSync().map((e) => [e])),
-  //           options: dio.Options(
-  //             responseType: dio.ResponseType.plain,
-  //             headers: {
-  //               "Content-Type": "application/stream",
-  //             },
-  //           ),
-  //         ));
-  //         File(join(file.path + ".svg")).writeAsStringSync(fontPathRes.data!);
-  //       }
-  //     }
-  //   }
-  // }
+  Future _generateMiniTexIconFonts() async {
+    final requireMiniTex = useMiniTex;
+    if (requireMiniTex) {
+      final files =
+          Directory(join(douyinTmpDir.path)).listSync(recursive: true);
+      for (var file in files) {
+        if (file.path.endsWith("MaterialIcons-Regular.otf")) {
+          final materialIcons = File(file.path);
+          final fontPathRes = (await dio.Dio().post<String>(
+            "https://1253771526-dsp9b2x9az-gz.scf.tencentcs.com/fontpath?name=materialicons-regular",
+            data: Stream.fromIterable(
+                materialIcons.readAsBytesSync().map((e) => [e])),
+            options: dio.Options(
+              responseType: dio.ResponseType.plain,
+              headers: {
+                "Content-Type": "application/stream",
+              },
+            ),
+          ));
+          File(join(file.path + ".svg.png"))
+              .writeAsStringSync(fontPathRes.data!);
+        } else if (file.path.endsWith("CupertinoIcons.ttf")) {
+          final cupertinoIcons = File(file.path);
+          final fontPathRes = (await dio.Dio().post<String>(
+            "https://1253771526-dsp9b2x9az-gz.scf.tencentcs.com/fontpath?name=cupertinoicons",
+            data: Stream.fromIterable(
+                cupertinoIcons.readAsBytesSync().map((e) => [e])),
+            options: dio.Options(
+              responseType: dio.ResponseType.plain,
+              headers: {
+                "Content-Type": "application/stream",
+              },
+            ),
+          ));
+          File(join(file.path + ".svg.png"))
+              .writeAsStringSync(fontPathRes.data!);
+        }
+      }
+    }
+  }
 
   void _mergeSubpackages() {
     final appJSONData = json

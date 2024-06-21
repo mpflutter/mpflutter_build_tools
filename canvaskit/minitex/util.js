@@ -90,7 +90,14 @@ function convertToUpwardToPixelRatio(number, pixelRatio) {
 }
 exports.convertToUpwardToPixelRatio = convertToUpwardToPixelRatio;
 function createCanvas(width, height) {
-    if (typeof wx === "object" && typeof wx.createOffscreenCanvas === "function") {
+    if (typeof tt === "object" && typeof tt.createOffscreenCanvas === "function") {
+        const canvas = tt.createOffscreenCanvas();
+        canvas.getContext("2d");
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
+    }
+    else if (typeof wx === "object" && typeof wx.createOffscreenCanvas === "function") {
         return wx.createOffscreenCanvas({
             type: "2d",
             width: width,
