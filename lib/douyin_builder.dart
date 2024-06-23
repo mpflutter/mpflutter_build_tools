@@ -178,7 +178,7 @@ void main(List<String> args) async {
     _fixCanvasReuseContextIssue();
     _makeDisableFeatures();
     _makeShadowPages();
-    // _enableMiniTex();
+    _enableMiniTex();
     _mergeSubpackages();
     _removeRepeatPages();
     _removeLicenseTipsFlag();
@@ -192,16 +192,16 @@ void main(List<String> args) async {
         Directory(join(douyinTmpDir.path, 'canvaskit', 'pages'));
     canvaskitOut.createSync(recursive: true);
     copyDirectory(canvaskitSrc, canvaskitOut);
+    if (useMiniTex && useNoFontCanvasKit) {
+      final noFontCanvaskitSrc =
+          Directory(join(_mpflutterSrcRoot.path, 'canvaskit_no_font'));
+      copyDirectory(noFontCanvaskitSrc, canvaskitOut);
+    }
     final canvaskitJSFile =
         File(join(douyinTmpDir.path, 'canvaskit', 'pages', 'canvaskit.js'));
     canvaskitJSFile.writeAsStringSync(canvaskitJSFile
         .readAsStringSync()
         .replaceFirst("GLVersion = 2", "GLVersion = 1"));
-    // if (useMiniTex && useNoFontCanvasKit) {
-    //   final noFontCanvaskitSrc =
-    //       Directory(join(_mpflutterSrcRoot.path, 'canvaskit_no_font'));
-    //   copyDirectory(noFontCanvaskitSrc, canvaskitOut);
-    // }
   }
 
   void _copyFlutterSkeleton(List<String> arguments) {
@@ -566,7 +566,7 @@ ${maybeDouyinPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     content = content.replaceAll(
         'new self.MutationObserver', 'new globalThis.MutationObserver');
     File(filePath).writeAsStringSync(
-        '''var globalThis = global;var self = getApp()._flutter.self;var XMLHttpRequest = self.XMLHttpRequest;var \$__dart_deferred_initializers__ = self.\$__dart_deferred_initializers__;var document = self.document;var window = self.window;''' +
+        '''var globalThis = global;var self = getApp()._flutter.self;var XMLHttpRequest = self.XMLHttpRequest;var \$__dart_deferred_initializers__ = self.\$__dart_deferred_initializers__;var document = self.document;var window = self.window;var crypto = self.crypto;''' +
             content);
   }
 
@@ -694,24 +694,24 @@ ${maybeDouyinPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     }
   }
 
-  // void _enableMiniTex() {
-  //   if (useMiniTex) {
-  //     final fontManifestFile = File(
-  //       join(webOut.path, 'assets', 'FontManifest.json'),
-  //     );
-  //     final fontManifestData =
-  //         json.decode(fontManifestFile.readAsStringSync()) as List;
-  //     final embeddingFonts =
-  //         fontManifestData.map((it) => '"' + it['family'] + '"');
-  //     File(
-  //       join(douyinTmpDir.path, 'pages', 'index', 'minitex.js'),
-  //     ).writeAsStringSync(
-  //         """export const useMiniTex = true;\nexport const embeddingFonts = [${embeddingFonts.join(",")}]""");
-  //   } else {
-  //     Directory(join(douyinTmpDir.path, "canvaskit", "pages", "minitex"))
-  //         .deleteSync(recursive: true);
-  //   }
-  // }
+  void _enableMiniTex() {
+    if (useMiniTex) {
+      final fontManifestFile = File(
+        join(webOut.path, 'assets', 'FontManifest.json'),
+      );
+      final fontManifestData =
+          json.decode(fontManifestFile.readAsStringSync()) as List;
+      final embeddingFonts =
+          fontManifestData.map((it) => '"' + it['family'] + '"');
+      File(
+        join(douyinTmpDir.path, 'pages', 'index', 'minitex.js'),
+      ).writeAsStringSync(
+          """export const useMiniTex = true;\nexport const embeddingFonts = [${embeddingFonts.join(",")}]""");
+    } else {
+      Directory(join(douyinTmpDir.path, "canvaskit", "pages", "minitex"))
+          .deleteSync(recursive: true);
+    }
+  }
 
   Future _generateMiniTexIconFonts() async {
     final requireMiniTex = useMiniTex;
