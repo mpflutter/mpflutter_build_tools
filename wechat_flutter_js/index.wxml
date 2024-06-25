@@ -1,7 +1,7 @@
 <!--index.wxml-->
 <view style="height: 100%;display: flex;overflow: hidden;">
   <canvas key="my_canvas" type="webgl2" id="my_canvas" style="width: 100vw; height: {{windowHeight}}px; background-color: white;" catchtouchstart="ontouchstart" catchtouchmove="ontouchmove" catchtouchend="ontouchend" catchtouchcancel="ontouchcancel" />
-  <page-container show="{{shouldCatchBack}}" duration="0" overlay="false" overlay-style="width:100vw;height:100vh;background-color:transparent" custom-style="width:100vw;height:100vh;background-color:transparent" bind:afterleave="onPageContainerHide">
+  <page-container show="{{shouldCatchBack}}" duration="0" overlay="{{false}}" overlay-style="width:100vw;height:100vh;background-color:transparent" custom-style="width:100vw;height:100vh;background-color:transparent" bind:afterleave="onPageContainerHide">
     <view style="width: 100vw; height: 100vh; background-color: transparent;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2" />
   </page-container>
 
@@ -9,7 +9,7 @@
     <input wx:if="{{!item.removed}}" key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" maxlength="-1" value="{{item.props.value}}" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="{{false}}" confirm-hold="{{true}}" hold-keyboard="{{true}}" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange"></input>
   </block>
   <block wx:for="{{MPFlutter_Wechat_TextArea_Block}}" wx:key="pvid">
-    <textarea wx:if="{{!item.removed}}" key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" maxlength="-1" value="{{item.props.value}}" show-confirm-bar="true" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="{{false}}" confirm-hold="{{true}}" hold-keyboard="{{false}}" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange" />
+    <textarea wx:if="{{!item.removed}}" key="{{item.pvid}}" id="{{item.pvid}}" style="position: absolute; top: -300px; left: 0px; width: 100vw; height: 44px; color: transparent; pointer-events: none; z-index: -100;" maxlength="-1" value="{{item.props.value}}" show-confirm-bar="{{true}}" type="{{item.props.type}}" password="{{item.props.password}}" confirm-type="{{item.props.confirmType}}" focus="{{item.props.focus}}" selection-start="{{item.props.selectionStart}}" selection-end="{{item.props.selectionEnd}}" adjust-position="{{false}}" confirm-hold="{{true}}" hold-keyboard="{{false}}" bindinput="onPVCB" bindblur="onPVCB" bindconfirm="onPVCB" bindkeyboardheightchange="onkeyboardheightchange" />
   </block>
 
   <view wx:if="{{!PVWrapper.removed}}" style="{{PVWrapper.style}}z-index:9999;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2">
