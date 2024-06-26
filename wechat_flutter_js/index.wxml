@@ -1,7 +1,7 @@
 <!--index.wxml-->
 <view style="height: 100%;display: flex;overflow: hidden;">
   <canvas key="my_canvas" type="webgl2" id="my_canvas" style="width: 100vw; height: {{windowHeight}}px; background-color: white;" catchtouchstart="ontouchstart" catchtouchmove="ontouchmove" catchtouchend="ontouchend" catchtouchcancel="ontouchcancel" />
-  <page-container show="{{shouldCatchBack}}" duration="0" overlay="{{false}}" overlay-style="width:100vw;height:100vh;background-color:transparent" custom-style="width:100vw;height:100vh;background-color:transparent" bind:afterleave="onPageContainerHide">
+  <page-container show="{{shouldCatchBack}}" duration="0" overlay="{{false}}" overlay-style="width:100vw;height:100vh;background-color:transparent" custom-style="width:100vw;height:100vh;background-color:transparent" bind:leave="onPageContainerHide">
     <view style="width: 100vw; height: 100vh; background-color: transparent;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2" />
   </page-container>
 
