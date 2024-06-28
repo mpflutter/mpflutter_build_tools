@@ -183,8 +183,10 @@ export const main = {
       this.data.shouldCatchBack &&
       new Date().getTime() - (FlutterHostView.shared.lastTouchTime ?? 0) > 1000
     ) {
-      // Android Back Pressed
-      FlutterHostView.shared.onAndroidBackPressed?.();
+      if (wxSystemInfo["platform"] === "android") {
+        // Android Back Pressed
+        FlutterHostView.shared.onAndroidBackPressed?.();
+      }
     }
     if (FlutterHostView.shared.shouldCatchBack) {
       this.setData({
