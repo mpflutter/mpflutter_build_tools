@@ -68,6 +68,11 @@ export class FlutterPlatformViewManager {
     }
   }
 
+  setWindowLevel(windowLevel) {
+    const self = this.FlutterHostView.shared.self;
+    self.setData({ windowLevel: windowLevel });
+  }
+
   addCBListenner(pvid, callback) {
     this[pvid + "_pvcb"] = callback;
   }
@@ -95,7 +100,9 @@ export class FlutterPlatformViewManager {
       }
     }
     if (!targetElement) {
-      targetElement = { pvid: viewOption.pvid };
+      targetElement = {
+        pvid: viewOption.pvid,
+      };
       targetIndex = nextIndex;
       targetElement.removed = false;
       let style =
@@ -113,9 +120,16 @@ export class FlutterPlatformViewManager {
         style += "top: -1000px;pointer-events:none;";
       }
       targetElement.style = style;
-      targetElement.props = { ...viewOption.props };
+      targetElement.props = {
+        ...viewOption.props,
+      };
       const keyPath = blockName + `.[${targetIndex}]`;
-      this.setData({ [keyPath]: targetElement }, true);
+      this.setData(
+        {
+          [keyPath]: targetElement,
+        },
+        true
+      );
       // wrapper
       this.updateWrapper(viewOption, true);
     } else {
@@ -177,7 +191,9 @@ export class FlutterPlatformViewManager {
     }
     if (targetIndex !== undefined) {
       const keyPath = blockName + `.[${targetIndex}].removed`;
-      this.setData({ [keyPath]: true });
+      this.setData({
+        [keyPath]: true,
+      });
     }
     this[viewOption.pvid + "_deleted"] = true;
     delete this[viewOption.pvid + "_pvcb"];
@@ -193,7 +209,7 @@ export class FlutterPlatformViewManager {
         const windowHeight = wxSystemInfo.windowHeight;
         let wrapperTop = viewOption.wrapper.top / windowHeight;
         let wrapperBottom = viewOption.wrapper.bottom / windowHeight;
-        let wrapper = `position: absolute;top:0px;left:0px;width:100%;height:100%;mask-image: linear-gradient(to bottom, transparent, transparent ${(
+        let wrapper = `z-index:-1;position: absolute;top:0px;left:0px;width:100%;height:100%;mask-image: linear-gradient(to bottom, transparent, transparent ${(
           wrapperTop * 100
         ).toFixed(0)}%, black ${(wrapperBottom * 100).toFixed(
           0
@@ -207,16 +223,24 @@ export class FlutterPlatformViewManager {
           self.data.PVWrapper.bottom === viewOption.wrapper.bottom
         )
           return;
-        this.setData({
-          "PVWrapper.removed": false,
-          "PVWrapper.style": wrapper,
-          "PVWrapper.top": viewOption.wrapper.top,
-          "PVWrapper.bottom": viewOption.wrapper.bottom,
-        }, ignoreBatching);
+        this.setData(
+          {
+            "PVWrapper.removed": false,
+            "PVWrapper.style": wrapper,
+            "PVWrapper.top": viewOption.wrapper.top,
+            "PVWrapper.bottom": viewOption.wrapper.bottom,
+          },
+          ignoreBatching
+        );
       }
     } else {
       if (self.data.PVWrapper.removed === true) return;
-      this.setData({ "PVWrapper.removed": true }, ignoreBatching);
+      this.setData(
+        {
+          "PVWrapper.removed": true,
+        },
+        ignoreBatching
+      );
     }
   }
 
@@ -242,4 +266,37 @@ export class FlutterPlatformViewManager {
       self.setData(data);
     }
   }
+
+  // MARK: PlatformOveraly
+  updateOverlay(viewOption) {
+    const self = this.FlutterHostView.shared.self;
+    const overlayList = self.data.MPFlutter_Wechat_PlatformOverlay ?? [];
+    let found = false;
+    overlayList.forEach((it) => {
+      if (it.pvid === viewOption.pvid) {
+        found = true;
+        Object.assign(it, viewOption);
+      }
+    });
+    if (!found) {
+      overlayList.push(viewOption);
+    }
+    self.setData({
+      MPFlutter_Wechat_PlatformOverlay: overlayList,
+    });
+    this.refreshOverlay(viewOption);
+  }
+
+  disposeOverlay(viewOption) {
+    const self = this.FlutterHostView.shared.self;
+    let overlayList = self.data.MPFlutter_Wechat_PlatformOverlay ?? [];
+    overlayList = overlayList.filter((it) => {
+      return !(it.pvid === viewOption.pvid);
+    });
+    self.setData({
+      MPFlutter_Wechat_PlatformOverlay: overlayList,
+    });
+  }
+
+  refreshOverlay(viewOption) {}
 }

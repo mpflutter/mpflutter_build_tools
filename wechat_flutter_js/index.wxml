@@ -1,6 +1,7 @@
 <!--index.wxml-->
 <view style="height: 100%;display: flex;overflow: hidden;">
-  <canvas key="my_canvas" type="webgl2" id="my_canvas" style="width: 100vw; height: {{windowHeight}}px; background-color: white;" catchtouchstart="ontouchstart" catchtouchmove="ontouchmove" catchtouchend="ontouchend" catchtouchcancel="ontouchcancel" />
+  <view style="z-index:0;position: absolute; top: 0px; left: 0px; width: 100vw; height: {{windowHeight}}px; background-color: transparent;" bindtouchstart="ontouchstart" bindtouchmove="ontouchmove" bindtouchend="ontouchend" bindtouchcancel="ontouchcancel"></view>
+  <canvas key="my_canvas" type="webgl2" id="my_canvas" style="pointer-events: none;z-index:{{windowLevel}};top: 0px; left: 0px; width: 100vw; height: {{windowHeight}}px; background-color: transparent;" />
   <page-container show="{{shouldCatchBack}}" duration="0" overlay="{{false}}" overlay-style="width:100vw;height:100vh;background-color:transparent" custom-style="width:100vw;height:100vh;background-color:transparent" bind:leave="onPageContainerHide">
     <view style="width: 100vw; height: 100vh; background-color: transparent;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2" />
   </page-container>
@@ -19,6 +20,10 @@
     <view style="position:absolute;bottom:0px;width:100vw;height:{{PVWrapper.bottom}}px;background-color:transparent;z-index: 20000;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2" />
     <!--PlatformViewBlocks-->
   </view>
+
+  <block wx:for="{{MPFlutter_Wechat_PlatformOverlay}}" wx:key="pvid">
+    <view key="platform_overlay_{{item.pvid}}" id="platform_overlay_{{item.pvid}}" style="z-index:30000;position: absolute; left: {{item.x}}px; top: {{item.y}}px; width: {{item.width}}px; height: {{item.height}}px; " catchtouchstart="ontouchstart2" catchtouchmove="ontouchmove2" catchtouchend="ontouchend2" catchtouchcancel="ontouchcancel2" />
+  </block>
 
   <image style="position: absolute;right:0;top:0;width:66px;height:66px;z-index: 10000" src="{{licenseUrl}}" />
   <include src="splash.wxml"/>

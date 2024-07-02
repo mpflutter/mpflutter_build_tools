@@ -329,7 +329,10 @@ export class FlutterMiniProgramMockWindow {
           let canvas = res[0].node;
 
           if (GLVersion > 1) {
-            const ctx = canvas.getContext("webgl2");
+            const ctx = canvas.getContext("webgl2", {
+              // preserveDrawingBuffer: true,
+              alpha: true,
+            });
             const originGetParameter = ctx.getParameter.bind(ctx);
             ctx.getParameter = function (v) {
               if (v === 7938) {
@@ -349,9 +352,15 @@ export class FlutterMiniProgramMockWindow {
               }
               return originGetParameter(v);
             };
+          } else {
+            canvas.getContext("webgl", {
+              // preserveDrawingBuffer: true,
+              alpha: true,
+            });
           }
 
           _flutter.activeCanvas = canvas;
+          _flutter.activeCanvasGLVersion = GLVersion;
           // 渲染上下文
           const ckLoaded = CanvasKitInit(canvas);
           ckLoaded.then(async (CanvasKit) => {

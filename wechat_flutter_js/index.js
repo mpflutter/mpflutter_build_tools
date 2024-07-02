@@ -10,6 +10,7 @@ const { useMiniTex } = require("./minitex");
 
 export const main = {
   data: {
+    windowLevel: 0,
     windowHeight: 0,
     readyToDisplay: false,
     shouldCatchBack: false,

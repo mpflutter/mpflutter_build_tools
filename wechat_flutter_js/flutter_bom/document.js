@@ -56,9 +56,9 @@ export class FlutterMiniProgramMockDocument {
         let oriGetContext = canvas.getContext.bind(canvas);
         canvas.getContext = function (type) {
           if (GLVersion > 1) {
-            return oriGetContext("webgl2");
+            return oriGetContext("webgl2", {alpha: true});
           } else {
-            return oriGetContext("webgl");
+            return oriGetContext("webgl", {alpha: true});
           }
         };
       } else {
@@ -73,9 +73,9 @@ export class FlutterMiniProgramMockDocument {
           let oriGetContext = newCanvas.getContext.bind(newCanvas);
           canvas.getContext = function (type) {
             if (GLVersion > 1) {
-              return oriGetContext("webgl2");
+              return oriGetContext("webgl2", {alpha: true});
             } else {
-              return oriGetContext("webgl");
+              return oriGetContext("webgl", {alpha: true});
             }
           };
         }
