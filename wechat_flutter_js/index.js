@@ -197,7 +197,7 @@ export const main = {
   onPageContainerHide() {
     if (
       this.data.shouldCatchBack &&
-      new Date().getTime() - (FlutterHostView.shared.lastTouchTime ?? 0) > 1000
+      new Date().getTime() - (FlutterHostView.shared.lastTouchTime ?? 0) > 300
     ) {
       if (wxSystemInfo["platform"] === "android") {
         // Android Back Pressed
