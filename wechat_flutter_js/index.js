@@ -101,17 +101,28 @@ export const main = {
 
   ontouchstart() {
     if (this.data.shouldCatchBack) return;
+    try {
+      if (arguments[0].touches[0].pageX < 24) { // 避免与微信右滑返回手势冲突
+        this.shouldBlockTouch = true;
+        return;
+      }
+    } catch (error) {}
     FlutterHostView.shared.touching = true;
     callFlutterTouchEvent("ontouchstart", arguments);
   },
 
   ontouchmove() {
     if (this.data.shouldCatchBack) return;
+    if (this.shouldBlockTouch) return;
     callFlutterTouchEvent("ontouchmove", arguments);
   },
 
   ontouchend() {
     if (this.data.shouldCatchBack) return;
+    if (this.shouldBlockTouch) {
+      this.shouldBlockTouch = false;
+      return;
+    }
     FlutterHostView.shared.touching = false;
     let moveEvent = { ...arguments[0] };
     moveEvent.type = "touchmove";
@@ -121,6 +132,10 @@ export const main = {
 
   ontouchcancel() {
     if (this.data.shouldCatchBack) return;
+    if (this.shouldBlockTouch) {
+      this.shouldBlockTouch = false;
+      return;
+    }
     FlutterHostView.shared.touching = false;
     callFlutterTouchEvent("ontouchcancel", arguments);
   },
