@@ -10,6 +10,7 @@ const { useMiniTex } = require("./minitex");
 
 export const main = {
   data: {
+    canvasType: "",
     windowLevel: 0,
     windowHeight: 0,
     readyToDisplay: false,
@@ -61,6 +62,8 @@ export const main = {
     setupAppLifeCycleListener();
 
     wx.mpcbExitState = this.exitState;
+
+    await this.doTestCanvas();
     wx.createSelectorQuery()
       .select("#my_canvas") // 在 WXML 中填入的 id
       .fields({ node: true, size: true })
@@ -68,7 +71,6 @@ export const main = {
         // Canvas 对象
         let canvas = res[0].node;
         resizeCanvas(canvas);
-
         await setupFlutterApp(canvas);
       });
 
@@ -84,7 +86,53 @@ export const main = {
     return wx.mpcb?.onSaveExitState();
   },
 
-  restoreCanvas() {
+  async doTestCanvas() {
+    await new Promise((resolve) => {
+      wx.createSelectorQuery()
+        .select("#test_canvas") // 在 WXML 中填入的 id
+        .fields({
+          node: true,
+          size: true,
+        })
+        .exec(async (res) => {
+          // Canvas 对象
+          try {
+            let canvas = res[0].node;
+            let tryWebGL2 = canvas.getContext("webgl2", {
+              alpha: true,
+            });
+            if (!tryWebGL2) {
+              getApp()._FlutterGLVersion = 1;
+              this.setData({
+                canvasType: "webgl",
+              });
+              setTimeout(() => {
+                resolve();
+              }, 16);
+            } else {
+              getApp()._FlutterGLVersion = 2;
+              this.setData({
+                canvasType: "webgl2",
+              });
+              setTimeout(() => {
+                resolve();
+              }, 16);
+            }
+          } catch (error) {
+            getApp()._FlutterGLVersion = 2;
+            this.setData({
+              canvasType: "webgl2",
+            });
+            setTimeout(() => {
+              resolve();
+            }, 16);
+          }
+        });
+    });
+  },
+
+  async restoreCanvas() {
+    await this.doTestCanvas();
     wx.createSelectorQuery()
       .select("#my_canvas") // 在 WXML 中填入的 id
       .fields({ node: true, size: true })
@@ -102,7 +150,8 @@ export const main = {
   ontouchstart() {
     if (this.data.shouldCatchBack) return;
     try {
-      if (arguments[0].touches[0].pageX < 24) { // 避免与微信右滑返回手势冲突
+      if (arguments[0].touches[0].pageX < 24) {
+        // 避免与微信右滑返回手势冲突
         this.shouldBlockTouch = true;
         return;
       }

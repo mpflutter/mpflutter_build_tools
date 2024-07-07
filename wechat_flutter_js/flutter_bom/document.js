@@ -2,8 +2,6 @@
 // Use of this source code is governed by a Apache-2.0 license that can be
 // found in the LICENSE file.
 
-const GLVersion = 2;
-
 export class FlutterMiniProgramMockDocument {
   addEventListener(event, callback) {}
   removeEventListener(event, callback) {}
@@ -35,6 +33,7 @@ export class FlutterMiniProgramMockDocument {
       return element;
     } else if (tag === "canvas") {
       const _flutter = getApp()._flutter;
+      const GLVersion = getApp()._FlutterGLVersion;
       const isOffScreen = _flutter.activeCanvasBinded === true;
       let canvas = !isOffScreen ? _flutter.activeCanvas : wx.createOffscreenCanvas({
         type: GLVersion >= 2 ? "webgl2" : "webgl",

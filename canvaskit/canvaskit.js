@@ -1,4 +1,4 @@
-const WebAssembly = WXWebAssembly;var requestAnimationFrame = undefined;const GLVersion = 2;
+const WebAssembly = WXWebAssembly;var requestAnimationFrame = undefined;let GLInfo = {GLVersion: 2};
 var CanvasKitInit = (() => {
   var _scriptDir = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : undefined;
   if (typeof __filename !== 'undefined') _scriptDir = _scriptDir || __filename;
@@ -11,7 +11,7 @@ alphaType:a.AlphaType.Unpremul,colorSpace:a.ColorSpace.SRGB},h=b*c*4,m=a._malloc
 0,0,b[0],b[1],b[2]-b[0],b[3]-b[1]):this.Id.getContext("2d").putImageData(c,0,0)}};a.Surface.prototype.dispose=function(){this.Ze&&a._free(this.Ze);this.delete()};a.Jd=a.Jd||function(){};a.Qe=a.Qe||function(){return null}})})(w);
 (function(a){a.Qd=a.Qd||[];a.Qd.push(function(){function b(n,q,v){return n&&n.hasOwnProperty(q)?n[q]:v}function c(n){var q=fa(ha);ha[q]=n;return q}function f(n){return n.naturalHeight||n.videoHeight||n.displayHeight||n.height}function h(n){return n.naturalWidth||n.videoWidth||n.displayWidth||n.width}function m(n,q,v,F){n.bindTexture(n.TEXTURE_2D,q);F||v.alphaType!==a.AlphaType.Premul||n.pixelStorei(n.UNPACK_PREMULTIPLY_ALPHA_WEBGL,!0);return q}function u(n,q,v){v||q.alphaType!==a.AlphaType.Premul||
 n.pixelStorei(n.UNPACK_PREMULTIPLY_ALPHA_WEBGL,!1);n.bindTexture(n.TEXTURE_2D,null)}a.GetWebGLContext=function(n,q){if(!n)throw"null canvas passed into makeWebGLContext";var v={alpha:b(q,"alpha",1),depth:b(q,"depth",1),stencil:b(q,"stencil",8),antialias:b(q,"antialias",0),premultipliedAlpha:b(q,"premultipliedAlpha",1),preserveDrawingBuffer:b(q,"preserveDrawingBuffer",0),preferLowPowerToHighPerformance:b(q,"preferLowPowerToHighPerformance",0),failIfMajorPerformanceCaveat:b(q,"failIfMajorPerformanceCaveat",
-0),enableExtensionsByDefault:b(q,"enableExtensionsByDefault",1),explicitSwapControl:b(q,"explicitSwapControl",0),renderViaOffscreenBackBuffer:b(q,"renderViaOffscreenBackBuffer",0)};v.majorVersion=GLVersion;if(v.explicitSwapControl)throw"explicitSwapControl is not supported";n=ia(n,v);if(!n)return 0;na(n);A.ce.getExtension("WEBGL_debug_renderer_info");return n};a.deleteContext=function(n){A===oa[n]&&(A=null);"object"==typeof JSEvents&&
+0),enableExtensionsByDefault:b(q,"enableExtensionsByDefault",1),explicitSwapControl:b(q,"explicitSwapControl",0),renderViaOffscreenBackBuffer:b(q,"renderViaOffscreenBackBuffer",0)};v.majorVersion=GLInfo.GLVersion;if(v.explicitSwapControl)throw"explicitSwapControl is not supported";n=ia(n,v);if(!n)return 0;na(n);A.ce.getExtension("WEBGL_debug_renderer_info");return n};a.deleteContext=function(n){A===oa[n]&&(A=null);"object"==typeof JSEvents&&
 JSEvents.rg(oa[n].ce.canvas);oa[n]&&oa[n].ce.canvas&&(oa[n].ce.canvas.wf=void 0);oa[n]=null};a._setTextureCleanup({deleteTexture:function(n,q){var v=ha[q];v&&oa[n].ce.deleteTexture(v);ha[q]=null}});a.MakeWebGLContext=function(n){if(!this.Jd(n))return null;var q=this._MakeGrContext();if(!q)return null;q.Hd=n;var v=q.delete.bind(q);q["delete"]=function(){a.Jd(this.Hd);v()}.bind(q);return A.cf=q};a.MakeGrContext=a.MakeWebGLContext;a.GrDirectContext.prototype.getResourceCacheLimitBytes=function(){a.Jd(this.Hd);
 this._getResourceCacheLimitBytes()};a.GrDirectContext.prototype.getResourceCacheUsageBytes=function(){a.Jd(this.Hd);this._getResourceCacheUsageBytes()};a.GrDirectContext.prototype.releaseResourcesAndAbandonContext=function(){a.Jd(this.Hd);this._releaseResourcesAndAbandonContext()};a.GrDirectContext.prototype.setResourceCacheLimitBytes=function(n){a.Jd(this.Hd);this._setResourceCacheLimitBytes(n)};a.MakeOnScreenGLSurface=function(n,q,v,F,I,L){if(!this.Jd(n.Hd))return null;q=void 0===I||void 0===L?
 this._MakeOnScreenGLSurface(n,q,v,F):this._MakeOnScreenGLSurface(n,q,v,F,I,L);if(!q)return null;q.Hd=n.Hd;return q};a.MakeRenderTarget=function(){var n=arguments[0];if(!this.Jd(n.Hd))return null;if(3===arguments.length){var q=this._MakeRenderTargetWH(n,arguments[1],arguments[2]);if(!q)return null}else if(2===arguments.length){if(q=this._MakeRenderTargetII(n,arguments[1]),!q)return null}else return null;q.Hd=n.Hd;return q};a.MakeWebGLCanvasSurface=function(n,q,v){requestAnimationFrame = n.requestAnimationFrame;q=q||null;v=this.GetWebGLContext(n,
@@ -308,10 +308,10 @@ else if (typeof define === 'function' && define['amd'])
 if (typeof exports === "object" && typeof module === "object")
   module.exports = {
     CanvasKitInit,
-    GLVersion
+    GLInfo
   };
 else if (typeof define === "function" && define["amd"])
   define([], () => {
     CanvasKitInit,
-    GLVersion
+    GLInfo
   });

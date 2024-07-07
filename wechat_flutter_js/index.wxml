@@ -1,7 +1,8 @@
 <!--index.wxml-->
 <view style="height: 100%;display: flex;overflow: hidden;">
+  <canvas wx:if="{{!canvasType}}" key="test_canvas" type="webgl2" id="test_canvas" style="pointer-events: none; position:absolute; top: -1000px; left: 0px; width: 1px; height: 1px;background-color: transparent;" />
   <view style="z-index:0;position: absolute; top: 0px; left: 0px; width: 100vw; height: {{windowHeight}}px; background-color: transparent;" bindtouchstart="ontouchstart" bindtouchmove="ontouchmove" bindtouchend="ontouchend" bindtouchcancel="ontouchcancel"></view>
-  <canvas key="my_canvas" type="webgl2" id="my_canvas" style="pointer-events: none;z-index:{{windowLevel}};top: 0px; left: 0px; width: 100vw; height: {{windowHeight}}px; background-color: transparent;" />
+  <canvas wx:if="{{canvasType}}" key="my_canvas" type="{{canvasType}}" id="my_canvas" style="pointer-events: none;z-index:{{windowLevel}};top: 0px; left: 0px; width: 100vw; height: {{windowHeight}}px; background-color: transparent;" />
   <page-container show="{{shouldCatchBack}}" duration="0" overlay="{{false}}" overlay-style="width:100vw;height:100vh;background-color:transparent" custom-style="width:100vw;height:100vh;background-color:transparent" bind:leave="onPageContainerHide">
     <view style="width: 100vw; height: 100vh; background-color: transparent;" bindtouchstart="ontouchstart2" bindtouchmove="ontouchmove2" bindtouchend="ontouchend2" bindtouchcancel="ontouchcancel2" />
   </page-container>

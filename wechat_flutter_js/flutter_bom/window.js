@@ -321,14 +321,15 @@ export class FlutterMiniProgramMockWindow {
           size: true,
         })
         .exec(async (res) => {
-          const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
+          const { CanvasKitInit, GLInfo } = await new Promise((resolve) => {
             require("../../../canvaskit/pages/canvaskit", resolve);
           });
           const _flutter = getApp()._flutter;
+          GLInfo.GLVersion = getApp()._FlutterGLVersion;
           // Canvas 对象
           let canvas = res[0].node;
 
-          if (GLVersion > 1) {
+          if (GLInfo.GLVersion > 1) {
             const ctx = canvas.getContext("webgl2", {
               // preserveDrawingBuffer: true,
               alpha: true,
@@ -360,7 +361,6 @@ export class FlutterMiniProgramMockWindow {
           }
 
           _flutter.activeCanvas = canvas;
-          _flutter.activeCanvasGLVersion = GLVersion;
           // 渲染上下文
           const ckLoaded = CanvasKitInit(canvas);
           ckLoaded.then(async (CanvasKit) => {
