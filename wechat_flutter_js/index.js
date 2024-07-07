@@ -4,9 +4,15 @@
 
 // index.ts
 // 获取应用实例
-const { FlutterHostView } = require("./flutter");
-const { wxSystemInfo } = require("./system_info");
-const { useMiniTex } = require("./minitex");
+const {
+  FlutterHostView
+} = require("./flutter");
+const {
+  wxSystemInfo
+} = require("./system_info");
+const {
+  useMiniTex
+} = require("./minitex");
 
 export const main = {
   data: {
@@ -15,7 +21,10 @@ export const main = {
     windowHeight: 0,
     readyToDisplay: false,
     shouldCatchBack: false,
-    PVWrapper: { removed: true, style: "" },
+    PVWrapper: {
+      removed: true,
+      style: ""
+    },
   },
 
   onUnload() {
@@ -38,7 +47,9 @@ export const main = {
       Object.assign(wxSystemInfo, res);
       resolve();
     });
-    this.setData({ windowHeight: wxSystemInfo.windowHeight });
+    this.setData({
+      windowHeight: wxSystemInfo.windowHeight
+    });
     if (FlutterHostView.shared.onwebglcontextrestored) {
       await new Promise((r) => setTimeout(r, 100));
       this.restoreCanvas();
@@ -66,7 +77,10 @@ export const main = {
     await this.doTestCanvas();
     wx.createSelectorQuery()
       .select("#my_canvas") // 在 WXML 中填入的 id
-      .fields({ node: true, size: true })
+      .fields({
+        node: true,
+        size: true
+      })
       .exec(async (res) => {
         // Canvas 对象
         let canvas = res[0].node;
@@ -135,7 +149,10 @@ export const main = {
     await this.doTestCanvas();
     wx.createSelectorQuery()
       .select("#my_canvas") // 在 WXML 中填入的 id
-      .fields({ node: true, size: true })
+      .fields({
+        node: true,
+        size: true
+      })
       .exec(async (res) => {
         // Canvas 对象
         let canvas = res[0].node;
@@ -157,12 +174,14 @@ export const main = {
       }
     } catch (error) {}
     FlutterHostView.shared.touching = true;
+    FlutterHostView.shared.touchmoved = false;
     callFlutterTouchEvent("ontouchstart", arguments);
   },
 
   ontouchmove() {
     if (this.data.shouldCatchBack) return;
     if (this.shouldBlockTouch) return;
+    FlutterHostView.shared.touchmoved = true;
     callFlutterTouchEvent("ontouchmove", arguments);
   },
 
@@ -173,10 +192,11 @@ export const main = {
       return;
     }
     FlutterHostView.shared.touching = false;
-    let moveEvent = { ...arguments[0] };
-    moveEvent.type = "touchmove";
-    callFlutterTouchEvent("ontouchmove", [moveEvent]);
-    callFlutterTouchEvent("ontouchend", arguments);
+    if (FlutterHostView.shared.touchmoved) {
+      callFlutterTouchEvent("ontouchend", arguments);
+    } else {
+      callFlutterTouchEvent("onpointerup", arguments);
+    }
   },
 
   ontouchcancel() {
@@ -192,12 +212,14 @@ export const main = {
   ontouchstart2() {
     if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = true;
+    FlutterHostView.shared.touchmoved = false;
     callFlutterTouchEvent("ontouchstart", arguments);
   },
 
   ontouchmove2() {
     if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
+    FlutterHostView.shared.touchmoved = true;
     callFlutterTouchEvent("ontouchmove", arguments);
   },
 
@@ -205,10 +227,11 @@ export const main = {
     if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = false;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
-    let moveEvent = { ...arguments[0] };
-    moveEvent.type = "touchmove";
-    callFlutterTouchEvent("ontouchmove", [moveEvent]);
-    callFlutterTouchEvent("ontouchend", arguments);
+    if (FlutterHostView.shared.touchmoved) {
+      callFlutterTouchEvent("ontouchend", arguments);
+    } else {
+      callFlutterTouchEvent("onpointerup", arguments);
+    }
   },
 
   ontouchcancel2() {
@@ -239,7 +262,9 @@ export const main = {
 
   onWXKeyboardheightchange(detail) {
     if (detail.height <= 0) {
-      this.onkeyboardheightchange({ detail: detail });
+      this.onkeyboardheightchange({
+        detail: detail
+      });
     }
   },
 
@@ -346,7 +371,30 @@ function loadCanvasKitPages() {
 }
 
 async function loadPlugins() {
-  // loadPlugins
+  await Promise.all([
+    new Promise((resolve) => {
+      require("../../audioplayers_web/pages/main", resolve);
+    }),
+    new Promise((resolve) => {
+      require("../../mpflutter_wechat_button/pages/main", resolve);
+    }),
+    new Promise((resolve) => {
+      require("../../mpflutter_wechat_editable/pages/main", resolve);
+    }),
+    new Promise((resolve) => {
+      require("../../mpflutter_wechat_image/pages/main", resolve);
+    }),
+    new Promise((resolve) => {
+      require("../../mpflutter_wechat_mapview/pages/main", resolve);
+    }),
+    new Promise((resolve) => {
+      require("../../mpflutter_wechat_videoview/pages/main", resolve);
+    }),
+    new Promise((resolve) => {
+      require("../../mpflutter_wechat_webview/pages/main", resolve);
+    }),
+  ])
+
 }
 
 function loadRobotoFont() {
@@ -363,8 +411,7 @@ function loadRobotoFont() {
     wx.loadFontFace({
       global: true,
       family: "Roboto",
-      source:
-        'url("https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/lato-font/3.0.0/fonts/lato-normal/lato-normal.woff")',
+      source: 'url("https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/lato-font/3.0.0/fonts/lato-normal/lato-normal.woff")',
       scopes: ["native"],
       success: function () {
         if (resolved) return;
@@ -409,8 +456,7 @@ function setupFlutterHostView(self) {
   };
 
   FlutterHostView.shared.self.setData({
-    licenseUrl:
-      "https://license.mpflutter.com/" +
+    licenseUrl: "https://license.mpflutter.com/" +
       wx.getAccountInfoSync().miniProgram.appId +
       ".png",
   });
@@ -442,9 +488,11 @@ function setupFlutterApp(canvas) {
 
 function callFlutterTouchEvent(eventName, args) {
   if (FlutterHostView.shared[eventName]) {
-    FlutterHostView.shared[eventName].apply(null, [
-      FlutterHostView.transformTouchEvent(args[0]),
-    ]);
+    let pointers = FlutterHostView.transformTouchEvent(args[0]);
+    if (pointers.length <= 0) return;
+    pointers.forEach((pointer) => {
+      FlutterHostView.shared[eventName].apply(null, [pointer]);
+    })
   }
 }
 

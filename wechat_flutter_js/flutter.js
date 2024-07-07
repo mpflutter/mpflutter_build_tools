@@ -5,7 +5,9 @@
 // Copyright 2023 MPFlutter Author. All rights reserved.
 // For MiniProgram polyfill code is governed by a Apache-2.0 license.
 
-const { wxSystemInfo } = require("./system_info");
+const {
+  wxSystemInfo
+} = require("./system_info");
 
 var _flutter = getApp()._flutter;
 
@@ -21,38 +23,56 @@ _flutter.imageCacheNextIndex = 0;
 export class FlutterHostView {
   static shared = new FlutterHostView();
 
+  static touchStartPoint = [];
+  static touchStartTS = 0;
+
   static transformTouchEvent = (event) => {
-    if (event.touches) {
-      for (let index = 0; index < event.touches.length; index++) {
-        const touch = event.touches[index];
-        touch.clientX = touch.pageX ?? touch.x;
-        touch.clientY = touch.pageY ?? touch.y;
-      }
-      event.touches.item = function (index) {
-        return event.touches[index];
-      };
+    if (event.type === "touchstart") {
+      this.touchStartTS = event.timeStamp;
     }
-    if (event.changedTouches) {
-      for (let index = 0; index < event.changedTouches.length; index++) {
-        const touch = event.changedTouches[index];
-        touch.clientX = touch.pageX ?? touch.x;
-        touch.clientY = touch.pageY ?? touch.y;
+    let pointers = [];
+    let touches = (event.changedTouches && event.changedTouches.length > 0 ? event.changedTouches : event.touches) ?? [];
+    for (let index = 0; index < touches.length; index++) {
+      const touch = touches[index];
+      touch.clientX = touch.pageX ?? touch.x;
+      touch.clientY = touch.pageY ?? touch.y;
+      if (event.type === "touchstart") {
+        this.touchStartPoint[touch.identifier] = touch;
+      } else if (event.type === "touchmove") {
+        if (this.touchStartPoint[touch.identifier] &&
+          Math.abs(touch.clientX - this.touchStartPoint[touch.identifier].clientX) < 8.0 &&
+          Math.abs(touch.clientY - this.touchStartPoint[touch.identifier].clientY) < 8.0) {
+          continue
+        }
+        delete this.touchStartPoint[touch.identifier];
       }
-      event.changedTouches.item = function (index) {
-        return event.changedTouches[index];
-      };
+      pointers.push({
+        ...event,
+        ...touch,
+        changedTouches: [...touches],
+        pointerType: "touch",
+        pointerId: this.touchStartTS + touch.identifier,
+        button: 0,
+        buttons: event.type === "touchstart" || event.type === "touchmove" ? 1 : 0,
+        altKey: false,
+        ctrlKey: false,
+        metaKey: false,
+        shiftKey: false,
+        tiltX: 0,
+        tiltY: 0,
+        getModifierState: function () {
+          return false;
+        },
+        preventDefault: function () {},
+      });
     }
-    event.altKey = false;
-    event.ctrlKey = false;
-    event.metaKey = false;
-    event.shiftKey = false;
-    event.preventDefault = function () {};
-    return event;
+    return pointers;
   };
 
   ontouchstart = undefined;
   ontouchmove = undefined;
   ontouchend = undefined;
+  onpointerup = undefined;
   ontouchcancel = undefined;
   oninputinput = undefined;
   oninputblur = undefined;
@@ -104,8 +124,10 @@ globalThis.FlutterHostView = FlutterHostView;
      * Returns undefined when an `onEntrypointLoaded` callback is supplied in `options`.
      */
     async loadEntrypoint(options) {
-      const { entrypointUrl = `${baseUri}main.dart.js`, onEntrypointLoaded } =
-        options || {};
+      const {
+        entrypointUrl = `${baseUri}main.dart.js`, onEntrypointLoaded
+      } =
+      options || {};
 
       return this._loadEntrypoint(entrypointUrl, onEntrypointLoaded);
     }
@@ -192,7 +214,9 @@ globalThis.FlutterHostView = FlutterHostView;
         _flutter.self.safeAreaInsetTop = 0;
         _flutter.self.safeAreaInsetBottom = 0;
       }
-      const { ...entrypoint } = options || {};
+      const {
+        ...entrypoint
+      } = options || {};
       // The FlutterEntrypointLoader instance could be injected as a dependency
       // (and dynamically imported from a module if not present).
       const entrypointLoader = new FlutterEntrypointLoader();
@@ -219,9 +243,9 @@ globalThis.FlutterHostView = FlutterHostView;
 
   _flutter.loader = new FlutterLoader();
   _flutter.window =
-    new (require("./flutter_bom/window").FlutterMiniProgramMockWindow)();
+    new(require("./flutter_bom/window").FlutterMiniProgramMockWindow)();
   _flutter.document =
-    new (require("./flutter_bom/document").FlutterMiniProgramMockDocument)();
+    new(require("./flutter_bom/document").FlutterMiniProgramMockDocument)();
   _flutter.window.document = _flutter.document;
   _flutter.self = {
     FlutterHostView: FlutterHostView,
@@ -231,10 +255,9 @@ globalThis.FlutterHostView = FlutterHostView;
     Array: Array,
     Uint8Array: Uint8Array,
     WeakRef: typeof WeakRef !== "undefined" ? WeakRef : require("./flutter_bom/weak_ref").WeakRef,
-    platformViewManager:
-      new (require("./platform_view").FlutterPlatformViewManager)(
-        FlutterHostView
-      ),
+    platformViewManager: new(require("./platform_view").FlutterPlatformViewManager)(
+      FlutterHostView
+    ),
     crypto: require("./flutter_bom/crypto"),
     _flutter: _flutter,
     window: _flutter.window,
@@ -242,7 +265,7 @@ globalThis.FlutterHostView = FlutterHostView;
     document: _flutter.document,
     setTimeout: setTimeout,
     setInterval: setInterval,
-    localStorage: new (require("./flutter_bom/storage").LocalStorage)(),
+    localStorage: new(require("./flutter_bom/storage").LocalStorage)(),
     Blob: require("./flutter_bom/blob").Blob,
     FileReader: require("./flutter_bom/file-reader").FileReader,
     clearTimeout: clearTimeout,
@@ -266,12 +289,14 @@ globalThis.FlutterHostView = FlutterHostView;
           require("../../" +
             pkgs[uri] +
             "/pages" +
-            uri.replace(".part.js", ".part"), function () {
-            // console.log(uri, "done");
-            res();
-          }, function (err) {
-            console.error(err);
-          });
+            uri.replace(".part.js", ".part"),
+            function () {
+              // console.log(uri, "done");
+              res();
+            },
+            function (err) {
+              console.error(err);
+            });
         } else {
           require("./" + uri, function () {
             // console.log(uri, "done");

@@ -134,6 +134,12 @@ export class FlutterMiniProgramMockDocument {
     }
   }
 
+  createTextNode() {
+    const el = new(require("./element").FlutterMiniProgramMockElement)();
+    el.tagName = 'text';
+    return el;
+  }
+
   hasFocus() {
     return wx._mpflutter_hasFocus === true;
   }

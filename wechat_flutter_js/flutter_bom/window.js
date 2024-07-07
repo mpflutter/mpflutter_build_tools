@@ -30,6 +30,7 @@ export class FlutterMiniProgramMockWindow {
   console = console;
   requestAnimationFrame;
   TouchEvent = {};
+  PointerEvent = {};
   performance = {
     now: () => new Date().getTime(),
   };
@@ -92,6 +93,10 @@ export class FlutterMiniProgramMockWindow {
   addEventListener(event, callback) {
     if (event === "resize") {
       this.onResize = callback;
+    } else if (event === "pointermove") {
+      FlutterHostView.shared.ontouchmove = callback;
+    } else if (event === "pointerup") {
+      FlutterHostView.shared.onpointerup = callback;
     }
   }
   removeEventListener(event) {

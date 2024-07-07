@@ -20,7 +20,7 @@ part 'wechat_builder.dart';
 part 'wegame_builder.dart';
 
 /// 当前 MPFlutter 支持的最高版本 Flutter SDK
-final compactVersion = '3.16.7';
+final compactVersion = '3.99.7';
 
 /// 声明已获取 MPFlutter 使用授权
 bool licenseGrant = false;
