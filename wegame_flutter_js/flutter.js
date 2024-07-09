@@ -24,6 +24,7 @@ export class FlutterHostView {
   static touchStartPoint = [];
 
   static transformTouchEvent = (event) => {
+    let eventType = event.type.replace("ontouch", "touch");
     let pointers = [];
     let touches = (event.changedTouches && event.changedTouches.length > 0 ? event.changedTouches : event.touches) ?? [];
     for (let index = 0; index < touches.length; index++) {
@@ -33,9 +34,9 @@ export class FlutterHostView {
       }
       touch.clientX = touch.pageX ?? touch.x;
       touch.clientY = touch.pageY ?? touch.y;
-      if (event.type === "touchstart") {
+      if (eventType === "touchstart") {
         this.touchStartPoint[touch.identifier] = touch;
-      } else if (event.type === "touchmove") {
+      } else if (eventType === "touchmove") {
         if (this.touchStartPoint[touch.identifier] &&
           Math.abs(touch.clientX - this.touchStartPoint[touch.identifier].clientX) < 8.0 &&
           Math.abs(touch.clientY - this.touchStartPoint[touch.identifier].clientY) < 8.0) {
@@ -50,7 +51,7 @@ export class FlutterHostView {
         pointerType: "touch",
         pointerId: touch.identifier,
         button: 0,
-        buttons: event.type === "touchstart" || event.type === "touchmove" ? 1 : 0,
+        buttons: eventType === "touchstart" || eventType === "touchmove" ? 1 : 0,
         altKey: false,
         ctrlKey: false,
         metaKey: false,

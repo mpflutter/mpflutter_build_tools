@@ -181,7 +181,6 @@ export const main = {
   ontouchmove() {
     if (this.data.shouldCatchBack) return;
     if (this.shouldBlockTouch) return;
-    FlutterHostView.shared.touchmoved = true;
     callFlutterTouchEvent("ontouchmove", arguments);
   },
 
@@ -219,7 +218,6 @@ export const main = {
   ontouchmove2() {
     if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
-    FlutterHostView.shared.touchmoved = true;
     callFlutterTouchEvent("ontouchmove", arguments);
   },
 
@@ -467,6 +465,9 @@ function callFlutterTouchEvent(eventName, args) {
   if (FlutterHostView.shared[eventName]) {
     let pointers = FlutterHostView.transformTouchEvent(args[0]);
     if (pointers.length <= 0) return;
+    if (eventName === 'ontouchmove') {
+      FlutterHostView.shared.touchmoved = true;
+    }
     pointers.forEach((pointer) => {
       FlutterHostView.shared[eventName].apply(null, [pointer]);
     })

@@ -76,7 +76,6 @@ export class Main {
   }
 
   ontouchmove() {
-    FlutterHostView.shared.touchmoved = true;
     callFlutterTouchEvent("ontouchmove", arguments);
   }
 
@@ -153,6 +152,9 @@ function callFlutterTouchEvent(eventName, args) {
   if (FlutterHostView.shared[eventName]) {
     let pointers = FlutterHostView.transformTouchEvent(args[0]);
     if (pointers.length <= 0) return;
+    if (eventName === 'ontouchmove') {
+      FlutterHostView.shared.touchmoved = true;
+    }
     pointers.forEach((pointer) => {
       FlutterHostView.shared[eventName].apply(null, [pointer]);
     })
