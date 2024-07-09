@@ -20,7 +20,8 @@ part 'wechat_builder.dart';
 part 'wegame_builder.dart';
 
 /// 当前 MPFlutter 支持的最高版本 Flutter SDK
-final compactVersion = '3.99.7';
+final compactVersionStep1 = '3.16.7';
+final compactVersionStep2 = '3.22.0';
 
 /// 声明已获取 MPFlutter 使用授权
 bool licenseGrant = false;
@@ -189,8 +190,9 @@ void checkFlutterVersion() async {
     final flutterVersion = match.group(1);
 
     if (flutterVersion != null &&
-        compareVersions(flutterVersion, compactVersion) > 0) {
-      throw "你当前的 Flutter SDK 版本是 $flutterVersion，请勿使用高于 $compactVersion 版本的 Flutter SDK，MPFlutter 尚未兼容你当前的版本。";
+        compareVersions(flutterVersion, compactVersionStep1) > 0 &&
+        compareVersions(flutterVersion, compactVersionStep2) < 0) {
+      throw "你当前的 Flutter SDK 版本是 $flutterVersion，MPFlutter 支持的版本是 <= 3.16.7 或 >= 3.22.0";
     }
   }
 }
