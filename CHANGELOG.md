@@ -1,5 +1,11 @@
 # ChangeLog
 
+## 2.7.1
+
+feat:
+- 新增 Flutter SDK 3.22+ 支持
+- 新增 PlatformView 置于下层支持
+
 ## 2.6.5
 
 fix:
