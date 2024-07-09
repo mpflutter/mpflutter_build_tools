@@ -45,18 +45,18 @@ packages:
     dependency: "direct main"
     description:
       name: es_compression
-      sha256: b74194ef670a0ea26106f0cc96131cf05c65706467ed985096b6fab501ca7028
+      sha256: "554d47db69c40eb8647e4c1f29e68223c834cc3d0602976252642aa50afb2faa"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.0.12"
+    version: "2.0.11"
   ffi:
     dependency: transitive
     description:
       name: ffi
-      sha256: "493f37e7df1804778ff3a53bd691d8692ddf69702cf4c1c1096a2e41b4779e21"
+      sha256: "7bf0adc28a23d395f19f3f1eb21dd7cfd1dd9f8e1c50051c069122e6853bc878"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.1.2"
+    version: "2.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -172,4 +172,4 @@ packages:
     source: hosted
     version: "2.2.0"
 sdks:
-  dart: ">=3.3.0-279.1.beta <4.0.0"
+  dart: ">=3.3.0-0 <4.0.0"

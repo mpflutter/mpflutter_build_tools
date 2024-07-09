@@ -24,12 +24,8 @@ export class FlutterHostView {
   static shared = new FlutterHostView();
 
   static touchStartPoint = [];
-  static touchStartTS = 0;
 
   static transformTouchEvent = (event) => {
-    if (event.type === "touchstart") {
-      this.touchStartTS = event.timeStamp;
-    }
     let pointers = [];
     let touches = (event.changedTouches && event.changedTouches.length > 0 ? event.changedTouches : event.touches) ?? [];
     for (let index = 0; index < touches.length; index++) {
@@ -51,7 +47,7 @@ export class FlutterHostView {
         ...touch,
         changedTouches: [...touches],
         pointerType: "touch",
-        pointerId: this.touchStartTS + touch.identifier,
+        pointerId: touch.identifier,
         button: 0,
         buttons: event.type === "touchstart" || event.type === "touchmove" ? 1 : 0,
         altKey: false,
