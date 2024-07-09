@@ -666,6 +666,13 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {w
         join(wegameTmpDir.path, 'pages', 'index', 'minitex.js'),
       ).writeAsStringSync(
           """export const useMiniTex = true;\nexport const embeddingFonts = [${embeddingFonts.join(",")}]""");
+      File(
+        join(wegameTmpDir.path, 'canvaskit', 'pages', 'minitex', 'target.js'),
+      ).writeAsStringSync(File(
+        join(wegameTmpDir.path, 'canvaskit', 'pages', 'minitex', 'target.js'),
+      )
+          .readAsStringSync()
+          .replaceAll('appTarget = "normal"', 'appTarget = "wegame"'));
     } else {
       Directory(join(wegameTmpDir.path, "canvaskit", "pages", "minitex"))
           .deleteSync(recursive: true);
