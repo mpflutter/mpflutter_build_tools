@@ -199,6 +199,7 @@ void main(List<String> args) async {
         .readAsStringSync()
         .replaceFirst("const GLVersion=2;", "const GLVersion = 1;")
         .replaceFirst("const GLVersion = 2;", "const GLVersion = 1;")
+        .replaceFirst("GLVersion: 2", "GLVersion: 1")
         .replaceFirst("Object.assign(w,sa);", "");
     jsFile.writeAsStringSync(newContent);
     File(join(wegameTmpDir.path, 'canvaskit', 'game.js')).writeAsStringSync('');

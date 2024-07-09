@@ -21,38 +21,55 @@ _flutter.imageCacheNextIndex = 0;
 export class FlutterHostView {
   static shared = new FlutterHostView();
 
+  static touchStartPoint = [];
+
   static transformTouchEvent = (event) => {
-    if (event.touches) {
-      for (let index = 0; index < event.touches.length; index++) {
-        const touch = event.touches[index];
-        touch.clientX = touch.pageX ?? touch.x;
-        touch.clientY = touch.pageY ?? touch.y;
+    let pointers = [];
+    let touches = (event.changedTouches && event.changedTouches.length > 0 ? event.changedTouches : event.touches) ?? [];
+    for (let index = 0; index < touches.length; index++) {
+      const touch = touches[index];
+      if (!touch.target) {
+        touch.target = {};
       }
-      event.touches.item = function (index) {
-        return event.touches[index];
-      };
-    }
-    if (event.changedTouches) {
-      for (let index = 0; index < event.changedTouches.length; index++) {
-        const touch = event.changedTouches[index];
-        touch.clientX = touch.pageX ?? touch.x;
-        touch.clientY = touch.pageY ?? touch.y;
+      touch.clientX = touch.pageX ?? touch.x;
+      touch.clientY = touch.pageY ?? touch.y;
+      if (event.type === "touchstart") {
+        this.touchStartPoint[touch.identifier] = touch;
+      } else if (event.type === "touchmove") {
+        if (this.touchStartPoint[touch.identifier] &&
+          Math.abs(touch.clientX - this.touchStartPoint[touch.identifier].clientX) < 8.0 &&
+          Math.abs(touch.clientY - this.touchStartPoint[touch.identifier].clientY) < 8.0) {
+          continue
+        }
+        delete this.touchStartPoint[touch.identifier];
       }
-      event.changedTouches.item = function (index) {
-        return event.changedTouches[index];
-      };
+      pointers.push({
+        ...event,
+        ...touch,
+        changedTouches: [...touches],
+        pointerType: "touch",
+        pointerId: touch.identifier,
+        button: 0,
+        buttons: event.type === "touchstart" || event.type === "touchmove" ? 1 : 0,
+        altKey: false,
+        ctrlKey: false,
+        metaKey: false,
+        shiftKey: false,
+        tiltX: 0,
+        tiltY: 0,
+        getModifierState: function () {
+          return false;
+        },
+        preventDefault: function () {},
+      });
     }
-    event.altKey = false;
-    event.ctrlKey = false;
-    event.metaKey = false;
-    event.shiftKey = false;
-    event.preventDefault = function () {};
-    return event;
+    return pointers;
   };
 
   ontouchstart = undefined;
   ontouchmove = undefined;
   ontouchend = undefined;
+  onpointerup = undefined;
   ontouchcancel = undefined;
   oninputinput = undefined;
   oninputblur = undefined;

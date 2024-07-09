@@ -71,16 +71,22 @@ export class Main {
 
   ontouchstart() {
     FlutterHostView.shared.touching = true;
+    FlutterHostView.shared.touchmoved = false;
     callFlutterTouchEvent("ontouchstart", arguments);
   }
 
   ontouchmove() {
+    FlutterHostView.shared.touchmoved = true;
     callFlutterTouchEvent("ontouchmove", arguments);
   }
 
   ontouchend() {
     FlutterHostView.shared.touching = false;
-    callFlutterTouchEvent("ontouchend", arguments);
+    if (FlutterHostView.shared.touchmoved) {
+      callFlutterTouchEvent("ontouchend", arguments);
+    } else {
+      callFlutterTouchEvent("onpointerup", arguments);
+    }
   }
 
   ontouchcancel() {
@@ -145,8 +151,10 @@ function setupFlutterApp(canvas) {
 
 function callFlutterTouchEvent(eventName, args) {
   if (FlutterHostView.shared[eventName]) {
-    FlutterHostView.shared[eventName].apply(null, [
-      FlutterHostView.transformTouchEvent(args[0]),
-    ]);
+    let pointers = FlutterHostView.transformTouchEvent(args[0]);
+    if (pointers.length <= 0) return;
+    pointers.forEach((pointer) => {
+      FlutterHostView.shared[eventName].apply(null, [pointer]);
+    })
   }
 }

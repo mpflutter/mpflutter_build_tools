@@ -46,28 +46,42 @@ export class FlutterMiniProgramMockElement {
   };
   addEventListener = (event, callback) => {
     if (this.tagName === "flutter-view") {
-      if (event === "touchstart") {
+      if (event === "touchstart" || event === "pointerdown") {
         FlutterHostView.shared.ontouchstart = callback;
-      } else if (event === "touchmove") {
+      } else if (event === "touchmove" || event === "pointermove") {
         FlutterHostView.shared.ontouchmove = callback;
-      } else if (event === "touchend") {
+      } else if (event === "touchend" || event === "pointercancel") {
         FlutterHostView.shared.ontouchend = callback;
       } else if (event === "touchcancel") {
         FlutterHostView.shared.ontouchcancel = callback;
       }
     } else if (this.tagName === "canvas") {
       if (event === "webglcontextlost") {
-        FlutterHostView.shared.onwebglcontextlost = () => {
+        if (!this.isOffscreenCanvas) {
+          FlutterHostView.shared.onwebglcontextlost = () => {
+            const event = new Event();
+            event.target = this;
+            callback(event);
+          };
+        }
+        this.onwebglcontextlost = () => {
           const event = new Event();
           event.target = this;
           callback(event);
-        };
+        }
       } else if (event === "webglcontextrestored") {
-        FlutterHostView.shared.onwebglcontextrestored = () => {
+        if (!this.isOffscreenCanvas) {
+          FlutterHostView.shared.onwebglcontextrestored = () => {
+            const event = new Event();
+            event.target = this;
+            callback(event);
+          };
+        }
+        this.onwebglcontextrestored = () => {
           const event = new Event();
           event.target = this;
           callback(event);
-        };
+        }
       }
     }
   };
@@ -85,6 +99,7 @@ export class FlutterMiniProgramMockElement {
     };
   };
   remove = () => {};
+  contains = () => false;
   classList = {
     add: function () {},
   };

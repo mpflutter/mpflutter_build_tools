@@ -18,6 +18,7 @@ export class FlutterMiniProgramMockWindow {
   console = console;
   requestAnimationFrame;
   TouchEvent = {};
+  PointerEvent = {};
   performance = {
     now: () => new Date().getTime(),
   };
@@ -66,7 +67,15 @@ export class FlutterMiniProgramMockWindow {
   dispatchEvent() {
     return true;
   }
-  addEventListener(event, callback) {}
+  addEventListener(event, callback) {
+    if (event === "resize") {
+      this.onResize = callback;
+    } else if (event === "pointermove") {
+      FlutterHostView.shared.ontouchmove = callback;
+    } else if (event === "pointerup") {
+      FlutterHostView.shared.onpointerup = callback;
+    }
+  }
   removeEventListener() {}
   getComputedStyle() {
     return {
@@ -241,10 +250,11 @@ export class FlutterMiniProgramMockWindow {
   };
   CanvasKitInit() {
     return new Promise(async (resolve) => {
-      const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
+      const { CanvasKitInit, GLInfo } = await new Promise((resolve) => {
         console.log("load canvaskit");
         require("../../../canvaskit/pages/canvaskit", resolve);
       });
+      const GLVersion = GLInfo.GLVersion;
       console.log("done canvaskit", CanvasKitInit);
       const _flutter = getApp()._flutter;
       // Canvas 对象
