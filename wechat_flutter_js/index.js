@@ -371,30 +371,7 @@ function loadCanvasKitPages() {
 }
 
 async function loadPlugins() {
-  await Promise.all([
-    new Promise((resolve) => {
-      require("../../audioplayers_web/pages/main", resolve);
-    }),
-    new Promise((resolve) => {
-      require("../../mpflutter_wechat_button/pages/main", resolve);
-    }),
-    new Promise((resolve) => {
-      require("../../mpflutter_wechat_editable/pages/main", resolve);
-    }),
-    new Promise((resolve) => {
-      require("../../mpflutter_wechat_image/pages/main", resolve);
-    }),
-    new Promise((resolve) => {
-      require("../../mpflutter_wechat_mapview/pages/main", resolve);
-    }),
-    new Promise((resolve) => {
-      require("../../mpflutter_wechat_videoview/pages/main", resolve);
-    }),
-    new Promise((resolve) => {
-      require("../../mpflutter_wechat_webview/pages/main", resolve);
-    }),
-  ])
-
+  // loadPlugins
 }
 
 function loadRobotoFont() {
