@@ -350,7 +350,10 @@ export class FlutterMiniProgramMockWindow {
                 }
               } else if (v === 35724) {
                 const value = originGetParameter(v);
-                if (value.indexOf("OpenGL ES 3.2") > 0) {
+                if (value.indexOf("GLSL ES") < 0) {
+                  return "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.2 Chromium)";
+                }
+                else if (value.indexOf("OpenGL ES 3.2") > 0) {
                   return "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.2 Chromium)";
                 } else {
                   return value;
