@@ -93,11 +93,11 @@ export const main = {
 
   onEnter() {
     const enterQuery = wx.getEnterOptionsSync().query;
-    wx.mpcb.onEnter(enterQuery);
+    wx.mpcb?.onEnter?.(enterQuery);
   },
 
   onSaveExitState() {
-    return wx.mpcb?.onSaveExitState();
+    return wx.mpcb?.onSaveExitState?.();
   },
 
   async doTestCanvas() {
