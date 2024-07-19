@@ -119,27 +119,24 @@ export const main = {
               getApp()._FlutterGLVersion = 1;
               this.setData({
                 canvasType: "webgl",
-              });
-              setTimeout(() => {
+              }, () => {
                 resolve();
-              }, 16);
+              });
             } else {
               getApp()._FlutterGLVersion = 2;
               this.setData({
                 canvasType: "webgl2",
-              });
-              setTimeout(() => {
+              }, () => {
                 resolve();
-              }, 16);
+              });
             }
           } catch (error) {
             getApp()._FlutterGLVersion = 2;
             this.setData({
               canvasType: "webgl2",
-            });
-            setTimeout(() => {
+            }, () => {
               resolve();
-            }, 16);
+            });
           }
         });
     });
