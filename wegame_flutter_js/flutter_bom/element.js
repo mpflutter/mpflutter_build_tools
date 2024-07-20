@@ -13,7 +13,10 @@ export class FlutterMiniProgramMockElement {
   attachShadow = () => {
     return new FlutterMiniProgramMockElement();
   };
-  append = () => {
+  append = (child) => {
+    if (child.tagName === "canvas") {
+      child.isOffscreenCanvas = false;
+    }
     return {};
   };
   prepend = () => {
@@ -22,7 +25,10 @@ export class FlutterMiniProgramMockElement {
   insertBefore = () => {
     return {};
   };
-  appendChild = () => {
+  appendChild = (child) => {
+    if (child.tagName === "canvas") {
+      child.isOffscreenCanvas = false;
+    }
     return {};
   };
   getAttribute = (key) => {
