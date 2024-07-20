@@ -32,84 +32,8 @@ export class FlutterMiniProgramMockDocument {
       element.tagName = tag;
       return element;
     } else if (tag === "canvas") {
-      const _flutter = getApp()._flutter;
-      const GLVersion = getApp()._FlutterGLVersion;
-      const isOffScreen = _flutter.activeCanvasBinded === true;
-      let canvas = !isOffScreen ? _flutter.activeCanvas : wx.createOffscreenCanvas({
-        type: GLVersion >= 2 ? "webgl2" : "webgl",
-        width: 1,
-        height: 1
-      });
-      setTimeout(() => {
-        _flutter.activeCanvasBinded = true;
-      }, 100);
-      let mockElement =
-        new(require("./element").FlutterMiniProgramMockElement)();
-      mockElement.tagName = "canvas";
-      mockElement.isOffscreenCanvas = isOffScreen;
-      for (const key in mockElement) {
-        canvas[key] = mockElement[key];
-      }
-      let recreateOffScrrenCanvas;
-      if (!isOffScreen) {
-        let oriGetContext = canvas.getContext.bind(canvas);
-        canvas.getContext = function (type) {
-          if (GLVersion > 1) {
-            return oriGetContext("webgl2", {alpha: true});
-          } else {
-            return oriGetContext("webgl", {alpha: true});
-          }
-        };
-      } else {
-        recreateOffScrrenCanvas = function() {
-          mockElement.onwebglcontextlost?.();
-          mockElement.onwebglcontextrestored?.();
-          let newCanvas = wx.createOffscreenCanvas({
-            type: GLVersion >= 2 ? "webgl2" : "webgl",
-            width: canvas._width,
-            height: canvas._height
-          });
-          let oriGetContext = newCanvas.getContext.bind(newCanvas);
-          canvas.getContext = function (type) {
-            if (GLVersion > 1) {
-              return oriGetContext("webgl2", {alpha: true});
-            } else {
-              return oriGetContext("webgl", {alpha: true});
-            }
-          };
-        }
-      }
-      Object.defineProperty(canvas, "width", {
-        get: function () {
-          return canvas.width;
-        },
-        set: function (value) {
-          if (isOffScreen) {
-            this._width = value;
-          }
-          if (isOffScreen && this._width && this._height) {
-            recreateOffScrrenCanvas();
-          }
-        },
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(canvas, "height", {
-        get: function () {
-          return canvas.height;
-        },
-        set: function (value) {
-          if (isOffScreen) {
-            this._height = value;
-          }
-          if (isOffScreen && this._width && this._height) {
-            recreateOffScrrenCanvas();
-          }
-        },
-        enumerable: true,
-        configurable: true,
-      });
-      return canvas;
+      const el = new(require("./canvas_element").FlutterMiniProgramMockCanvasElement)();
+      return el;
     } else if (tag === "flutter-view") {
       const el = new(require("./element").FlutterMiniProgramMockElement)();
       el.tagName = "flutter-view";
