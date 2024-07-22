@@ -56,10 +56,35 @@ function deepCompare(value1, value2) {
 export class FlutterPlatformViewManager {
   constructor(FlutterHostView) {
     this.FlutterHostView = FlutterHostView;
+    this.cacheBlockNames = [];
+    this.cacheBlockViews = [];
+    this.cachePVWrapper = {};
     this.devtools = wxSystemInfo.platform === "devtools";
     setTimeout(() => {
       this.devtools = wxSystemInfo.platform === "devtools";
     }, 300);
+  }
+
+  saveViews() {
+    const self = this.FlutterHostView.shared.self;
+    for (let index = 0; index < this.cacheBlockNames.length; index++) {
+      const blockName = this.cacheBlockNames[index];
+      this.cacheBlockViews[blockName] = self.data[blockName];
+    }
+    this.cachePVWrapper = self.data.PVWrapper;
+  }
+
+  restoreViews() {
+    const self = this.FlutterHostView.shared.self;
+    for (let index = 0; index < this.cacheBlockNames.length; index++) {
+      const blockName = this.cacheBlockNames[index];
+      self.setData({
+        [blockName]: this.cacheBlockViews[blockName],
+      })
+    }
+    self.setData({
+      PVWrapper: this.cachePVWrapper,
+    })
   }
 
   onPVCB(option) {
@@ -81,6 +106,9 @@ export class FlutterPlatformViewManager {
     if (viewOption && this[viewOption.pvid + "_deleted"]) return;
     const self = this.FlutterHostView.shared.self;
     const blockName = viewOption.viewClazz + "_Block";
+    if (this.cacheBlockNames.indexOf(blockName) < 0) {
+      this.cacheBlockNames.push(blockName)
+    }
     const viewInstances = self.data[blockName] ?? [];
     let targetElement;
     let targetIndex;

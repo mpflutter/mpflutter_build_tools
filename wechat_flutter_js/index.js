@@ -53,7 +53,13 @@ export const main = {
     if (FlutterHostView.shared.onwebglcontextrestored) {
       await new Promise((r) => setTimeout(r, 100));
       this.restoreCanvas();
+      try {
+        getApp()._flutter.self.platformViewManager.saveViews();
+      } catch (error) {}
       setupFlutterHostView(this);
+      try {
+        getApp()._flutter.self.platformViewManager.restoreViews();
+      } catch (error) {}
       this.setData({
         readyToDisplay: true,
         shouldCatchBack: FlutterHostView.shared.shouldCatchBack,
