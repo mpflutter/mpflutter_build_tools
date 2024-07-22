@@ -67,7 +67,7 @@ EventLog? _mpflutterEventLog;
 late Directory _mpflutterSrcRoot;
 
 Future main(List<String> arguments) async {
-  checkFlutterVersion();
+  checkFlutterVersion(allowStep1: arguments.contains("--wechat"));
   init();
 
   print("====== 欢迎使用 MPFlutter Build Tools ======");
@@ -167,7 +167,7 @@ Future main(List<String> arguments) async {
   }
 }
 
-void checkFlutterVersion() async {
+void checkFlutterVersion({bool allowStep1 = false}) async {
   if (useFvm()) {
     print("[提示]检测到存在 .fvmrc 配置文件，本次构建使用 fvm 执行构建。");
   }
@@ -189,10 +189,17 @@ void checkFlutterVersion() async {
   if (match != null) {
     final flutterVersion = match.group(1);
 
-    if (flutterVersion != null &&
-        compareVersions(flutterVersion, compactVersionStep1) > 0 &&
-        compareVersions(flutterVersion, compactVersionStep2) < 0) {
-      throw "你当前的 Flutter SDK 版本是 $flutterVersion，MPFlutter 支持的版本是 <= 3.16.7 或 >= 3.22.0";
+    if (allowStep1) {
+      if (flutterVersion != null &&
+          compareVersions(flutterVersion, compactVersionStep1) > 0 &&
+          compareVersions(flutterVersion, compactVersionStep2) < 0) {
+        throw "你当前的 Flutter SDK 版本是 $flutterVersion，MPFlutter 支持的版本是 <= 3.16.7 或 >= 3.22.0";
+      }
+    } else {
+      if (flutterVersion != null &&
+          compareVersions(flutterVersion, compactVersionStep2) < 0) {
+        throw "你当前的 Flutter SDK 版本是 $flutterVersion，MPFlutter 支持的版本是 >= 3.22.0";
+      }
     }
   }
 }
