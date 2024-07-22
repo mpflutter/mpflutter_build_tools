@@ -14,6 +14,17 @@ export class FlutterMiniProgramMockCanvasElement extends FlutterMiniProgramMockE
   isOffscreenCanvas = true;
   backendCanvas = undefined;
 
+  setAttribute = (key, value) => {
+    this[key] = value;
+    if (key === 'aria-hidden') {
+      if (getApp()._flutter.activeCanvasBinded) {
+        this.isOffscreenCanvas = true;
+      } else {
+        this.isOffscreenCanvas = false;
+      }
+    }
+  };
+
   getContext(eagerType, attrs) {
     const GLVersion = getApp()._FlutterGLVersion;
     if (this.backendCanvas && this.isOffscreenCanvas) {
@@ -38,6 +49,9 @@ export class FlutterMiniProgramMockCanvasElement extends FlutterMiniProgramMockE
         const _flutter = getApp()._flutter;
         this.backendCanvas = _flutter.activeCanvas;
       }
+    }
+    if (!this.isOffscreenCanvas) {
+      getApp()._flutter.activeCanvasBinded = true;
     }
     if (eagerType.indexOf("webgl") >= 0) {
       return this.backendCanvas.getContext(
