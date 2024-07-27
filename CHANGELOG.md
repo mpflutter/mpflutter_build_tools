@@ -1,5 +1,10 @@
 # ChangeLog
 
+## 2.7.4
+
+fix:
+- 修正 pointerup 没有正确回调的问题
+
 ## 2.7.3
 
 fix:
