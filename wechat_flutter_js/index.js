@@ -177,7 +177,6 @@ export const main = {
       }
     } catch (error) {}
     FlutterHostView.shared.touching = true;
-    FlutterHostView.shared.touchmoved = false;
     callFlutterTouchEvent("ontouchstart", arguments);
   },
 
@@ -194,11 +193,8 @@ export const main = {
       return;
     }
     FlutterHostView.shared.touching = false;
-    if (FlutterHostView.shared.touchmoved) {
-      callFlutterTouchEvent("ontouchend", arguments);
-    } else {
-      callFlutterTouchEvent("onpointerup", arguments);
-    }
+    callFlutterTouchEvent("onpointerup", arguments);
+    callFlutterTouchEvent("ontouchend", arguments);
   },
 
   ontouchcancel() {
@@ -214,7 +210,6 @@ export const main = {
   ontouchstart2() {
     if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = true;
-    FlutterHostView.shared.touchmoved = false;
     callFlutterTouchEvent("ontouchstart", arguments);
   },
 
@@ -228,11 +223,8 @@ export const main = {
     if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = false;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
-    if (FlutterHostView.shared.touchmoved) {
-      callFlutterTouchEvent("ontouchend", arguments);
-    } else {
-      callFlutterTouchEvent("onpointerup", arguments);
-    }
+    callFlutterTouchEvent("onpointerup", arguments);
+    callFlutterTouchEvent("ontouchend", arguments);
   },
 
   ontouchcancel2() {
@@ -468,9 +460,6 @@ function callFlutterTouchEvent(eventName, args) {
   if (FlutterHostView.shared[eventName]) {
     let pointers = FlutterHostView.transformTouchEvent(args[0]);
     if (pointers.length <= 0) return;
-    if (eventName === 'ontouchmove') {
-      FlutterHostView.shared.touchmoved = true;
-    }
     pointers.forEach((pointer) => {
       FlutterHostView.shared[eventName].apply(null, [pointer]);
     })

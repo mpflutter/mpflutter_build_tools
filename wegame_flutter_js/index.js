@@ -81,11 +81,8 @@ export class Main {
 
   ontouchend() {
     FlutterHostView.shared.touching = false;
-    if (FlutterHostView.shared.touchmoved) {
-      callFlutterTouchEvent("ontouchend", arguments);
-    } else {
-      callFlutterTouchEvent("onpointerup", arguments);
-    }
+    callFlutterTouchEvent("onpointerup", arguments);
+    callFlutterTouchEvent("ontouchend", arguments);
   }
 
   ontouchcancel() {
