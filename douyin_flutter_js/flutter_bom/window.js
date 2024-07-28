@@ -371,7 +371,7 @@ export class FlutterMiniProgramMockWindow {
         .select("#my_canvas") // 在 WXML 中填入的 id
         .node()
         .exec(async (res) => {
-          const { CanvasKitInit, GLVersion } = await new Promise((resolve) => {
+          const { CanvasKitInit, GLInfo } = await new Promise((resolve) => {
             require("../../../canvaskit/pages/canvaskit", resolve);
           });
           const _flutter = getApp()._flutter;
@@ -380,8 +380,24 @@ export class FlutterMiniProgramMockWindow {
           canvas.width = wxSystemInfo.windowWidth * wxSystemInfo.pixelRatio;
           canvas.height = wxSystemInfo.windowHeight * wxSystemInfo.pixelRatio;
 
-          if (GLVersion == 1) {
+          if (GLInfo.GLVersion == 1) {
             const ctx = canvas.getContext("webgl");
+            const originGetParameter = ctx.getParameter.bind(ctx);
+            ctx.getParameter = function (v) {
+              if (v === 7938) {
+                return "WebGL 1.0 (OpenGL ES 2.0 Chromium)";
+              }
+              else if (v === 35724) {
+                return "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)";
+              }
+              else if (v === 7937) {
+                return "Apple A15 GPU";
+              }
+              else if (v === 7936) {
+                return "Apple Inc.";
+              }
+              return originGetParameter(v);
+            };
           }
 
           _flutter.activeCanvas = canvas;
@@ -389,9 +405,9 @@ export class FlutterMiniProgramMockWindow {
 
           const ckLoaded = CanvasKitInit(canvas);
           ckLoaded.then(async (CanvasKit) => {
-            if (true) {
-              await this.MiniTexInit(CanvasKit);
-            }
+            // if (true) {
+            //   await this.MiniTexInit(CanvasKit);
+            // }
             const surface = CanvasKit.MakeCanvasSurface(canvas);
             _flutter.window.flutterCanvasKit = CanvasKit;
             if (!global.window) {

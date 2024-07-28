@@ -14,5 +14,5 @@
   </view>
 
   <image style="position: absolute;right:0;top:0;width:66px;height:66px;z-index: 10000" src="{{licenseUrl}}" />
-  <include src="splash.ttml"/>
+  <!--<include src="splash.ttml"/>-->
 </view>
