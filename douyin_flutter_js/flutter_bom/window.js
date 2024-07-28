@@ -92,9 +92,9 @@ export class FlutterMiniProgramMockWindow {
           }/pages/index`, resolve);
         });
         const fs = tt.getFileSystemManager();
-        const brExists = await new Promise((resolve) => {
+        const zlibExists = await new Promise((resolve) => {
           fs.getFileInfo({
-            filePath: subPackageUrl + ".br",
+            filePath: subPackageUrl + ".zlib.png",
             success: () => {
               resolve(true);
             },
@@ -103,7 +103,7 @@ export class FlutterMiniProgramMockWindow {
             },
           });
         });
-        if (brExists) {
+        if (zlibExists) {
           url = mUrl;
         }
         const abPngExists = await new Promise((resolve) => {
@@ -128,13 +128,13 @@ export class FlutterMiniProgramMockWindow {
             subPackageUrl.split("/")[1]
           }/pages/index`, resolve);
         });
-        let br = false;
+        let zlib = false;
         let abPng = false;
         const fs = tt.getFileSystemManager();
 
-        const brExists = await new Promise((resolve) => {
+        const zlibExists = await new Promise((resolve) => {
           fs.getFileInfo({
-            filePath: subPackageUrl + ".br",
+            filePath: subPackageUrl + ".zlib.png",
             success: () => {
               resolve(true);
             },
@@ -143,9 +143,9 @@ export class FlutterMiniProgramMockWindow {
             },
           });
         });
-        if (brExists) {
-          br = true;
-          subPackageUrl = subPackageUrl + ".br";
+        if (zlibExists) {
+          zlib = true;
+          subPackageUrl = subPackageUrl + ".zlib.png";
         }
 
         const abPngExists = await new Promise((resolve) => {
@@ -178,11 +178,10 @@ export class FlutterMiniProgramMockWindow {
                   done: false,
                   value: new Uint8Array(
                     (() => {
-                      if (br) {
-                        return fs.readCompressedFileSync({
-                          filePath: subPackageUrl,
-                          compressionAlgorithm: "br",
-                        });
+                      if (zlib) {
+                        const buf = fs.readFileSync(subPackageUrl);
+                        const pako = require("../pako.min");
+                        return pako.inflate(buf);
                       } else if (abPng) {
                         return fs.readFileSync(subPackageUrl);
                       } else {
@@ -199,11 +198,10 @@ export class FlutterMiniProgramMockWindow {
         };
         const arrayBuffer = async () => {
           const originBuffer = (() => {
-            if (br) {
-              return fs.readCompressedFileSync({
-                filePath: subPackageUrl,
-                compressionAlgorithm: "br",
-              });
+            if (zlib) {
+              const buf = fs.readFileSync(subPackageUrl);
+              const pako = require("../pako.min");
+              return pako.inflate(buf);
             } else if (abPng) {
               return fs.readFileSync(subPackageUrl);
             } else {
@@ -217,15 +215,12 @@ export class FlutterMiniProgramMockWindow {
           return newBuffer;
         };
         const text = async () => {
-          if (br) {
+          if (zlib) {
+            const buf = fs.readFileSync(subPackageUrl);
+            const pako = require("../pako.min");
+            const uncompressBuf = pako.inflate(buf);
             const tmpFile = tt.env.USER_DATA_PATH + "/brtext_tmp";
-            fs.writeFileSync(
-              tmpFile,
-              fs.readCompressedFileSync({
-                filePath: subPackageUrl,
-                compressionAlgorithm: "br",
-              })
-            );
+            fs.writeFileSync(tmpFile, uncompressBuf);
             const localFileText = fs.readFileSync(tmpFile, "utf8");
             fs.removeSavedFile({
               filePath: tmpFile,
@@ -332,7 +327,9 @@ export class FlutterMiniProgramMockWindow {
         });
       });
       if (svgExists) {
-        return wx.getFileSystemManager().readFileSync(iconPath + ".svg.png.ab.png", "utf-8");
+        return wx
+          .getFileSystemManager()
+          .readFileSync(iconPath + ".svg.png.ab.png", "utf-8");
       }
     };
     const materialIconPath =
@@ -354,12 +351,7 @@ export class FlutterMiniProgramMockWindow {
           cupertinoIconData;
       }
     }
-    MiniTex.install(
-      CanvasKit,
-      wxSystemInfo.devicePixelRatio,
-      [],
-      iconDatas
-    );
+    MiniTex.install(CanvasKit, wxSystemInfo.devicePixelRatio, [], iconDatas);
   }
   // bizs
   flutterConfiguration = {
@@ -386,15 +378,14 @@ export class FlutterMiniProgramMockWindow {
             ctx.getParameter = function (v) {
               if (v === 7938) {
                 return "WebGL 1.0 (OpenGL ES 2.0 Chromium)";
-              }
-              else if (v === 35724) {
+              } else if (v === 35724) {
                 return "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)";
-              }
-              else if (v === 7937) {
+              } else if (v === 7937) {
                 return "Apple A15 GPU";
-              }
-              else if (v === 7936) {
+              } else if (v === 7936) {
                 return "Apple Inc.";
+              } else if (v === 32937) {
+                return 1;
               }
               return originGetParameter(v);
             };

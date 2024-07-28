@@ -580,7 +580,17 @@ ${maybeDouyinPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
           if (element.path.endsWith('index.js') ||
               element.path.endsWith('index.json') ||
               element.path.endsWith('index.ttml')) return;
-          File(element.path).renameSync(element.path + ".ab.png");
+          try {
+            final codec = ZLibCodec();
+            final encoded = codec.encode(
+              File(element.path).readAsBytesSync().toList(),
+            );
+            File(element.path + ".zlib.png").writeAsBytesSync(encoded);
+            element.deleteSync();
+          } catch (e) {
+            File(element.path).renameSync(element.path + ".ab.png");
+            element.deleteSync();
+          }
         });
       }
     }
