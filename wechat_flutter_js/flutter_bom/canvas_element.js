@@ -53,6 +53,12 @@ export class FlutterMiniProgramMockCanvasElement extends FlutterMiniProgramMockE
     if (!this.isOffscreenCanvas) {
       getApp()._flutter.activeCanvasBinded = true;
     }
+    if (attrs) {
+      attrs.alpha = true;
+    }
+    else {
+      attrs = { alpha: true };
+    }
     if (eagerType.indexOf("webgl") >= 0) {
       return this.backendCanvas.getContext(
         GLVersion >= 2 ? "webgl2" : "webgl",
