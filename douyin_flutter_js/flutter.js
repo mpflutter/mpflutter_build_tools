@@ -182,7 +182,7 @@ global.FlutterHostView = FlutterHostView;
      */
     async loadEntrypoint(options) {
       if (wxSystemInfo.safeArea) {
-        _flutter.self.safeAreaInsetTop = Math.max(wxSystemInfo.safeArea.top, wxSystemInfo.statusBarHeight);
+        _flutter.self.safeAreaInsetTop = 0; //Math.max(wxSystemInfo.safeArea.top, wxSystemInfo.statusBarHeight);
         _flutter.self.safeAreaInsetBottom =
           wxSystemInfo.windowHeight - wxSystemInfo.safeArea.bottom;
       }
@@ -224,6 +224,7 @@ global.FlutterHostView = FlutterHostView;
   _flutter.self = {
     FlutterHostView: FlutterHostView,
     wx: wx,
+    tt: tt,
     Object: Object,
     Promise: Promise,
     Array: Array,

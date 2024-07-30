@@ -83,7 +83,7 @@ export class FlutterMiniProgramMockDocument {
       }
       Object.defineProperty(canvas, "width", {
         get: function () {
-          return canvas.width;
+          return this._width;
         },
         set: function (value) {
           if (isOffScreen) {
@@ -98,7 +98,7 @@ export class FlutterMiniProgramMockDocument {
       });
       Object.defineProperty(canvas, "height", {
         get: function () {
-          return canvas.height;
+          return this._height;
         },
         set: function (value) {
           if (isOffScreen) {
