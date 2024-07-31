@@ -23,11 +23,14 @@ export const main = () => {
 
     onShow() {
       if (this.data.readyToDisplay) {
-        this.onLoad();
+        if (tt.flutterNavigatorBackHandler) {
+          tt.flutterNavigatorBackHandler(getCurrentPages().length);
+        }
+        this.onLoad(true);
       }
     },
 
-    async onLoad() {
+    async onLoad(loadFromShow) {
       await new Promise((resolve) => {
         tt.getSystemInfo({
           success: (res) => {
@@ -36,6 +39,16 @@ export const main = () => {
           },
         });
       });
+      if (FlutterHostView.shared.onwebglcontextlost) {
+        if (loadFromShow === true) {
+        } else {
+          FlutterHostView.shared.onwebglcontextlost();
+        }
+      }
+      if (tt.flutterReadyToPushRoute) {
+        tt.flutterReadyToPushRoute();
+        tt.flutterReadyToPushRoute = undefined;
+      }
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve();
