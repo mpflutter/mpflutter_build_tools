@@ -204,6 +204,7 @@ export const main = {
       return;
     }
     FlutterHostView.shared.touching = false;
+    callFlutterTouchEvent("onpointerup", arguments);
     callFlutterTouchEvent("ontouchcancel", arguments);
   },
 
@@ -231,6 +232,7 @@ export const main = {
     if (FlutterHostView.shared.textareaHasFocus) return;
     FlutterHostView.shared.touching = false;
     FlutterHostView.shared.lastTouchTime = new Date().getTime();
+    callFlutterTouchEvent("onpointerup", arguments);
     callFlutterTouchEvent("ontouchcancel", arguments);
   },
 

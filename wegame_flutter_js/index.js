@@ -87,6 +87,7 @@ export class Main {
 
   ontouchcancel() {
     FlutterHostView.shared.touching = false;
+    callFlutterTouchEvent("onpointerup", arguments);
     callFlutterTouchEvent("ontouchcancel", arguments);
   }
 }
