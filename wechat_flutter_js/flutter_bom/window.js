@@ -48,6 +48,14 @@ export class FlutterMiniProgramMockWindow {
     return wxSystemInfo.windowHeight - this._keyboardHeight;
   }
 
+  get flutterCanvasKitLoaded() {
+    let p = this._flutterCanvasKitLoadedPromise ?? new Promise(async (resolve) => {
+      resolve(await this.CanvasKitInit())
+    })
+    this._flutterCanvasKitLoadedPromise = p
+    return p
+  }
+
   // keyboard
 
   _keyboardHeight = 0;
