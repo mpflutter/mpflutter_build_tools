@@ -1,5 +1,10 @@
 # ChangeLog
 
+## 2.7.6
+
+fix:
+- 修正 Flutter 3.24.3 白屏问题
+
 ## 2.7.5
 
 fix:
