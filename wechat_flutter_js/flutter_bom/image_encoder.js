@@ -21,7 +21,7 @@ export const encodeImage = async (
 };
 
 export const encodeImageToFilePath = async (
-  rawRgba,
+  rawRgbaDataView,
   width,
   height,
   format,
@@ -29,6 +29,7 @@ export const encodeImageToFilePath = async (
   filePath,
   callback
 ) => {
+  const rawRgba = new Uint8Array(rawRgbaDataView.buffer);
   let _filePath = filePath;
   if (_filePath.indexOf("/") < 0) {
     _filePath = wx.env.USER_DATA_PATH + "/" + filePath;
@@ -50,6 +51,9 @@ export const encodeImageToFilePath = async (
     data: dataUrl.split("base64,")[1],
     encoding: "base64",
     success(res) {
+      wx.saveImageToPhotosAlbum({
+        filePath: _filePath,
+      })
       callback(_filePath);
     },
     fail(res) {
