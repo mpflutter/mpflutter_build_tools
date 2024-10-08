@@ -109,4 +109,7 @@ export class FlutterMiniProgramMockElement {
   classList = {
     add: function () {},
   };
+  closest = () => {
+    return null
+  };
 }
