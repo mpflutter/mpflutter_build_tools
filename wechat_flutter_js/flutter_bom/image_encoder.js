@@ -51,9 +51,6 @@ export const encodeImageToFilePath = async (
     data: dataUrl.split("base64,")[1],
     encoding: "base64",
     success(res) {
-      wx.saveImageToPhotosAlbum({
-        filePath: _filePath,
-      })
       callback(_filePath);
     },
     fail(res) {
