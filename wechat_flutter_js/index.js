@@ -413,6 +413,9 @@ function setupFlutterHostView(self) {
   FlutterHostView.shared.self = self;
 
   FlutterHostView.shared.requireCatchBack = (shouldCatchBack) => {
+    if (FlutterHostView.shared.shouldCatchBack === shouldCatchBack) {
+      return;
+    }
     FlutterHostView.shared.shouldCatchBack = shouldCatchBack;
     const self = FlutterHostView.shared.self;
     setTimeout(() => {
