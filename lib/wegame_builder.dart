@@ -177,7 +177,6 @@ void main(List<String> args) async {
     _makeDisableFeatures();
     _enableMiniTex();
     _mergeSubpackages();
-    _removeLicenseTipsFlag();
     wegameOutDir.deleteSync();
     wegameTmpDir.renameSync(wegameOutDir.path);
   }
@@ -202,6 +201,8 @@ void main(List<String> args) async {
         .replaceFirst("GLVersion: 2", "GLVersion: 1")
         .replaceFirst("Object.assign(w,sa);", "");
     jsFile.writeAsStringSync(newContent);
+    File(join(wegameTmpDir.path, 'canvaskit', 'pages', 'index.wxml'))
+        .deleteSync();
     File(join(wegameTmpDir.path, 'canvaskit', 'game.js')).writeAsStringSync('');
     File(join(wegameTmpDir.path, 'canvaskit', 'game.json'))
         .writeAsStringSync('{}');
@@ -264,8 +265,6 @@ void main(List<String> args) async {
       File(join(pkgDirRoot, 'game.json')).writeAsStringSync('{}');
       File(join(pkgDirRoot, 'pages', 'index.js')).writeAsStringSync('Page({})');
       File(join(pkgDirRoot, 'pages', 'index.json')).writeAsStringSync('{}');
-      File(join(pkgDirRoot, 'pages', 'index.wxml'))
-          .writeAsStringSync('<view></view>');
       value.forEach((element) {
         var srcOut = element.replaceFirst(join(webOut.path, "assets"),
             join(wegameTmpDir.path, "assets${keyId}"));
@@ -363,8 +362,6 @@ $subPkgAsset
       Directory(join(pkgDirRoot, 'pages')).createSync();
       File(join(pkgDirRoot, 'pages', 'index.js')).writeAsStringSync('Page({})');
       File(join(pkgDirRoot, 'pages', 'index.json')).writeAsStringSync('{}');
-      File(join(pkgDirRoot, 'pages', 'index.wxml'))
-          .writeAsStringSync('<view></view>');
       File(join(pkgDirRoot, 'game.js')).writeAsStringSync('');
       File(join(pkgDirRoot, 'game.json')).writeAsStringSync('{}');
       value.forEach((element) {
@@ -493,7 +490,6 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {w
     pkgOut.createSync(recursive: true);
     File(join(pkgOut.path, 'index.js')).writeAsStringSync('Page({})');
     File(join(pkgOut.path, 'index.json')).writeAsStringSync('{}');
-    File(join(pkgOut.path, 'index.wxml')).writeAsStringSync('<view></view>');
     File(join(pkgOut.path, '..', 'game.js')).writeAsStringSync('');
     File(join(pkgOut.path, '..', 'game.json')).writeAsStringSync('{}');
     copyDirectory(
@@ -757,15 +753,5 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {w
       File(join(wegameTmpDir.path, 'game.json'))
           .writeAsStringSync(json.encode(appJSONData));
     }
-  }
-
-  void _removeLicenseTipsFlag() {
-    if (!licenseGrant) return;
-    final file = File(join(wegameTmpDir.path, 'pages', 'index', 'index.wxml'));
-    var content = file.readAsStringSync();
-    content = content.replaceAll(
-        '<image style="position: absolute;right:0;top:0;width:66px;height:66px;z-index: 10000" src="{{licenseUrl}}" />',
-        '');
-    file.writeAsStringSync(content);
   }
 }
