@@ -76,7 +76,7 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
 
   set inputmode(v) {
     let newValue = v;
-    if (newValue === "numberic") {
+    if (newValue === "numeric") {
       newValue = "number";
     } else if (newValue === "decimal") {
       newValue = "digit";
@@ -127,6 +127,9 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     }, 500);
   }
   focus = () => {
+    if (new Date().getTime() - (this.viewOption.props.blurTime ?? 0) < 300) {
+      return
+    }
     FlutterMiniProgramMockInputElement.activeInput = this.viewOption.pvid;
     wx._mpflutter_focusNode = this.viewOption.pvid;
     wx._mpflutter_hasFocus = true;
@@ -144,6 +147,12 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
   blur = () => {
     if (this.preventDispose) return;
     this.viewOption.props.focus = false;
+    this.viewOption.props.blurTime = new Date().getTime();
+    setTimeout(() => {
+      if (!wx._mpflutter_hasFocus) {
+        FlutterHostView.shared.onkeyboardheightchange({detail: {height: 0}});
+      }
+    }, 300);
     this.updateView();
   };
   remove = () => {
@@ -177,6 +186,11 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     } else if (event === "blur") {
       this.onBlur = () => {
         if (this.preventDispose) return;
+        setTimeout(() => {
+          if (!wx._mpflutter_hasFocus) {
+            FlutterHostView.shared.onkeyboardheightchange({detail: {height: 0}});
+          }
+        }, 300);
         if (
           FlutterMiniProgramMockInputElement.activeInput !==
           this.viewOption.pvid

@@ -64,7 +64,7 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
 
   set inputmode(v) {
     let newValue = v;
-    if (newValue === "numberic") {
+    if (newValue === "numeric") {
       newValue = "number";
     } else if (newValue === "decimal") {
       newValue = "digit";
