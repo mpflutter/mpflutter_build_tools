@@ -342,6 +342,13 @@ export const main = {
       const event = e.type;
       const pvid = e.target.id;
       const detail = e.detail;
+      if (event === "blur" && wxSystemInfo.platform === "android") {
+        setTimeout(() => {
+          if (!wx._mpflutter_hasFocus) {
+            FlutterHostView.shared.onkeyboardheightchange({detail: {height: 0}});
+          }
+        }, 300);
+      }
       return getApp()._flutter.self.platformViewManager.onPVCB({
         pvid,
         event,

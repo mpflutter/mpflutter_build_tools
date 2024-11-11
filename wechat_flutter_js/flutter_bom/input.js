@@ -186,11 +186,6 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
     } else if (event === "blur") {
       this.onBlur = () => {
         if (this.preventDispose) return;
-        setTimeout(() => {
-          if (!wx._mpflutter_hasFocus) {
-            FlutterHostView.shared.onkeyboardheightchange({detail: {height: 0}});
-          }
-        }, 300);
         if (
           FlutterMiniProgramMockInputElement.activeInput !==
           this.viewOption.pvid
