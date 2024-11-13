@@ -1,5 +1,13 @@
 # ChangeLog
 
+## 2.7.8
+
+fix:
+- android 数字键盘无高度变化回调的问题
+- flutter 3.24 焦点无法 blur 的问题
+- Cavnas.toImage 异常问题
+
+
 ## 2.7.7
 
 fix:
