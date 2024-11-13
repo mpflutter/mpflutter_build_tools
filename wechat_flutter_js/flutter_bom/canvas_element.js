@@ -45,6 +45,9 @@ export class FlutterMiniProgramMockCanvasElement extends FlutterMiniProgramMockE
           width: this.width,
           height: this.height,
         });
+        setTimeout(() => {
+          this.onwebglcontextlost()
+        }, 0);
       } else {
         const _flutter = getApp()._flutter;
         this.backendCanvas = _flutter.activeCanvas;
