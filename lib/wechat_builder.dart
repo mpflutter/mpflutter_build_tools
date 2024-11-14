@@ -326,7 +326,7 @@ $subPkgAsset
         .listSync()
         .where((element) => element.path.endsWith('.part.js'))
         .forEach((element) {
-      if (currentPkgSize + element.statSync().size > 2 * 1000 * 1000) {
+      if (currentPkgSize + element.statSync().size > 1.8 * 1000 * 1000) {
         subPkgs.add(currentPkgFiles);
         currentPkgFiles = [];
         currentPkgSize = 0;
