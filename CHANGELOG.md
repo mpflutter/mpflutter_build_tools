@@ -1,5 +1,10 @@
 # ChangeLog
 
+## 2.7.9
+
+fix:
+- function call error
+
 ## 2.7.8
 
 fix:
