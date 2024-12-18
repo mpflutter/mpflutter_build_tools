@@ -176,6 +176,7 @@ void main(List<String> args) async {
     _addLogStack(arguments);
     _fixEnterkeyhint();
     _fixCanvasReuseContextIssue();
+    _fixObjectDefinePropertyIssue();
     _makeDisableFeatures();
     _makeShadowPages();
     _enableMiniTex();
@@ -836,5 +837,22 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
         '<image style="position: absolute;right:0;top:0;width:66px;height:66px;z-index: 10000" src="{{licenseUrl}}" />',
         '');
     file.writeAsStringSync(content);
+  }
+
+  void _fixObjectDefinePropertyIssue() {
+    if (!fixObjectDefinePropertyIssue) return;
+    final preCode = """var Object_defineProperty = function(){
+  try {
+    Object.defineProperty.call(Object, arguments)
+  } catch (error) {}
+}
+""";
+    final mainDartJSFile =
+        File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
+    var content = mainDartJSFile.readAsStringSync();
+    content =
+        content.replaceAll("Object.defineProperty", "Object_defineProperty");
+    content = preCode + content;
+    mainDartJSFile.writeAsStringSync(content);
   }
 }

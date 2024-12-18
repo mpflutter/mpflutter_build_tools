@@ -32,6 +32,9 @@ bool useMiniTex = false;
 /// 使用无字体支持的 CanvasKit，可以缩小 wasm 体积
 bool useNoFontCanvasKit = false;
 
+/// 使用腾讯直播插件时，会造成白屏，设置为 true 可以避免
+bool fixObjectDefinePropertyIssue = false;
+
 /// 不受 MPFlutter 编译支持的 dart package
 Map<String, List<String>> _nonCompatiblesPackages = {
   "fluwx": [],
