@@ -243,7 +243,7 @@ void main(List<String> args) async {
       if (element.statSync().type == FileSystemEntityType.directory) return;
       if (element.path.endsWith(".DS_Store")) return;
       if (element.path.contains('/packages/window_manager/')) return;
-      if (currentPkgSize + element.statSync().size > 2.5 * 1000 * 1000) {
+      if (currentPkgSize + element.statSync().size > 2.0 * 1000 * 1000) {
         // brotli 压缩，预估 2.5M -> 2.0M。
         subPkgs.add(currentPkgFiles);
         currentPkgFiles = [];

@@ -235,7 +235,7 @@ void main(List<String> args) async {
       if (element.statSync().type == FileSystemEntityType.directory) return;
       if (element.path.endsWith(".DS_Store")) return;
       if (element.path.contains('/packages/window_manager/')) return;
-      if (currentPkgSize + element.statSync().size > 2.5 * 1000 * 1000) {
+      if (currentPkgSize + element.statSync().size > 2.0 * 1000 * 1000) {
         // brotli 压缩，预估 2.5M -> 2.0M。
         subPkgs.add(currentPkgFiles);
         currentPkgFiles = [];
@@ -493,6 +493,29 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
           .join("\n"),
     );
     indexWxmlFile.writeAsStringSync(indexWxmlContent);
+    // add main.json to index.json
+    final indexJsonFile =
+        File(join(wechatTmpDir.path, 'pages', 'index', 'index.json'));
+    var indexJsonContent = indexJsonFile.readAsStringSync();
+    final indexJsonObj = json.decode(indexJsonContent);
+
+    maybeWeChatPkgs
+        .map((key, value) {
+          final file = File(join(value.path, 'wechat', 'main.json'));
+          if (!file.existsSync()) {
+            return MapEntry(key, "{}");
+          }
+          return MapEntry(key, file.readAsStringSync());
+        })
+        .values
+        .forEach((pluginJsonContent) {
+          final pluginJsonObj = json.decode(pluginJsonContent);
+          if (pluginJsonObj["usingComponents"] is Map) {
+            (indexJsonObj["usingComponents"] as Map)
+                .addAll(pluginJsonObj["usingComponents"]);
+            indexJsonFile.writeAsStringSync(json.encode(indexJsonObj));
+          }
+        });
   }
 
   void _copyPubPackageToWechat(String pkgName, Directory pkgSrc) {
@@ -700,6 +723,9 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     if (_shadowPages.length > 0) {
       final appJSONData = json
           .decode(File(join(wechatTmpDir.path, 'app.json')).readAsStringSync());
+      if (appJSONData["plugins"] != null) {
+        fixObjectDefinePropertyIssue = true;
+      }
       final appJSONPages = appJSONData['pages'] as List<dynamic>;
       _shadowPages.forEach((element) {
         appJSONPages.add('pages/index/$element');
