@@ -25,6 +25,7 @@
   <block wx:for="{{MPFlutter_Wechat_PlatformOverlay}}" wx:key="pvid">
     <view key="platform_overlay_{{item.pvid}}" id="platform_overlay_{{item.pvid}}" style="z-index:30000;position: absolute; left: {{item.x}}px; top: {{item.y}}px; width: {{item.width}}px; height: {{item.height}}px; visibility: {{item.visibility}}; " catchtouchstart="ontouchstart2" catchtouchmove="ontouchmove2" catchtouchend="ontouchend2" catchtouchcancel="ontouchcancel2" />
   </block>
+  <view id="platform_overlay_modallayer" style="z-index:30001;position:absolute;left:0px;top:0px;right:0px;bottom:0px;visibility: {{displayOverlayModalLayer}}; " catchtouchstart="ontouchstart2" catchtouchmove="ontouchmove2" catchtouchend="ontouchend2" catchtouchcancel="ontouchcancel2" />
 
   <image style="position: absolute;right:0;top:0;width:66px;height:66px;z-index: 10000" src="{{licenseUrl}}" />
   <include src="splash.wxml"/>

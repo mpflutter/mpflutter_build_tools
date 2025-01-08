@@ -98,6 +98,11 @@ export class FlutterPlatformViewManager {
     self.setData({ windowLevel: windowLevel });
   }
 
+  setDisplayOverlayModalLayer(displayOverlayModalLayer) {
+    const self = this.FlutterHostView.shared.self;
+    self.setData({ displayOverlayModalLayer: displayOverlayModalLayer });
+  }
+
   addCBListenner(pvid, callback) {
     this[pvid + "_pvcb"] = callback;
   }
