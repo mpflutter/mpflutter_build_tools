@@ -366,6 +366,8 @@ export class FlutterMiniProgramMockWindow {
                 } else {
                   return value;
                 }
+              } else if (v === 3415) {
+                return 0;
               }
               return originGetParameter(v);
             };
@@ -390,6 +392,8 @@ export class FlutterMiniProgramMockWindow {
             }
             globalThis.window.flutterCanvasKit = CanvasKit;
             resolve(CanvasKit);
+          }).catch(e => {
+            console.error(e);
           });
         });
     });

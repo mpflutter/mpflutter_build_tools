@@ -26,15 +26,23 @@ export async function isAssetExist(key) {
   const filePath = await getAssetPath(key);
   const fs = wx.getFileSystemManager();
   const brExists = await new Promise((resolve) => {
-    fs.getFileInfo({
-      filePath: filePath,
+    fs.access({
+      path: filePath,
       success: () => {
         resolve(true);
       },
       fail: () => {
-        resolve(false);
+        fs.getFileInfo({
+          filePath: filePath,
+          success: () => {
+            resolve(true);
+          },
+          fail: () => {
+            resolve(false);
+          },
+        });
       },
-    });
+    })
   });
   return brExists;
 }
