@@ -45,6 +45,35 @@ export class FlutterMiniProgramMockCanvasElement extends FlutterMiniProgramMockE
           width: this.width,
           height: this.height,
         });
+        if (GLVersion >= 2) {
+          const ctx = this.backendCanvas.getContext("webgl2", {
+            alpha: true,
+          });
+          const originGetParameter = ctx.getParameter.bind(ctx);
+          ctx.getParameter = function (v) {
+            if (v === 7938) {
+              const value = originGetParameter(v);
+              if (value.indexOf("OpenGL ES 3.2") > 0) {
+                return "WebGL 2.0 (OpenGL ES 3.2 Chromium)";
+              } else {
+                return value;
+              }
+            } else if (v === 35724) {
+              const value = originGetParameter(v);
+              if (value.indexOf("GLSL ES") < 0) {
+                return "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.2 Chromium)";
+              }
+              else if (value.indexOf("OpenGL ES 3.2") > 0) {
+                return "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.2 Chromium)";
+              } else {
+                return value;
+              }
+            } else if (v === 3415) {
+              return 0;
+            }
+            return originGetParameter(v);
+          };
+        }
         setTimeout(() => {
           this.onwebglcontextlost?.()
         }, 0);
