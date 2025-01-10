@@ -278,13 +278,21 @@ export class FlutterMiniProgramMockWindow {
         require(`../../../${iconPath.split("/")[1]}/pages/index`, resolve);
       });
       const svgExists = await new Promise((resolve) => {
-        fs.getFileInfo({
-          filePath: iconPath + ".svg.br",
+        fs.access({
+          path: iconPath + ".svg.br",
           success: () => {
             resolve(true);
           },
           fail: () => {
-            resolve(false);
+            fs.getFileInfo({
+              filePath: iconPath + ".svg.br",
+              success: () => {
+                resolve(true);
+              },
+              fail: () => {
+                resolve(false);
+              },
+            });
           },
         });
       });
