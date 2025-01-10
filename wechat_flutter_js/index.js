@@ -269,7 +269,7 @@ export const main = {
       this.data.shouldCatchBack &&
       new Date().getTime() - (FlutterHostView.shared.lastTouchTime ?? 0) > 300
     ) {
-      if (wxSystemInfo["platform"] === "android") {
+      if (wxSystemInfo["platform"] === "android" || wxSystemInfo["platform"] === "ohos") {
         // Android Back Pressed
         FlutterHostView.shared.onAndroidBackPressed?.();
       }
