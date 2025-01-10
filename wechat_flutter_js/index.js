@@ -21,6 +21,7 @@ export const main = {
     windowHeight: 0,
     readyToDisplay: false,
     shouldCatchBack: false,
+    displayOverlayModalLayer: "hidden",
     PVWrapper: {
       removed: true,
       style: ""
