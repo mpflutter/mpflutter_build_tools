@@ -338,10 +338,10 @@ export const main = {
     }
   },
 
-  onPVCB(e) {
+  onPVCB(e, tid) {
     if (e.target) {
       const event = e.type;
-      const pvid = e.target.id;
+      const pvid = e.target.id ?? tid;
       const detail = e.detail;
       if (event === "blur" && wxSystemInfo.platform === "android") {
         setTimeout(() => {

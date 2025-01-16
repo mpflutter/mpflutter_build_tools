@@ -110,6 +110,9 @@ export class FlutterPlatformViewManager {
   updateView(viewOption) {
     if (viewOption && this[viewOption.pvid + "_deleted"]) return;
     const self = this.FlutterHostView.shared.self;
+    self["onPVCB_" + viewOption.pvid] = (e) => {
+      self.onPVCB(e, viewOption.pvid);
+    }
     const blockName = viewOption.viewClazz + "_Block";
     if (this.cacheBlockNames.indexOf(blockName) < 0) {
       this.cacheBlockNames.push(blockName)
@@ -230,6 +233,7 @@ export class FlutterPlatformViewManager {
     }
     this[viewOption.pvid + "_deleted"] = true;
     delete this[viewOption.pvid + "_pvcb"];
+    delete self["onPVCB_" + viewOption.pvid];
     this.updateWrapper({});
   }
 
