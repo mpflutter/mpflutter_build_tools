@@ -183,6 +183,7 @@ void main(List<String> args) async {
     _mergeSubpackages();
     _removeRepeatPages();
     _removeLicenseTipsFlag();
+    _addNPMPackageToFlutterJS();
     wechatOutDir.deleteSync();
     wechatTmpDir.renameSync(wechatOutDir.path);
   }
@@ -880,5 +881,21 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
         content.replaceAll("Object.defineProperty", "Object_defineProperty");
     content = preCode + content;
     mainDartJSFile.writeAsStringSync(content);
+  }
+
+  void _addNPMPackageToFlutterJS() {
+    if (_npmPackages.isEmpty) return;
+    final flutterJSFile =
+        File(join(wechatTmpDir.path, 'pages', 'index', 'flutter.js'));
+        var flutterJSContent = flutterJSFile.readAsStringSync();
+    final loaderCode = _npmPackages.entries.map((it) {
+      return "const ${it.key} = require('${it.value}');";
+    }).join("\n");
+    flutterJSContent = flutterJSContent.replaceAll("// NPM Package Loader", loaderCode);
+    final injectorCode = _npmPackages.entries.map((it) {
+      return "${it.key}: ${it.key},";
+    }).join("\n");
+    flutterJSContent = flutterJSContent.replaceAll("// NPM Package Injector", injectorCode);
+    flutterJSFile.writeAsStringSync(flutterJSContent);
   }
 }

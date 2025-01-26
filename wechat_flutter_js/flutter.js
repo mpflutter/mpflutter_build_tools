@@ -9,6 +9,8 @@ const {
   wxSystemInfo
 } = require("./system_info");
 
+// NPM Package Loader
+
 var _flutter = getApp()._flutter;
 
 if (!_flutter) {
@@ -302,6 +304,7 @@ globalThis.FlutterHostView = FlutterHostView;
       }
     },
     XMLHttpRequest: require("./flutter_bom/xml-http-request").XMLHttpRequest,
+    // NPM Package Injector
   };
   FlutterHostView.shared.onkeyboardheightchange = (e) => {
     if (e.detail.height != null && e.detail.height != undefined) {

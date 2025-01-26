@@ -64,6 +64,14 @@ void addShadowPage(String pageName) {
   _shadowPages.add(pageName);
 }
 
+/// NPM 包
+Map<String, String> _npmPackages = {};
+
+/// 添加一个 NPM 包
+void addNpmPackage(String scopeName, String pkgName) {
+  _npmPackages[scopeName] = pkgName;
+}
+
 // === 以下是编译程序主逻辑 ===
 
 EventLog? _mpflutterEventLog;
