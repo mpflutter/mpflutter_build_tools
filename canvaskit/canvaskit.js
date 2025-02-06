@@ -62,8 +62,8 @@ function(d,g){d=I(d);return a.PathEffect._MakePath2D(d,g)};a.Shader.MakeColor=fu
 g,l,t,x,C,J,O){O=O||null;var P=F(l),Z=v(t,"HEAPF32");J=J||0;C=I(C);d=a.Shader._MakeRadialGradient(d[0],d[1],g,P.Zd,P.colorType,Z,P.count,x,J,C,O);q(P.Zd,l);t&&q(Z,t);return d};a.Shader.MakeSweepGradient=function(d,g,l,t,x,C,J,O,P,Z){Z=Z||null;var ba=F(l),r=v(t,"HEAPF32");J=J||0;O=O||0;P=P||360;C=I(C);d=a.Shader._MakeSweepGradient(d,g,ba.Zd,ba.colorType,r,ba.count,x,O,P,J,C,Z);q(ba.Zd,l);t&&q(r,t);return d};a.Shader.MakeTwoPointConicalGradient=function(d,g,l,t,x,C,J,O,P,Z){Z=Z||null;var ba=F(x),r=
 v(C,"HEAPF32");P=P||0;O=I(O);var D=Ba.toTypedArray();D.set(d);D.set(l,2);d=a.Shader._MakeTwoPointConicalGradient(ja,g,t,ba.Zd,ba.colorType,r,ba.count,J,P,O,Z);q(ba.Zd,x);C&&q(r,C);return d};a.Vertices.prototype.bounds=function(d){this._bounds(ja);var g=Ba.toTypedArray();return d?(d.set(g),d):g.slice()};a.Qd&&a.Qd.forEach(function(d){d()})};a.computeTonalColors=function(e){var d=v(e.ambient,"HEAPF32"),g=v(e.spot,"HEAPF32");this._computeTonalColors(d,g);var l={ambient:T(d),spot:T(g)};q(d,e.ambient);
 q(g,e.spot);return l};a.LTRBRect=function(e,d,g,l){return Float32Array.of(e,d,g,l)};a.XYWHRect=function(e,d,g,l){return Float32Array.of(e,d,e+g,d+l)};a.LTRBiRect=function(e,d,g,l){return Int32Array.of(e,d,g,l)};a.XYWHiRect=function(e,d,g,l){return Int32Array.of(e,d,e+g,d+l)};a.RRectXY=function(e,d,g){return Float32Array.of(e[0],e[1],e[2],e[3],d,g,d,g,d,g,d,g)};a.MakeAnimatedImageFromEncoded=function(e){e=new Uint8Array(e);
-if (e[0] === 1 && e[1] === 6 && e[2] === 0 && e[3] === 7) {
-  const imageIndex = (e[4] << 24) | (e[5] << 16) | (e[6] << 8) | e[7];
+  if (e.byteLength === 1010 && e[0] === 0x47 && e[1] === 0x49 && e[2] === 0x46 && e[3] === 0x38 && e[4] === 0x39 && e[5] === 0x61) {
+    const imageIndex = (e[6] << 24) | (e[7] << 16) | (e[8] << 8) | e[9];
   const image = getApp()._flutter.imageCache[imageIndex];
   if (image && image.width > 0 && image.height > 0) {
     try {

@@ -284,14 +284,15 @@ export class XMLHttpRequest {
         this.$_callReadyStateChange(XMLHttpRequest.LOADING);
         this.$$trigger("loadstart");
         const uint8Array = new Uint8Array([
-          1,
-          6,
-          0,
-          7,
+          0x47, 0x49, 0x46, 0x38, 0x39, 0x61,
           ...(() => {
             const buffer = new ArrayBuffer(4);
             const dataView = new DataView(buffer);
             dataView.setUint32(0, imageIndex);
+            return new Uint8Array(buffer);
+          })(),
+          ...(() => {
+            const buffer = new ArrayBuffer(1000);
             return new Uint8Array(buffer);
           })(),
         ]);
