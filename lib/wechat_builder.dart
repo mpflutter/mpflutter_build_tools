@@ -177,6 +177,7 @@ void main(List<String> args) async {
     _fixEnterkeyhint();
     _fixCanvasReuseContextIssue();
     _fixObjectDefinePropertyIssue();
+    _fixImageDecoderForFlutter327();
     _makeDisableFeatures();
     _makeShadowPages();
     _enableMiniTex();
@@ -897,5 +898,13 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {r
     }).join("\n");
     flutterJSContent = flutterJSContent.replaceAll("// NPM Package Injector", injectorCode);
     flutterJSFile.writeAsStringSync(flutterJSContent);
+  }
+
+  void _fixImageDecoderForFlutter327() {
+    final mainDartJSFile =
+        File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
+    var content = mainDartJSFile.readAsStringSync();
+    content = content.replaceAll("\$async\$goto = imageType.isAnimated ? 7 : 9;", "\$async\$goto = 7;").replaceAll("case 5:s=o.d?7:9\nbreak\ncase 7:f=A.aOf(a,\"encoded image bytes\",c,b)", "case 5:s=7\nbreak\ncase 7:f=A.aOf(a,\"encoded image bytes\",c,b)");
+    mainDartJSFile.writeAsStringSync(content);
   }
 }

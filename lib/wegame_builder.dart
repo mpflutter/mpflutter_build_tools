@@ -174,6 +174,7 @@ void main(List<String> args) async {
     await _openDevMode(arguments);
     _addLogStack(arguments);
     _fixEnterkeyhint();
+    _fixImageDecoderForFlutter327();
     _makeDisableFeatures();
     _enableMiniTex();
     _mergeSubpackages();
@@ -753,5 +754,13 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {w
       File(join(wegameTmpDir.path, 'game.json'))
           .writeAsStringSync(json.encode(appJSONData));
     }
+  }
+
+  void _fixImageDecoderForFlutter327() {
+    final mainDartJSFile =
+        File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
+    var content = mainDartJSFile.readAsStringSync();
+    content = content.replaceAll("\$async\$goto = imageType.isAnimated ? 7 : 9;", "\$async\$goto = 7;").replaceAll("case 5:s=o.d?7:9\nbreak\ncase 7:f=A.aOf(a,\"encoded image bytes\",c,b)", "case 5:s=7\nbreak\ncase 7:f=A.aOf(a,\"encoded image bytes\",c,b)");
+    mainDartJSFile.writeAsStringSync(content);
   }
 }
