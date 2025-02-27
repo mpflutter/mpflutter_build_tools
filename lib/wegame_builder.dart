@@ -758,7 +758,7 @@ ${maybeWeChatPkgs.map((key, value) => MapEntry(key, 'new Promise((resolve) => {w
 
   void _fixImageDecoderForFlutter327() {
     final mainDartJSFile =
-        File(join(wechatTmpDir.path, 'pages', 'index', 'main.dart.js'));
+        File(join(wegameTmpDir.path, 'pages', 'index', 'main.dart.js'));
     var content = mainDartJSFile.readAsStringSync();
     content = content.replaceAll("\$async\$goto = imageType.isAnimated ? 7 : 9;", "\$async\$goto = 7;").replaceAllMapped(RegExp(r'(case 5:)([a-zA-Z])=([a-zA-Z])\.[a-zA-Z]\?7:9(\nbreak\ncase 7:.*encoded image bytes)'),(match) {
                 return '${match[1]}${match[2]}=7${match[4]}';
