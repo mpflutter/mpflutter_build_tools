@@ -250,6 +250,7 @@ globalThis.FlutterHostView = FlutterHostView;
     wx: wx,
     Object: Object,
     Promise: Promise,
+    JSON: JSON,
     Array: Array,
     Uint8Array: Uint8Array,
     WeakRef: typeof WeakRef !== "undefined" ? WeakRef : require("./flutter_bom/weak_ref").WeakRef,
