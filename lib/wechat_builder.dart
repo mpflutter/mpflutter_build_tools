@@ -78,7 +78,7 @@ void main(List<String> args) async {
                 element == '--printstack')),
             ...[
               '--target=lib/main.mpflutter.dart',
-              '--web-renderer',
+              (compareVersions(currentFlutterVersion, "3.29.0") < 0 ? '--web-renderer' : ''),
               'canvaskit',
               '--dart-define=mpflutter.library.core=true',
               '--dart-define=mpflutter.library.target.wechat=true',

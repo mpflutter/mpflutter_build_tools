@@ -22,6 +22,7 @@ part 'wegame_builder.dart';
 /// 当前 MPFlutter 支持的最高版本 Flutter SDK
 final compactVersionStep1 = '3.16.7';
 final compactVersionStep2 = '3.22.0';
+var currentFlutterVersion = '';
 
 /// 声明已获取 MPFlutter 使用授权
 bool licenseGrant = false;
@@ -78,7 +79,7 @@ EventLog? _mpflutterEventLog;
 late Directory _mpflutterSrcRoot;
 
 Future main(List<String> arguments) async {
-  checkFlutterVersion(allowStep1: arguments.contains("--wechat"));
+  await checkFlutterVersion(allowStep1: arguments.contains("--wechat"));
   init();
 
   print("====== 欢迎使用 MPFlutter Build Tools ======");
@@ -178,7 +179,7 @@ Future main(List<String> arguments) async {
   }
 }
 
-void checkFlutterVersion({bool allowStep1 = false}) async {
+Future<void> checkFlutterVersion({bool allowStep1 = false}) async {
   if (useFvm()) {
     print("[提示]检测到存在 .fvmrc 配置文件，本次构建使用 fvm 执行构建。");
   }
@@ -199,6 +200,8 @@ void checkFlutterVersion({bool allowStep1 = false}) async {
 
   if (match != null) {
     final flutterVersion = match.group(1);
+    print("cchekrw");
+    currentFlutterVersion = flutterVersion ?? "";
 
     if (allowStep1) {
       if (flutterVersion != null &&
