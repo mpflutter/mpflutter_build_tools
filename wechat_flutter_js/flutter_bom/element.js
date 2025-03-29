@@ -112,4 +112,6 @@ export class FlutterMiniProgramMockElement {
   closest = () => {
     return null
   };
+  focus = () => {};
+  blur = () => {};
 }

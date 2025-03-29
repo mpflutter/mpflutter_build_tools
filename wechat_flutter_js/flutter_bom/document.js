@@ -83,6 +83,13 @@ export class FlutterMiniProgramMockDocument {
   }
 
   execCommand(command) {
+    if (command === "copy") {
+      const FlutterMiniProgramMockTextAreaElement = require("./input").FlutterMiniProgramMockTextAreaElement;
+      if (FlutterMiniProgramMockTextAreaElement.selectingElement) {
+        const copyText = FlutterMiniProgramMockTextAreaElement.selectingElement._value;
+        wx.setClipboardData({data: copyText});
+      }
+    }
     console.log("execCommand", command);
   }
 }

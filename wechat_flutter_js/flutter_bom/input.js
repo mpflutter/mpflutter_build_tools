@@ -143,7 +143,7 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
       }, 300);
     }
   };
-  select = () => {};
+  select() {};
   blur = () => {
     if (this.preventDispose) return;
     this.viewOption.props.focus = false;
@@ -206,8 +206,13 @@ export class FlutterMiniProgramMockInputElement extends FlutterMiniProgramMockEl
 }
 
 export class FlutterMiniProgramMockTextAreaElement extends FlutterMiniProgramMockInputElement {
+
   constructor() {
     super("MPFlutter_Wechat_TextArea");
+  }
+
+  select() {
+    FlutterMiniProgramMockTextAreaElement.selectingElement = this;
   }
 }
 
